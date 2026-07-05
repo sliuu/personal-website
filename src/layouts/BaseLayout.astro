@@ -1,0 +1,99 @@
+---
+// src/layouts/BaseLayout.astro
+// Shared chrome for every page: head, fonts, design tokens, background,
+// grain, cursor, and the top nav. Each page passes a `title` and its content.
+const { title = "stephanie liu" } = Astro.props;
+
+const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
+const githubUrl = "https://www.github.com/sliuu";
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400&display=swap" rel="stylesheet" />
+
+    <!-- is:global so these reach page content injected via <slot />.
+         Page-specific styles stay in each page's own scoped <style>. -->
+    <style is:global>
+      :root {
+        --bg: #472222;
+        --cream: #EEE0E0;
+        --gold: #EFBE87;
+        --muted: #C4A1A1;
+        --line: var(--muted);
+        --menu-bg: #5E3232;
+        --menu-border: #6b4b3e;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--cream);
+        font-family: "Heebo", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding: 2.5rem 2rem 5rem;
+        cursor: url("/cursor.png") 0 0, auto;
+        image-rendering: pixelated;
+      }
+
+      /* uncomment once /hover.png exists, to give clickable things a pixel pointer */
+      /* a, button, .role-btn, .role-menu li { cursor: url("/hover.png") 0 0, pointer; } */
+
+      /* subtle film grain over everything — delete this block to remove */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0.15;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      /* shared content wrapper — every page is centered the same way.
+         (project pages can override .wrap width in their own scoped style if needed) */
+      .wrap { max-width: 52%; margin: 0 auto; }
+
+      /* base link behavior: gold, brighten on hover, no underline.
+         Pages add extras (e.g. underline on project links) in their own style. */
+      a { color: var(--gold); text-decoration: none; transition: filter 0.2s ease; }
+      a:hover { filter: brightness(1.25); }
+
+      /* top nav — shared across all pages */
+      nav.top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4rem;
+      }
+      .nav-links { display: flex; gap: 1.75rem; font-size: 0.95rem; }
+      .mark { height: 30px; width: auto; display: block; image-rendering: pixelated; }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <nav class="top">
+        <a href="/" class="home" aria-label="home">
+          <img src="/favicon.png" alt="" class="mark" />
+        </a>
+        <div class="nav-links">
+          <a href={githubUrl}>GitHub</a>
+          <a href={linkedinUrl}>LinkedIn</a>
+        </div>
+      </nav>
+
+      <slot />
+    </div>
+  </body>
+</html>

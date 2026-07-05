@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const jobs = (await getCollection('work'))
+  .sort((a, b) => b.data.start.localeCompare(a.data.start));
+---
+<BaseLayout title="work">
+  <h1>work</h1>
+  {jobs.map(({ data }) => (
+    <section>
+      <h3>{data.role} · {data.company}</h3>
+      <p>{data.start} – {data.end ?? "present"}</p>
+      <ul>
+        {data.highlights.map((h) => <li>{h}</li>)}
+      </ul>
+    </section>
+  ))}
+</BaseLayout>	

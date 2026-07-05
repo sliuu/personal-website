@@ -1,17 +1,201 @@
 ---
+// src/pages/index.astro — homepage content only; chrome lives in BaseLayout
+import BaseLayout from '../layouts/BaseLayout.astro';
 
+const roles = ["design engineer", "UX engineer", "UX researcher", "software engineer", "UX designer"];
+
+const projects = [
+  { title: "Scheduling App",                 client: "Personal", href: "/projects/scheduling-app" },
+  { title: "Youtube Ads Prototyping",        client: "Google", href: "/projects/youtube-ads-prototyping" },
+  { title: "Easy Labeling Design",      client: "Waymo",    href: "/projects/easy-labeling-design" },
+  { title: "Pickup & Dropoff User Research", client: "Waymo",    href: "/projects/pickup-dropoff-user-research" },
+  { title: "Label Request Process",          client: "Waymo",    href: "/projects/label-request-process" },
+];
+
+const work = [
+  { company: "Sabbatical", role: "Rest, Reflection & Writing",  dates: "Nov 2025 – Present" },
+  { company: "Google",     role: "UX Engineer",                 dates: "Feb 2025 – Oct 2025" },
+  { company: "Waymo",      role: "SWE & UX Research (20%)",      dates: "Nov 2022 – Feb 2025" },
+  { company: "Nuro",       role: "SWE & Analytics Engineer",     dates: "Mar 2021 – Oct 2022" },
+  { company: "Google",     role: "SWE",                          dates: "Oct 2018 – Mar 2021" },
+];
+
+const loves = [
+  "organizing information",
+  "immediate understandability",
+  "thinking about people",
+  "a really good sofa",
+];
 ---
+<BaseLayout title="stephanie liu">
+  <div class="col">
+    <div class="section" id="header">
+      <p class="intro"><span class="name">stephanie</span> is a</p>
+      <span class="role" id="role">
+        <button class="role-btn" id="roleBtn" aria-haspopup="listbox" aria-expanded="false">
+          <span id="roleLabel">{roles[0]}</span><span class="caret" aria-hidden="true">&#9662;</span>
+        </button>
+        <ul class="role-menu" id="roleMenu" role="listbox">
+          {roles.map((r) => <li role="option">{r}</li>)}
+        </ul>
+      </span>
+      <p class="location"> based in <span class="name">SF</span></p>
+      <p class="previously">previously @ <span class="name">Google</span>, <span class="name">Nuro</span>, <span class="name">Waymo</span></p>
+    </div>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+    <div class="section" id="projects">
+      <p class="label">Projects</p>
+      {projects.map((p) => (
+        <div class="project">
+          <a href={p.href}>{p.title}</a><span class="client">{p.client}</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="section" id="work">
+      <p class="label">Work</p>
+      {work.map((w) => (
+        <div class="work-row">
+          <div><span class="company">{w.company}</span><span class="role-title">{w.role}</span></div>
+          <span class="dates">{w.dates}</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="section" id="loves">
+      <p class="label">Loves</p>
+      {loves.map((l) => <p class="love">{l}</p>)}
+    </div>
+
+    <div class="section" id="me">
+      <p class="label"></p>
+      <img class="photo" src="/me.jpg" alt="Stephanie" />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .section { margin-bottom: 100px; }
+  .col { max-width: 760px; }
+  #header { margin-top: 170px; }
+
+  .name { transition: filter 0.2s ease; }
+  .name:hover { filter: brightness(1.45); }
+
+  .intro, .location, .previously {
+    line-height: 1.9;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin-right: 15px;
+    display: inline;
+  }
+  .previously { margin-top: -5px; display: block; }
+
+  /* gold + brighten for the dropdown button and project links.
+     (nav links already inherit this from the layout's base `a` rule.) */
+  .project a, .role-btn { color: var(--gold); transition: filter 0.2s ease; }
+  .project a:hover, .role-btn:hover { filter: brightness(1.25); }
+
+  /* the role dropdown */
+  .role { position: relative; display: inline-flex; vertical-align: baseline; }
+  .role-btn {
+    font: inherit;
+    background: transparent;
+    border: 1px solid var(--gold);
+    border-radius: 0px;
+    padding: 0.2em 0.5em;
+    cursor: pointer;
+    font-size: 24px;
+    display: inline-flex;
+    margin-right: 10px;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .role-btn .caret { font-size: 0.7em; }
+  .role-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    background: var(--menu-bg);
+    border: 1px solid var(--menu-border);
+    border-radius: 0px;
+    min-width: 100%;
+    z-index: 5;
+    display: none;
+  }
+  .role.open .role-menu { display: block; }
+  .role-menu li {
+    font-size: 1.05rem;
+    color: var(--cream);
+    padding: 6px 12px;
+    border-radius: 0px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .role-menu li:hover { background: #523231; color: var(--gold); }
+
+  /* section labels */
+  .label { font-size: 0.95rem; color: var(--muted); margin: 3.5rem 0 1.1rem; }
+
+  /* projects */
+  .project { margin-bottom: 1.15rem; }
+  .project a { text-decoration: underline; text-underline-offset: 3px; font-size: 1.15rem; }
+  .project .client { color: var(--muted); font-size: 1rem; margin-left: 0.9rem; }
+
+  /* work table */
+  .work-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.35rem 0;
+    border-bottom: 1.5px dashed #774d4d;
+  }
+  .work-row .company { font-size: 1.1rem; color: var(--cream); transition: filter 0.2s ease; }
+  .work-row .company:hover { filter: brightness(1.25); }
+  .work-row .role-title { font-family: 'Adelle Sans Devanagari', sans-serif; font-size: 0.98rem; color: var(--muted); margin-left: 0.7rem; }
+  .work-row .dates { font-family: 'Adelle Sans Devanagari', sans-serif; font-size: 0.98rem; color: var(--muted); font-style: italic; white-space: nowrap; }
+  .work-row:last-child { border-bottom: none; }
+
+  /* loves */
+  .love { font-size: 1.15rem; margin-bottom: 0.7rem; transition: filter 0.2s ease; }
+  .love:hover { filter: brightness(1.25); }
+
+  /* photo */
+  .photo { width: 260px; height: auto; border-radius: 2px; display: block; }
+
+  @media (max-width: 640px) {
+    .intro, .previously { font-size: 1.3rem; }
+    .work-row { flex-direction: column; gap: 0.2rem; }
+  }
+</style>
+
+<script>
+  const role = document.getElementById("role");
+  const btn = document.getElementById("roleBtn");
+  const menu = document.getElementById("roleMenu");
+  const label = document.getElementById("roleLabel");
+
+  if (!role || !btn || !menu || !label) {
+    throw new Error("role dropdown elements not found");
+  }
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = role.classList.toggle("open");
+    btn.setAttribute("aria-expanded", String(open));
+  });
+  menu.querySelectorAll("li").forEach((li) => {
+    li.addEventListener("click", () => {
+      label.textContent = li.textContent;
+      role.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+    });
+  });
+  document.addEventListener("click", () => {
+    role.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+  });
+</script>

@@ -1,0 +1,30 @@
+---
+// src/pages/projects/[id].astro — renders every project from the collection
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Tell Astro which pages to build — one per markdown file in content/projects/
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { id: project.id },   // the URL slug, from the filename
+    props: { project },           // hand the whole entry to the page below
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);   // markdown body → renderable component
+---
+<BaseLayout title={`${project.data.title} — stephanie liu`}>
+  <article class="col">
+    <h1>{project.data.title}</h1>
+    <p class="client">{project.data.client}</p>
+    <Content />
+  </article>
+
+  <style>
+    article h1 { font-size: 2rem; color: var(--cream); margin-bottom: 0.25rem; }
+    .client { color: var(--muted); margin-bottom: 2rem; }
+    article :global(p) { line-height: 1.7; margin-bottom: 1.2rem; }
+  </style>
+</BaseLayout>
