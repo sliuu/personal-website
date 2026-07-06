@@ -23,7 +23,7 @@ const githubUrl = "https://www.github.com/sliuu";
          Page-specific styles stay in each page's own scoped <style>. -->
     <style is:global>
       :root {
-        --bg: #472222;
+        --bg: #3c1616;
         --cream: #EEE0E0;
         --gold: #EFBE87;
         --muted: #C4A1A1;
@@ -78,6 +78,15 @@ const githubUrl = "https://www.github.com/sliuu";
       }
       .nav-links { display: flex; gap: 1.75rem; font-size: 0.95rem; }
       .mark { height: 30px; width: auto; display: block; image-rendering: pixelated; }
+      
+      .cols-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+      }
+      @media (max-width: 640px) {
+        .cols-3 { grid-template-columns: 1fr; }
+      }
     </style>
   </head>
 

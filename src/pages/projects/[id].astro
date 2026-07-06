@@ -23,8 +23,79 @@ const { Content } = await render(project);   // markdown body → renderable com
   </article>
 
   <style>
-    article h1 { font-size: 2rem; color: var(--cream); margin-bottom: 0.25rem; }
+    article h1 {
+      margin-top: 170px;
+      font-size: 26px;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+      font-weight: 400;
+    }
     .client { color: var(--muted); margin-bottom: 2rem; }
-    article :global(p) { line-height: 1.7; margin-bottom: 1.2rem; }
+    /* --- project page content (markdown) --- */
+    article :global(h1) {
+      font-size: 26px;
+      line-height: 1.9;
+      letter-spacing: -0.01em;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+    article :global(h2) {
+      font-size: 1.2rem;
+      color: var(--gold);
+      margin: 2rem 0 0.75rem;
+      font-weight: 500;
+    }
+    article :global(h3) {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+    article :global(h4) {
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin: 1.5rem 0 0rem;
+      font-weight: 500;
+    }
+    article :global(p),
+    article :global(li) {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--cream);
+    }
+    /* the company/duration blurb under the title */
+    article :global(.meta) {
+      font-size: 1.1rem;
+      color: var(--muted);
+      font-family: 'Adelle Sans Devanagari', sans-serif;
+      margin-bottom: 2rem;
+    }
+    article :global(.callout) {
+      border: 1px dashed var(--gold);
+      padding: 0rem 1.25rem 0.7rem;
+      margin: 1.5rem 0;
+    }
+
+    article :global(img) {
+      max-width: 100%;
+      /* width: 50%; */
+      height: auto;
+      display: block;
+      margin: 1.5rem 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    article :global(figure) {
+      margin: 1.5rem 0;
+    }
+    article :global(figcaption) {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      font-family: 'Adelle Sans Devanagari', sans-serif;   /* matches your .meta look */
+    }
+    article :global(.cols-3) {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
   </style>
 </BaseLayout>

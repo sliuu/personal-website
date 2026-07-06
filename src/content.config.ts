@@ -12,10 +12,10 @@ const writing = defineCollection({
 });
 
 const projects = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
-    client: z.string(),        // <-- add this
+    client: z.string(),
     summary: z.string(),
     tech: z.array(z.string()),
     year: z.number(),
