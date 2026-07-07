@@ -5,11 +5,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const roles = ["design engineer", "UX engineer", "UX researcher", "software engineer", "UX designer"];
 
 const projects = [
-  { title: "Scheduling App",                 client: "Personal", href: "/projects/scheduling-app" },
+  // { title: "Scheduling App",                 client: "Personal", href: "/projects/scheduling-app" },
   { title: "Youtube Ads Prototyping",        client: "Google", href: "/projects/youtube-ads-prototyping" },
-  { title: "Easy Labeling Design",      client: "Waymo",    href: "/projects/easy-labeling-design" },
-  { title: "Pickup & Dropoff User Research", client: "Waymo",    href: "/projects/pickup-dropoff-user-research" },
-  { title: "Label Request Process",          client: "Waymo",    href: "/projects/label-request-process" },
+  { title: "Easy Labeling Design",           client: "Waymo",    href: "/projects/easy-labeling-design" },
+  { title: "Pickup & Dropoff User Research Study", client: "Waymo",    href: "/projects/pickup-dropoff-user-research" },
+  { title: "Labeling Ops Request Process Redesign",          client: "Waymo",    href: "/projects/label-request-process" },
 ];
 
 const work = [
@@ -75,21 +75,20 @@ const loves = [
 </BaseLayout>
 
 <style>
-  .section { margin-bottom: 100px; }
-  .col { max-width: 760px; }
-  #header { margin-top: 170px; }
+  .section { margin-bottom: var(--space-7); }
+  #header { margin-top: var(--space-9); }
 
   .name { transition: filter 0.2s ease; }
   .name:hover { filter: brightness(1.45); }
 
   .intro, .location, .previously {
     line-height: 1.9;
-    font-size: 26px;
+    font-size: var(--text-xl);
     letter-spacing: -0.01em;
-    margin-right: 15px;
+    margin-right: var(--space-2);
     display: inline;
   }
-  .previously { margin-top: -5px; display: block; }
+  .previously { display: block; }
 
   /* gold + brighten for the dropdown button and project links.
      (nav links already inherit this from the layout's base `a` rule.) */
@@ -106,22 +105,22 @@ const loves = [
     border-radius: 0px;
     padding: 0.2em 0.5em;
     cursor: pointer;
-    font-size: 24px;
+    font-size: var(--text-xl);
     display: inline-flex;
-    margin-right: 10px;
+    margin-right: var(--space-1);
     align-items: center;
     gap: 0.4em;
   }
   .role-btn .caret { font-size: 0.7em; }
   .role-menu {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + var(--space-1));
     left: 0;
     list-style: none;
     margin: 0;
-    padding: 6px;
+    padding: 0;
     background: var(--menu-bg);
-    border: 1px solid var(--menu-border);
+    border: 0.5px solid var(--gold);
     border-radius: 0px;
     min-width: 100%;
     z-index: 5;
@@ -129,46 +128,48 @@ const loves = [
   }
   .role.open .role-menu { display: block; }
   .role-menu li {
-    font-size: 1.05rem;
-    color: var(--cream);
-    padding: 6px 12px;
+    font-size: var(--text-base);
+    color: var(--gold);
+    padding: var(--space-1) var(--space-2);
+    border: 0.5px solid var(--gold);
     border-radius: 0px;
     cursor: pointer;
     white-space: nowrap;
   }
-  .role-menu li:hover { background: #523231; color: var(--gold); }
+  .role-menu li:hover { background: var(--menu-hover); color: var(--gold); }
 
   /* section labels */
-  .label { font-size: 0.95rem; color: var(--muted); margin: 3.5rem 0 1.1rem; }
+  .label { font-size: var(--text-sm); color: var(--muted); margin: var(--space-5) 0 var(--space-2); }
 
   /* projects */
-  .project { margin-bottom: 1.15rem; }
-  .project a { text-decoration: underline; text-underline-offset: 3px; font-size: 1.2rem; }
-  .project .client { color: var(--muted); font-size: 1.1rem; margin-left: 0.9rem; font-family: 'Adelle Sans Devanagari', sans-serif;}
+  .project { margin-bottom: var(--space-2); }
+  .project a { text-decoration: underline; text-underline-offset: 3px; font-size: var(--text-lg); }
+  .project .client { color: var(--muted); font-size: var(--text-base); margin-left: var(--space-2); }
 
   /* work table */
   .work-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: 0.35rem 0;
-    border-bottom: 1.5px dashed #774d4d;
+    padding: var(--space-1) 0;
+    border-bottom: 1.5px dashed var(--line-soft);
   }
-  .work-row .company { font-size: 1.2rem; color: var(--cream); transition: filter 0.2s ease; }
+  .work-row .company { font-size: var(--text-lg); color: var(--cream); transition: filter 0.2s ease; }
   .work-row .company:hover { filter: brightness(1.25); }
-  .work-row .role-title { font-family: 'Adelle Sans Devanagari', sans-serif; font-size: 1.1rem; color: var(--muted); margin-left: 0.7rem; }
-  .work-row .dates { font-family: 'Adelle Sans Devanagari', sans-serif; font-size: 1.1rem; color: var(--muted); font-style: italic; white-space: nowrap; }
+  .work-row .role-title { font-size: var(--text-base); color: var(--muted); margin-left: var(--space-1); }
+  .work-row .dates { font-size: var(--text-base); color: var(--muted); font-style: italic; white-space: nowrap; }
   .work-row:last-child { border-bottom: none; }
 
   /* loves */
-  .love { font-size: 1.2rem; margin-bottom: 0.7rem; transition: filter 0.2s ease; }
+  .love { font-size: var(--text-lg); margin-bottom: var(--space-1); transition: filter 0.2s ease; }
   .love:hover { filter: brightness(1.25); }
 
   /* photo */
   .photo { width: 260px; height: auto; border-radius: 2px; display: block; }
 
   @media (max-width: 640px) {
-    .intro, .previously { font-size: 1.3rem; }
+    #header { margin-top: var(--space-6); }
+    .intro, .previously { font-size: var(--text-lg); }
     .work-row { flex-direction: column; gap: 0.2rem; }
   }
 </style>

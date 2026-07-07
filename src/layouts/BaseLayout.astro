@@ -2,10 +2,16 @@
 // src/layouts/BaseLayout.astro
 // Shared chrome for every page: head, fonts, design tokens, background,
 // grain, cursor, and the top nav. Each page passes a `title` and its content.
-const { title = "stephanie liu" } = Astro.props;
+const {
+  title = "stephanie liu",
+  description = "stephanie liu — design engineer based in SF. Previously at Google, Nuro, and Waymo.",
+} = Astro.props;
 
 const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
 const githubUrl = "https://www.github.com/sliuu";
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/me.jpg", Astro.site);
 ---
 <html lang="en">
   <head>
@@ -13,11 +19,19 @@ const githubUrl = "https://www.github.com/sliuu";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
 
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary" />
+
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- is:global so these reach page content injected via <slot />.
          Page-specific styles stay in each page's own scoped <style>. -->
@@ -28,8 +42,28 @@ const githubUrl = "https://www.github.com/sliuu";
         --gold: #EFBE87;
         --muted: #C4A1A1;
         --line: var(--muted);
-        --menu-bg: #5E3232;
+        --line-soft: #774d4d;
+        --menu-bg: #4f2222;
         --menu-border: #6b4b3e;
+        --menu-hover: #523231;
+
+        /* spacing scale — 8px base unit */
+        --space-1: 8px;
+        --space-2: 16px;
+        --space-3: 24px;
+        --space-4: 32px;
+        --space-5: 48px;
+        --space-6: 64px;
+        --space-7: 96px;
+        --space-8: 128px;
+        --space-9: 160px;
+        --space-10: 192px;
+
+        /* type scale */
+        --text-sm: 0.9375rem;    /* 15px — labels, captions, nav */
+        --text-base: 1.0625rem;  /* 17px — body, metadata */
+        --text-lg: 1.1875rem;    /* 19px — list items, project links */
+        --text-xl: 1.5rem;       /* 24px — intro, page titles */
       }
 
       * { box-sizing: border-box; }
@@ -39,15 +73,21 @@ const githubUrl = "https://www.github.com/sliuu";
         min-height: 100vh;
         background: var(--bg);
         color: var(--cream);
-        font-family: "Heebo", system-ui, sans-serif;
+        font-family: "Schibsted Grotesk", system-ui, sans-serif;
         -webkit-font-smoothing: antialiased;
-        padding: 2.5rem 2rem 5rem;
+        padding: 0;
         cursor: url("/cursor.png") 0 0, auto;
         image-rendering: pixelated;
       }
 
-      /* uncomment once /hover.png exists, to give clickable things a pixel pointer */
-      /* a, button, .role-btn, .role-menu li { cursor: url("/hover.png") 0 0, pointer; } */
+      /* clickable things use the system hand. (the body sets a custom pixel
+         cursor, which is inherited, so we override it back to pointer here.) */
+      a, button, .role-btn, .role-menu li { cursor: pointer; }
+
+      /* keyboard focus, in the same dashed-gold language as the callouts */
+      :focus-visible { outline: 1px dashed var(--gold); outline-offset: 3px; }
+
+      ::selection { background: var(--gold); color: var(--bg); }
 
       /* subtle film grain over everything — delete this block to remove */
       body::after {
@@ -56,33 +96,51 @@ const githubUrl = "https://www.github.com/sliuu";
         inset: 0;
         z-index: 9999;
         pointer-events: none;
-        opacity: 0.15;
+        opacity: 0.05;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       }
 
       /* shared content wrapper — every page is centered the same way.
-         (project pages can override .wrap width in their own scoped style if needed) */
-      .wrap { max-width: 52%; margin: 0 auto; }
+         Fixed measure so line length doesn't drift with window size.
+         Padding lives here now that body padding is 0 (nav is full-bleed). */
+      .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--space-4) var(--space-7); }
 
       /* base link behavior: gold, brighten on hover, no underline.
          Pages add extras (e.g. underline on project links) in their own style. */
       a { color: var(--gold); text-decoration: none; transition: filter 0.2s ease; }
       a:hover { filter: brightness(1.25); }
 
-      /* top nav — shared across all pages */
+      /* top nav — full-bleed sticky bar, shared across all pages.
+         Transparent at the top of the page; darkens + frosts once scrolled. */
       nav.top {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: var(--space-3) var(--space-4);
+        /* border-bottom: 1px solid transparent; */
+        transition: background 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
+      }
+      nav.top.scrolled {
+        /* background: rgba(28, 10, 10, 0.7); */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        /* border-bottom-color: var(--line-soft); */
+      }
+      /* nav contents stay aligned to the same measure as page content */
+      .nav-inner {
+        /* max-width: 720px; */
+        margin: 0 auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 4rem;
       }
-      .nav-links { display: flex; gap: 1.75rem; font-size: 0.95rem; }
+      .nav-links { display: flex; gap: var(--space-4); font-size: var(--text-sm); }
       .mark { height: 30px; width: auto; display: block; image-rendering: pixelated; }
       
       .cols-3 {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 2rem;
+        gap: var(--space-4);
       }
       @media (max-width: 640px) {
         .cols-3 { grid-template-columns: 1fr; }
@@ -91,18 +149,30 @@ const githubUrl = "https://www.github.com/sliuu";
   </head>
 
   <body>
-    <div class="wrap">
-      <nav class="top">
+    <nav class="top" id="topnav">
+      <div class="nav-inner">
         <a href="/" class="home" aria-label="home">
           <img src="/favicon.png" alt="" class="mark" />
         </a>
         <div class="nav-links">
-          <a href={githubUrl}>GitHub</a>
-          <a href={linkedinUrl}>LinkedIn</a>
+          <a href={githubUrl} target="_blank" rel="noopener">GitHub</a>
+          <a href={linkedinUrl} target="_blank" rel="noopener">LinkedIn</a>
         </div>
-      </nav>
+      </div>
+    </nav>
 
+    <div class="wrap">
       <slot />
     </div>
+
+    <script>
+      // Toggle the frosted/darkened nav state once the page is scrolled.
+      const nav = document.getElementById("topnav");
+      if (nav) {
+        const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+      }
+    </script>
   </body>
 </html>

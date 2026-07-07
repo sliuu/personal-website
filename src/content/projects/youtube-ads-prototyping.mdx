@@ -1,0 +1,72 @@
+---
+title: "Youtube Ads Prototyping Design"
+team: "Youtube Ads UX Engineering"
+role: "UX Engineer"
+summary: "Researched, planned, and re-designed an internal prototyping tool to make it possible for non-technical users (UX designers and UX researchers) to create functioning prototypes for testing new Youtube ads formats without requiring engineering hours."
+tech: ["Lit Element", "TypeScript", "HTML", "CSS"]
+year: 2025
+date: Mar - May 2025
+featured: true
+---
+
+## Project Brief
+
+Experimenting with new designs at a large company like Google requires many layers of research before improvements can be launched. One step, that happens before running a 1% experiment, is to create a prototype of a change and test it with users.
+
+Historically, this has been part of the work of the UX engineering team, but our team thought to create an in-house prototyping tool that everyone from UX designers to UX researchers could use to rapidly prototype and test their designs.
+
+<figure>
+<img src="/projects/prototyping-old-components.png" alt="Image of old prototyping tool" class="hero"/>
+<figcaption>First version of the prototyping tool</figcaption>
+</figure>
+
+The first version of this tool was clunky and technical, difficult to use, and had a lot of bugs. As a result, it was still mostly UX engineers (our team) using this tool to create prototypes for other teams.
+
+<div class="callout">
+  <h4 class="challenge-head"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg minisvg--inline" viewBox="0 0 24 24"><path d="M22 22h-2v-2h2v2Zm-2-2h-2v-2h2v2Zm-6-2H6v-2h8v2Zm4 0h-2v-2h2v2ZM6 16H4v-2h2v2Zm10 0h-2v-2h2v2ZM4 14H2V6h2v8Zm14 0h-2V6h2v8ZM6 6H4V4h2v2Zm10 0h-2V4h2v2Zm-2-2H6V2h8v2Z"/></svg><span>Challenge:</span></h4>
+
+  My task was to redesign the current tool focusing on usability, to improve adoption rates from non-technical users like UX designers and UX researchers.
+</div>
+
+## Discovery & Research
+
+I started with an extensive existing application audit, tracking feature inventory, current and expected CUJs, and logging all the current pain points. For example, looking at the first-time onboarding flow, the functionality for tracking state, and the functionality for creating custom components for reuse.
+
+<figure>
+<img src="/projects/prototyping-add-variables-current-flow.png" alt="Image of a flow for adding variables in the old tool" class="hero"/>
+<figcaption>In this screenshot, I track the current flow for adding new variables. I look at each step the user takes and think about where the user might run into painpoints. </figcaption>
+</figure>
+
+I also did a competitive analysis, looking at other prototyping tools like ProtoPie and Framer, to get an idea of what patterns worked particularly well or did not. 
+
+## The Solution
+
+For the final designs, I did an aesthetic overhaul to create a more enjoyable and modern experience using the tool, created more obvious groupings to not overwhelm the user with blocks of text, made interactions more obvious, and made different sections more distinct.
+
+<div class="cols-3">
+  <div class="callout">
+  <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M4 3h16v2H4zm0 16h6v2H4zM2 5h2v14H2zm18 0h2v8h-2zM6 7h2v2H6zm4 0h2v2h-2zm4 0h2v2h-2zm2 6h2v2h-2zm0 8h2v2h-2zm-4-4h2v2h-2zm8 0h2v2h-2zm-6-2h2v2h-2zm4 0h2v2h-2zm0 4h2v2h-2zm-4 0h2v2h-2z"/></svg>
+    <p>Aesthetic and modern changes to improve the overall user experience</p>
+  </div>
+  <div class="callout">
+    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg"fill="currentColor" viewBox="0 0 24 24"><path d="M10 5h12v2H10zm0 4h8v2h-8zm0 4h12v2H10zm0 4h8v2h-8zm-4-6H4V9h2v2ZM4 9H2V7h2v2Zm4 0H6V7h2v2ZM6 7H4V5h2v2Zm-2 6h2v2H4zm0 4h2v2H4zm-2 0v-2h2v2zm4 0v-2h2v2z"/></svg>
+    <p>Clear groupings of functionality and settings to reduce cognitive load</p>
+  </div>
+  <div class="callout">
+  <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M20 20H4v-2h16v2ZM4 18H2V6h2v12Zm18 0h-2V6h2v12ZM18 8v6h-8V8h8Zm2-2H4V4h16v2Zm-4 4h-4v2h4v-2Z"/></svg>
+    <p>Added new interactive elements to enhance user engagement</p>
+  </div>
+</div>
+
+All these changes worked toward the ultimate goal of making the tool easier to use and learn for the first time, and not require a high technical background in HTML and CSS to use it.
+
+<figure>
+<img src="/projects/prototyping-new-boards.png" alt="Image of a flow for adding variables in the old tool" class="hero"/>
+<figcaption>Interactions are dark and obvious; in this case the user is exporting a prototype. </figcaption>
+</figure>
+
+<figure>
+<img src="/projects/prototyping-new-elements.png" alt="Image of a flow for adding variables in the old tool" class="hero"/>
+<figcaption>More distinct sections and clearer interactions. </figcaption>
+</figure>
+

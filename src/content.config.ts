@@ -15,11 +15,15 @@ const projects = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
-    client: z.string(),
+    team: z.string(),
+    year: z.number(),
+    role: z.string(),
+    duration: z.string().optional(),
     summary: z.string(),
     tech: z.array(z.string()),
-    year: z.number(),
+    date: z.string(),
     featured: z.boolean().default(false),
+    draft: z.boolean().default(false),   // draft/archived: hidden from the built site
     repo: z.string().url().optional(),
   }),
 });
