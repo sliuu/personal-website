@@ -1,8 +1,7 @@
-company: "Acme Corp"
+company: "Test Corp"
 role: "Software Engineer"
 start: "2023-01"
 end: "2025-06"
 highlights:
-  - "Led a migration to a static-first architecture."
-  - "Built internal tooling used by 40+ engineers."
+  - "Placeholder"
 
