@@ -117,14 +117,13 @@ const ogImage = new URL("/me.jpg", Astro.site);
         top: 0;
         z-index: 100;
         padding: var(--space-3) var(--space-4);
-        /* border-bottom: 1px solid transparent; */
+        border-bottom: 1px solid transparent;
         transition: background 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
       }
       nav.top.scrolled {
-        /* background: rgba(28, 10, 10, 0.7); */
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        /* border-bottom-color: var(--line-soft); */
+        mask-image: linear-gradient(to bottom, #000000 30%, transparent 100%);
       }
       /* nav contents stay aligned to the same measure as page content */
       .nav-inner {
