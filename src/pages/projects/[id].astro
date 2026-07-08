@@ -139,7 +139,7 @@ const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
     article :global(.callout) {
       border: 1px solid var(--cream);
       padding: 0 var(--space-2) var(--space-1);
-      margin: 0 0 var(--space-3) 0;
+      margin: 0;
     }
     article :global(.callout p) {
       font-size: var(--text-sm);
@@ -165,7 +165,7 @@ const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
     article :global(.cols-3) {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-4);
+      gap: var(--space-2);
     }
     /* inline pixel icons (fill="currentColor") — muted so they stay
        decorative (gold is reserved for clickable things).
@@ -211,6 +211,7 @@ const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
     @media (max-width: 640px) {
       .back { margin-top: var(--space-6); }
       .meta-block { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      article :global(.cols-3) { grid-template-columns: 1fr; }
       .case-footer { flex-direction: column; gap: var(--space-2); }
       .case-footer__next { text-align: left; }
     }
