@@ -11,37 +11,52 @@ featured: true
 
 ## Project Brief
 
-Experimenting with new designs at a large company like Google requires many layers of research before improvements can be launched. One step, that happens before running a 1% experiment, is to create a prototype of a change and test it with users.
-
-Historically, this has been part of the work of the UX engineering team, but our team set out to create an in-house prototyping tool that everyone from UX designers to UX researchers could use to rapidly prototype and test their designs.
+The UX Engineering team in Ads was building a new internal prototyping tool to allow UX designers and researchers to create functioning prototypes for testing new ad formats without requiring engineering hours. The first version of this tool was live before I joined, but it was clunky and technical, difficult to use, and had a lot of bugs. As a result, it was still only UX engineers (our team) using this tool to create prototypes for other teams. The technical bar was just too high.
 
 <figure>
 <img src="/projects/prototyping-old-components.png" alt="Image of old prototyping tool" class="hero"/>
 <figcaption>First version of the prototyping tool</figcaption>
 </figure>
 
-The first version of this tool was clunky and technical, difficult to use, and had a lot of bugs. As a result, it was still mostly UX engineers (our team) using this tool to create prototypes for other teams.
-
 <div class="callout">
   <h4 class="challenge-head"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg minisvg--inline" viewBox="0 0 24 24"><path d="M22 22h-2v-2h2v2Zm-2-2h-2v-2h2v2Zm-6-2H6v-2h8v2Zm4 0h-2v-2h2v2ZM6 16H4v-2h2v2Zm10 0h-2v-2h2v2ZM4 14H2V6h2v8Zm14 0h-2V6h2v8ZM6 6H4V4h2v2Zm10 0h-2V4h2v2Zm-2-2H6V2h8v2Z"/></svg><span>Challenge:</span></h4>
 
-  My task was to redesign the current tool focusing on usability, to improve adoption rates from non-technical users like UX designers and UX researchers.
+  What prevented non-technical users from creating prototypes independently? Could we redesign the tool so that non-technical users would actually want to use it?
 </div>
 
 ## Discovery & Research
 
-I started with an extensive existing application audit, tracking feature inventory, current and expected CUJs, and logging all the current pain points. For example, looking at the first-time onboarding flow, the functionality for tracking state, and the functionality for creating custom components for reuse.
+Learning to use the tool myself, I ran into many pain points. I didn't know where to start, I realized the tool expected some basic knowledge of HTML and CSS, and "next steps" were not obvious. Most of the tool just expected you to know what things meant already, and to have some deep technical knowledge.
 
 <figure>
 <img src="/projects/prototyping-add-variables-current-flow.png" alt="Image of a flow for adding variables in the old tool" class="hero"/>
 <figcaption>In this screenshot, I track the current flow for adding new variables. I look at each step the user takes and think about where the user might run into painpoints. </figcaption>
 </figure>
 
-I also did a competitive analysis, looking at other prototyping tools like ProtoPie and Framer, to get an idea of what patterns worked particularly well or did not. 
+I also spoke to some expected users, UX designers and researchers, who didn't seem to be convinced that this tool would be useful for them. They were used to having UX engineers build stuff for them, and had little interest in learning a new tool.
+
+I gathered that this tool would have to be very simple for them to use, so simple that it would become easier to use than asking a UX engineer to build a prototype for them. I also gathered that the tool would have to be very obvious in its functionality, and not require a high technical background in HTML and CSS to use it. 
+
+I also did a competitive analysis to get an idea of what patterns worked particularly well or did not. Looking at Framer and ProtoPie, I noticed both tools aggressively reduce cognitive load by exposing complexity progressively instead of immediately, for example.
+
+## Approach
+
+Modernize the UI to make the tool more enjoyable to use
+Use clear imagery, icons, and tooltips to make the tool more obvious for new learners
+Group functionality and settings to reduce cognitive load
+Hide advanced settings
+Provide templates and pre-made components so users aren't starting from scratch
+
 
 ## The Solution
 
 For the final designs, I did an aesthetic overhaul to create a more enjoyable and modern experience using the tool, created more obvious groupings to not overwhelm the user with blocks of text, made interactions more obvious, and made different sections more distinct.
+
+My goal was to make a simple flow, adding pre-made Youtube components to a board, adding simple interactions, and exporting a prototype, as easy as possible for a first-time user. I also wanted to make it possible for users to create more complex prototypes with custom components and variables, but not overwhelm the first-time user with this complexity.
+
+Youtube components should surface first, rather than text fields and arbitrary boxes. Users should never need to start completely from scratch, especially in the Ads space. 
+
+Interactions should look strikingly similar to Figma; we want the users to feel like they already know how to use the tool, we don't need to reinvent the wheel.
 
 <div class="cols-3">
   <div class="callout">
