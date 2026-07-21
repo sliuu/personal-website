@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# local-only internal source material (never publish — confidential PDFs, etc.)
+.old/

@@ -89,35 +89,6 @@ const ogImage = new URL("/favicon.png", Astro.site);
 
       ::selection { background: var(--gold); color: var(--bg); }
 
-      /* warm spotlight that trails the cursor. Injected + positioned by JS.
-         Sits above content (screen-blends to lighten the maroon warmly) but
-         below the nav (100) and grain (9999). Hidden on touch / reduced-motion. */
-      .cursor-glow {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 460px;
-        height: 460px;
-        margin: -230px 0 0 -230px;   /* center the circle on the cursor point */
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 50;
-        background: radial-gradient(
-          circle closest-side,
-          rgba(239, 190, 135, 0.16),
-          rgba(239, 190, 135, 0.05) 45%,
-          transparent 72%
-        );
-        mix-blend-mode: screen;
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        will-change: transform;
-      }
-      .cursor-glow.on { opacity: 1; }
-      @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
-        .cursor-glow { display: none; }
-      }
-
       /* subtle film grain over everything — delete this block to remove */
       body::after {
         content: "";
@@ -200,73 +171,6 @@ const ogImage = new URL("/favicon.png", Astro.site);
         const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
         onScroll();
         window.addEventListener("scroll", onScroll, { passive: true });
-      }
-    </script>
-
-    <script>
-      // Cursor spotlight + proximity-reactive text. Only on fine pointers with
-      // hover and no reduced-motion preference — otherwise it's just noise.
-      const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
-      const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-      if (fine && !calm) {
-        const glow = document.createElement("div");
-        glow.className = "cursor-glow";
-        document.body.appendChild(glow);
-
-        const RADIUS = 130;    // how close (px) before an element reacts
-        const BRIGHT = 0.4;    // max extra brightness at the cursor
-        const SHIFT = 4;       // max px an element leans toward the cursor
-
-        // Elements that brighten / lean. Broad enough to cover every page.
-        const els = Array.from(
-          document.querySelectorAll(
-            ".wrap a, .name, .love, .work-row .company, .role-btn, .project a"
-          )
-        );
-        els.forEach((el) => {
-          el.style.transition = "filter 0.2s ease, transform 0.2s ease";
-        });
-
-        // Cache element centers; refresh on layout changes.
-        let pts = [];
-        const measure = () => {
-          pts = els.map((el) => {
-            const r = el.getBoundingClientRect();
-            return { el, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
-          });
-        };
-        measure();
-        window.addEventListener("resize", measure);
-        window.addEventListener("scroll", measure, { passive: true });
-
-        let mx = -9999, my = -9999, raf = 0;
-        const render = () => {
-          raf = 0;
-          glow.style.transform = `translate(${mx}px, ${my}px)`;
-          for (const p of pts) {
-            const dx = mx - p.cx, dy = my - p.cy;
-            const dist = Math.hypot(dx, dy);
-            if (dist < RADIUS) {
-              const t = 1 - dist / RADIUS;           // 1 at cursor → 0 at edge
-              const d = dist || 1;
-              p.el.style.filter = `brightness(${1 + t * BRIGHT})`;
-              p.el.style.transform =
-                `translate(${(dx / d) * t * SHIFT}px, ${(dy / d) * t * SHIFT}px)`;
-            } else if (p.el.style.filter) {
-              p.el.style.filter = "";
-              p.el.style.transform = "";
-            }
-          }
-        };
-
-        window.addEventListener("mousemove", (e) => {
-          mx = e.clientX;
-          my = e.clientY;
-          glow.classList.add("on");
-          if (!raf) raf = requestAnimationFrame(render);
-        });
-        document.addEventListener("mouseleave", () => glow.classList.remove("on"));
       }
     </script>
   </body>
