@@ -1,0 +1,18 @@
+---
+// The "Challenge:" callout that opens every case study.
+import { icons } from './icons';
+
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+<div class="callout">
+  <h4 class="challenge-head">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg minisvg--inline" viewBox="0 0 24 24" aria-hidden="true">
+      <path d={icons.chat} />
+    </svg>
+    <span>Challenge:</span>
+  </h4>
+  <p>{text}</p>
+</div>

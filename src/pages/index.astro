@@ -1,14 +1,15 @@
 ---
 // src/pages/index.astro — homepage content only; chrome lives in BaseLayout
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
 
 const roles = ["design engineer", "UX engineer", "UX researcher", "software engineer", "UX designer"];
 
 const projects = [
   // { title: "Scheduling App",                 client: "Personal", href: "/projects/scheduling-app" },
   { title: "Youtube Ads Prototyping",        client: "Google", href: "/projects/youtube-ads-prototyping" },
-  { title: "Easy Labeling Design",           client: "Waymo",    href: "/projects/easy-labeling-design" },
-  { title: "Pickup & Dropoff User Research Study", client: "Waymo",    href: "/projects/pickup-dropoff-user-research" },
+  // { title: "Easy Labeling Design",           client: "Waymo",    href: "/projects/easy-labeling-design" },
+  // { title: "Pickup & Dropoff User Research Study", client: "Waymo",    href: "/projects/pickup-dropoff-user-research" },
   { title: "Labeling Ops Request Process Redesign",          client: "Waymo",    href: "/projects/label-request-process" },
 ];
 

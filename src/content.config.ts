@@ -15,6 +15,7 @@ const projects = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
+    client: z.string(),                  // company shown next to the title on the homepage
     team: z.string(),
     year: z.number(),
     role: z.string(),
@@ -22,21 +23,12 @@ const projects = defineCollection({
     summary: z.string(),
     tech: z.array(z.string()),
     date: z.string(),
+    status: z.string().optional(),       // honest one-phrase outcome, shown in the meta block
+    order: z.number().default(99),       // homepage + next-project ordering (low = first)
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),   // draft/archived: hidden from the built site
     repo: z.string().url().optional(),
   }),
 });
 
-const work = defineCollection({
-  loader: glob({ pattern: '**/*.yaml', base: './src/content/work' }),
-  schema: z.object({
-    company: z.string(),
-    role: z.string(),
-    start: z.string(),
-    end: z.string().optional(),
-    highlights: z.array(z.string()),
-  }),
-});
-
-export const collections = { writing, projects, work };
+export const collections = { writing, projects };

@@ -1,87 +1,80 @@
 ---
-title: "Youtube Ads Prototyping Design"
-team: "Youtube Ads UX Engineering"
+title: "YouTube Ads Prototyping Tool"
+client: "Google"
+team: "YouTube Ads UX Engineering"
 role: "UX Engineer"
-summary: "Researched, planned, and re-designed an internal prototyping tool to make it possible for non-technical users (UX designers and UX researchers) to create functioning prototypes for testing new Youtube ads formats without requiring engineering hours."
-tech: ["Lit Element", "TypeScript", "HTML", "CSS"]
+summary: "An internal tool for prototyping new YouTube ad formats. Built and shipped production features, and simultaneously designed its next generation for non-engineers and broader adoption."
+tech: ["Lit", "TypeScript", "CSS", "Figma"]
 year: 2025
-date: Mar - May 2025
+date: "Feb – Oct 2025"
+status: "Features shipped · redesign handed off"
+order: 1
 featured: true
 ---
 
-## Project Brief
+import Challenge from '../../components/Challenge.astro';
+import Callout from '../../components/Callout.astro';
+import Figure from '../../components/Figure.astro';
 
-The UX Engineering team in Ads was building a new internal prototyping tool to allow UX designers and researchers to create functioning prototypes for testing new ad formats without requiring engineering hours. The first version of this tool was live before I joined, but it was clunky and technical, difficult to use, and had a lot of bugs. As a result, it was still only UX engineers (our team) using this tool to create prototypes for other teams. The technical bar was just too high.
+Testing a new YouTube ad format starts with a working prototype — something a research participant can actually click, scroll, and react to. The Ads UX Engineering team had built an internal prototyping tool for exactly this. It worked, but only if you already thought like an engineer: it assumed working knowledge of HTML and CSS, so in practice only our own team used it, and every prototype still cost engineering hours.
 
-<figure>
-<img src="/projects/prototyping-old-components.png" alt="Image of old prototyping tool" class="hero"/>
-<figcaption>First version of the prototyping tool</figcaption>
-</figure>
+I worked on this tool from both sides. As a UX engineer on the team, I built and shipped production features on the live tool — in Lit and TypeScript — and used it to deliver prototypes for real research studies. In parallel, I designed its next generation: the version UX designers and researchers could pick up without us. I left Google before the redesign shipped, so this case study covers both the production work that shipped and the design work I handed off.
 
-<div class="callout">
-  <h4 class="challenge-head"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg minisvg--inline" viewBox="0 0 24 24"><path d="M22 22h-2v-2h2v2Zm-2-2h-2v-2h2v2Zm-6-2H6v-2h8v2Zm4 0h-2v-2h2v2ZM6 16H4v-2h2v2Zm10 0h-2v-2h2v2ZM4 14H2V6h2v8Zm14 0h-2V6h2v8ZM6 6H4V4h2v2Zm10 0h-2V4h2v2Zm-2-2H6V2h8v2Z"/></svg><span>Challenge:</span></h4>
+<Figure src="/projects/prototyping-old-components.png" alt="The first version of the prototyping tool: a components panel, an empty board, and a dense properties sidebar" caption="The first version of the prototyping tool." />
 
-  What prevented non-technical users from creating prototypes independently? Could we redesign the tool so that non-technical users would actually want to use it?
-</div>
+<Challenge text="What actually prevented non-technical users from creating prototypes on their own — and could the tool be redesigned so that they'd want to use it?" />
 
-## Discovery & Research
+## Shipping on the live tool
 
-Learning to use the tool myself, I ran into many pain points. I didn't know where to start, I realized the tool expected some basic knowledge of HTML and CSS, and "next steps" were not obvious. Most of the tool just expected you to know what things meant already, and to have some deep technical knowledge.
+Redesigns don't pause the roadmap. While the new design took shape, I kept building the current tool and building *with* it:
 
-<figure>
-<img src="/projects/prototyping-add-variables-current-flow.png" alt="Image of a flow for adding variables in the old tool" class="hero"/>
-<figcaption>In this screenshot, I track the current flow for adding new variables. I look at each step the user takes and think about where the user might run into painpoints. </figcaption>
-</figure>
+- Built functioning prototypes of YouTube Shorts ad formats used in live user research studies. [TODO: one concrete, shareable example of a study these supported]
+- Designed and shipped new production functionality in the tool itself. [TODO: name 1–3 shipped features — e.g. new components, publish/export flow improvements]
 
-I also spoke to some expected users, UX designers and researchers, who didn't seem to be convinced that this tool would be useful for them. They were used to having UX engineers build stuff for them, and had little interest in learning a new tool.
+Working in the tool daily is also what made the redesign concrete. I wasn't guessing where users got stuck — I got stuck there myself, and I knew from the codebase which fixes were cheap and which were architectural.
 
-I gathered that this tool would have to be very simple for them to use, so simple that it would become easier to use than asking a UX engineer to build a prototype for them. I also gathered that the tool would have to be very obvious in its functionality, and not require a high technical background in HTML and CSS to use it. 
+## Discovery & research
 
-I also did a competitive analysis to get an idea of what patterns worked particularly well or did not. Looking at Framer and ProtoPie, I noticed both tools aggressively reduce cognitive load by exposing complexity progressively instead of immediately, for example.
+Learning the tool as a newcomer, I hit the walls firsthand: no obvious starting point, an assumed vocabulary of HTML and CSS, and "next steps" that were anything but obvious. The tool expected you to already know what everything meant.
 
-## Approach
+<Figure src="/projects/prototyping-add-variables-current-flow.png" alt="An annotated walkthrough of the flow for adding variables in the old tool" caption="Tracking the current flow for adding new variables, step by step, and noting where a first-time user would stall." />
 
-Modernize the UI to make the tool more enjoyable to use
-Use clear imagery, icons, and tooltips to make the tool more obvious for new learners
-Group functionality and settings to reduce cognitive load
-Hide advanced settings
-Provide templates and pre-made components so users aren't starting from scratch
+Then I talked to the people the tool was supposed to serve. UX designers and researchers weren't just untrained on it — they were unconvinced. They had UX engineers to build prototypes for them; learning a new tool was a cost with no obvious payoff.
 
+That reframed the bar for the redesign: it couldn't just be *possible* for non-engineers to use — it had to be *easier than asking us*. I also ran a competitive analysis of Framer and ProtoPie, and the shared pattern was striking: both aggressively reduce cognitive load by revealing complexity progressively, never all at once.
 
-## The Solution
+## Design principles
 
-For the final designs, I did an aesthetic overhaul to create a more enjoyable and modern experience using the tool, created more obvious groupings to not overwhelm the user with blocks of text, made interactions more obvious, and made different sections more distinct.
+The redesign came down to a few commitments:
 
-My goal was to make a simple flow, adding pre-made Youtube components to a board, adding simple interactions, and exporting a prototype, as easy as possible for a first-time user. I also wanted to make it possible for users to create more complex prototypes with custom components and variables, but not overwhelm the first-time user with this complexity.
+- Start from YouTube components, not empty boxes — nobody in Ads should begin from scratch
+- Reveal complexity progressively; hide advanced settings until they're asked for
+- Group functionality so screens read as a handful of decisions, not a wall of settings
+- Borrow Figma's interaction grammar — designers should feel like they already know the tool
+- Make the interface legible to newcomers: clear imagery, icons, and tooltips over assumed knowledge
 
-Youtube components should surface first, rather than text fields and arbitrary boxes. Users should never need to start completely from scratch, especially in the Ads space. 
-
-Interactions should look strikingly similar to Figma; we want the users to feel like they already know how to use the tool, we don't need to reinvent the wheel.
+## The redesign
 
 <div class="cols-3">
-  <div class="callout">
-  <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M4 3h16v2H4zm0 16h6v2H4zM2 5h2v14H2zm18 0h2v8h-2zM6 7h2v2H6zm4 0h2v2h-2zm4 0h2v2h-2zm2 6h2v2h-2zm0 8h2v2h-2zm-4-4h2v2h-2zm8 0h2v2h-2zm-6-2h2v2h-2zm4 0h2v2h-2zm0 4h2v2h-2zm-4 0h2v2h-2z"/></svg>
-    <p>Aesthetic and modern changes to improve the overall user experience</p>
-  </div>
-  <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg"fill="currentColor" viewBox="0 0 24 24"><path d="M10 5h12v2H10zm0 4h8v2h-8zm0 4h12v2H10zm0 4h8v2h-8zm-4-6H4V9h2v2ZM4 9H2V7h2v2Zm4 0H6V7h2v2ZM6 7H4V5h2v2Zm-2 6h2v2H4zm0 4h2v2H4zm-2 0v-2h2v2zm4 0v-2h2v2z"/></svg>
-    <p>Clear groupings of functionality and settings to reduce cognitive load</p>
-  </div>
-  <div class="callout">
-  <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M20 20H4v-2h16v2ZM4 18H2V6h2v12Zm18 0h-2V6h2v12ZM18 8v6h-8V8h8Zm2-2H4V4h16v2Zm-4 4h-4v2h4v-2Z"/></svg>
-    <p>Added new interactive elements to enhance user engagement</p>
-  </div>
+  <Callout icon="shine" text="A visual overhaul, to make the tool feel modern and worth choosing" />
+  <Callout icon="listNested" text="Clear groupings of functionality and settings, to reduce cognitive load" />
+  <Callout icon="browser" text="Bold, obvious interactions modeled on tools designers already use" />
 </div>
 
-All these changes worked toward the ultimate goal of making the tool easier to use and learn for the first time, and not require a high technical background in HTML and CSS to use it.
+My benchmark flow was a first-time user's first fifteen minutes: add pre-made YouTube components to a board, wire up simple interactions, export a working prototype. That path had to feel effortless. Depth — custom components, variables, conditional logic — stayed available, but never in the way.
 
-<figure>
-<img src="/projects/prototyping-new-boards.png" alt="Redesigned tool showing a prototype being exported" class="hero"/>
-<figcaption>Interactions are bold and obvious; in this case the user is exporting a prototype. </figcaption>
-</figure>
+<Figure src="/projects/prototyping-new-boards.png" alt="The redesigned tool with a prototype being exported" caption="Interactions are bold and obvious — here, exporting a finished prototype." />
 
-<figure>
-<img src="/projects/prototyping-new-elements.png" alt="Redesigned tool showing distinct sections and clearer interactions" class="hero"/>
-<figcaption>More distinct sections and clearer interactions. </figcaption>
-</figure>
+<Figure src="/projects/prototyping-new-elements.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." />
 
+## Where it landed
+
+I left Google in October 2025, before the redesign shipped. The production features I built along the way are part of the live tool.
+
+What the work established:
+
+- **A sharper problem definition.** The adoption barrier wasn't missing capability — it was prerequisite knowledge. Every design decision followed from removing that prerequisite.
+- **A tested design direction.** Components-first authoring, progressive disclosure, and a Figma-native interaction grammar, validated against the exact moments where real users stalled.
+- **The case for the audience.** The research documented *why* designers and researchers weren't converting, giving the team a target for the next version rather than a hunch.
+
+Designing a tool while maintaining its production codebase is my favorite way to work — the design and the implementation inform each other in both directions. [TODO: link the shipped data-viz tool here as the end-to-end version of this story.]

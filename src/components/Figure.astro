@@ -1,0 +1,14 @@
+---
+// Case-study image with optional caption. Carries the .reveal hook so figures
+// fade up as they enter the viewport (no-ops under prefers-reduced-motion).
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+const { src, alt, caption } = Astro.props;
+---
+<figure class="reveal">
+  <img src={src} alt={alt} loading="lazy" decoding="async" />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

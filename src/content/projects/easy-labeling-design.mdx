@@ -1,14 +1,84 @@
 ---
-title: "Easy Labeling Design"
-team: "Waymo UX Design, ML Infrastructure"
-role: "UX Design, UX Engineering"
-summary: "Designed user flows and interfaces for a new internal Waymo application enabling users to self-label and auto-label driving data. This app streamlined LLM experimentation workflows and supported broader adoption of GenAI tools at Waymo."
-tech: ["Figma", "Angular", "JavaScript", "CSS"]
-date: Aug - Oct 2024
+title: "Easy Labeling"
+client: "Waymo"
+team: "Waymo ML Infrastructure & UX"
+role: "UX Design"
+summary: "A design proposal for a Waymo-internal tool that would let any team — technical or not — self-label and auto-label driving data with LLMs. Designed to make a labeling experiment as easy to start as a spreadsheet."
+tech: ["Figma"]
+date: "Aug – Oct 2024"
 year: 2024
-duration: 3 months
+duration: "3 months"
+status: "Design proposal · handed off"
+order: 3
 featured: true
+draft: true
 ---
+
+import Challenge from '../../components/Challenge.astro';
+import Callout from '../../components/Callout.astro';
+import Figure from '../../components/Figure.astro';
+
+This is a design proposal I led at Waymo — a tool the labeling team needed, designed end-to-end and handed off. I left Waymo before it shipped.
+
+<Figure src="/projects/easy-labeling-waymo-run.png" alt="A Waymo vehicle's view of the road, with detected objects highlighted" />
+
+## The problem
+
+When LLMs got good enough to label driving data, everyone at Waymo suddenly wanted to experiment — not just the specialists. The company wanted technical and non-technical teams alike using GenAI tools across the stack, and labeled data is where that starts:
+
+1. **Auto-labeling** — using LLMs to label Waymo run data at experiment speed
+2. **Self-labeling** — hand-labeling ground truth for fine-tuning models
+
+The existing labeling stack was built for specialists running large production jobs. There was no lightweight path for a curious team with a thousand examples and a question.
+
+<Challenge text="Design a labeling interface that lets non-technical and technical users alike experiment with auto-labeling and self-labeling Waymo data." />
+
+## Research
+
+I started by interviewing users across the spectrum and shadowing them through their actual workflows — what was hard, what was easy, what they needed but couldn't name:
+
+<div class="cols-3">
+  <Callout icon="users" text="Highly technical users with experience using labeling tools" />
+  <Callout icon="user" text="A technical user with no experience using labeling tools" />
+  <Callout icon="user" text="A non-technical user with little experience using labeling tools" />
+</div>
+
+Three pain points came up again and again, and they became the design's requirements:
+
+<div class="cols-3">
+  <Callout icon="puzzle" text="High setup complexity for less technical users" />
+  <Callout icon="arrowTurn" text="Difficulty transitioning between tools" />
+  <Callout icon="chart" text="Challenges tracking iterative experiments" />
+</div>
+
+## The proposed design
+
+I mapped the full set of user flows the design needed to cover — importing data, creating a project, and labeling — and how a user would move through each step:
+
+<Figure src="/projects/easy-labeling-user-flow.png" alt="User flow diagram covering importing data, creating a project, and labeling" />
+
+The proposal placed Easy Labeling inside the ML platform Waymo teams already used, as a central hub for simple labeling requests. Scope was a deliberate design decision: bulk labeling in the many thousands, 3D bounding boxes, and other complex requests stayed out, keeping the tool honest about what "easy" means.
+
+The core concept is the **experiment**: a dataset + a prompt + a labeling method. A thousand examples of puddles + "Will this splash someone?" + auto-labeled with AI — that's one experiment, legible at a glance, cheap to iterate on. Experiments live in workspaces, so a team's parallel attempts stay organized instead of scattered.
+
+To solve the tool-transition pain point, the design threads Easy Labeling into the tools users already had: found a slice of interesting data in the data-search tool? One action imports it into an experiment. Labels ready? Send them onward to fine-tuning without leaving the flow.
+
+<Figure src="/projects/easy-labeling-experiments-list.png" alt="Easy Labeling's experiments list showing progress, precision, and recall per experiment" caption="Experiments within a workspace: each one a dataset, a prompt, and a labeling method, with progress visible at a glance." />
+
+<Figure src="/projects/easy-labeling-examples.png" alt="The examples view within an experiment, with operations on the labeled data" caption="Inside an experiment: users can review and operate on individual examples." />
+
+## What the design established
+
+I left Waymo before Easy Labeling shipped. What the proposal gave the team:
+
+- **A mental model for LLM labeling.** The experiment (dataset + prompt + method) turned an intimidating ML workflow into something a non-specialist can reason about, compare, and iterate on.
+- **A deliberate scope.** Simple requests only — the design argued that "easy" is a feature you protect, not a marketing word.
+- **Integration-first adoption.** Import and export paths from existing tools, so using Easy Labeling never required abandoning a workflow — the design's answer to why previous tools stayed specialist-only.
+
+The underlying problem — making a data-heavy internal tool feel obvious to someone who isn't an engineer — is the throughline of my work. [TODO: link the shipped data-viz tool here as the version of this story I carried from design through production.]
+
+{
+/* 
 
 <figure>
 <img src="/projects/easy-labeling-waymo-run.png" alt="Image of Waymo car view on a road" class="hero"/>
@@ -109,3 +179,5 @@ We also added options on existing tools to import data into “Easy Labeling” 
     <p>Streamlined the labeling process from different tools</p>
   </div>
 </div>
+*/
+}
