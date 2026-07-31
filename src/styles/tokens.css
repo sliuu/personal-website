@@ -1,0 +1,50 @@
+/* src/styles/tokens.css — the design system's knobs.
+   Imported by BaseLayout, so every page and every scoped <style> block can
+   reach these. Nothing in here paints anything; see global.css for that. */
+
+:root {
+  --grid: 2rem;              /* 32px at a 16px root — the one knob */
+  --ink-rgb: 38,34,28;       /* text as R,G,B so one var drives solid + translucent */
+  --paper: #eae4d8;
+  --color-accent: #8a2f28;   /* maroon */
+  --accent-rgb: 168,64,54;   /* the lighter maroon, as R,G,B */
+  --accent-strong: rgb(var(--accent-rgb));
+  --color-divider: rgba(var(--accent-rgb), 0.28);  /* rules carry the maroon, faintly */
+  --color-stroke-neutral: rgba(var(--ink-rgb), 0.18);  /* strokes that shouldn't
+                                                          compete with the maroon */
+  --color-grid: rgba(var(--ink-rgb), 0.035);  /* the painted grid lines */
+  --glow-strength: 0.15;     /* how hot the lit grid gets under the cursor —
+                                kept low: the lines pass behind the text */
+
+  --btn-h: 40px;             /* deliberately not a grid multiple — see .btn-row */
+
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'Lora', serif;
+
+  /* --- legacy aliases -----------------------------------------------
+     The case-study pages still speak the old token vocabulary. Mapping
+     them onto the new palette keeps those pages coherent until they are
+     rebuilt. */
+  --bg: var(--paper);
+  --cream: rgb(var(--ink-rgb));
+  --muted: rgba(var(--ink-rgb), 0.7);
+  --gold: var(--color-accent);
+  --line: var(--color-divider);
+  --line-soft: var(--color-divider);
+
+  --space-1: calc(var(--grid) / 4);    /* 8px  */
+  --space-2: calc(var(--grid) / 2);    /* 16px */
+  --space-3: calc(var(--grid) * 0.75); /* 24px */
+  --space-4: var(--grid);              /* 32px */
+  --space-5: calc(var(--grid) * 1.5);  /* 48px */
+  --space-6: calc(var(--grid) * 2);    /* 64px */
+  --space-7: calc(var(--grid) * 3);    /* 96px */
+  --space-8: calc(var(--grid) * 4);    /* 128px */
+  --space-9: calc(var(--grid) * 5);    /* 160px */
+  --space-10: calc(var(--grid) * 6);   /* 192px */
+
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 20px;
+  --text-xl: 30px;
+}

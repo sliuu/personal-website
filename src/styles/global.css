@@ -1,0 +1,130 @@
+/* src/styles/global.css — the shared chrome: reset, the painted grid, the
+   cursor spotlight, the header, the content column, buttons, and the footer.
+   Everything here is global by definition; page-specific rules live in each
+   page's own scoped <style> block. Tokens come from tokens.css. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* pin the root size so `rem` is predictable — the grid and every spacing
+   value scale together under zoom / OS font-scaling. */
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: rgb(var(--ink-rgb));
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--color-accent); text-decoration: none; text-underline-offset: 3px; }
+a:hover { color: var(--accent-strong); }
+
+::selection { background: rgba(138, 47, 40, 0.18); }
+:focus-visible { outline: 1px solid var(--color-accent); outline-offset: 2px; }
+
+/* ---- the grid ---- */
+.page {
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: var(--grid) var(--grid);
+}
+
+/* ---- mouse spotlight: a thicker copy of the grid in the accent maroon,
+       revealed in a circle. Opaque lines, so under the mask they read as
+       the grid turning red rather than as a wash over the page. ---- */
+.glow {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgb(var(--accent-rgb)) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgb(var(--accent-rgb)) 1.5px, transparent 1.5px);
+  background-size: var(--grid) var(--grid);
+  opacity: 0; transition: opacity .15s;
+  -webkit-mask-image: radial-gradient(150px circle at var(--mx,-999px) var(--my,-999px), #000 0%, rgba(0,0,0,.35) 55%, transparent 75%);
+          mask-image: radial-gradient(150px circle at var(--mx,-999px) var(--my,-999px), #000 0%, rgba(0,0,0,.35) 55%, transparent 75%);
+}
+.glow.is-lit { opacity: var(--glow-strength); }
+
+.wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; }
+
+/* ---- header ---- */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  height: calc(var(--grid) * 3);
+  padding: 0 calc(var(--grid) * 2);
+}
+.header .mark { display: flex; }
+.nav { display: flex; gap: 36px; font-family: var(--font-heading); font-size: 16px; line-height: var(--grid); }
+.nav a { color: rgb(var(--ink-rgb)); }
+.nav a:hover { color: var(--color-accent); }
+
+/* the content column — left edge lands on a grid line */
+.col {
+  margin-left: calc(var(--grid) * 3);
+  max-width: 928px;
+  padding: calc(var(--grid) * 3) calc(var(--grid) * 2) calc(var(--grid) * 2) 0;
+}
+
+/* ---- outlined buttons (color as stroke, never a fill) ---- */
+.btn {
+  display: inline-flex; align-items: center;
+  height: var(--btn-h); padding: 0 20px;
+  border: 1px solid; border-radius: 4px;
+  font-family: var(--font-heading); font-size: 16px;
+  background: transparent; cursor: pointer;
+}
+.btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
+.btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
+.btn-secondary { color: rgb(var(--ink-rgb)); border-color: rgba(var(--ink-rgb), 0.3); }
+.btn-secondary:hover { border-color: var(--color-accent); color: var(--color-accent); }
+/* The button is 40px on a 32px grid, so it overhangs a row by 8px. Where that
+   8px lands is the whole question. [data-snap-box] puts the row's top edge on
+   a grid line, so centring the button in the row would put its centre on a
+   line too — and that line then cuts straight through it.
+   Instead the button is centred on a HALF row: flex-start plus a -4px offset.
+   Its edges then fall 4px outside two adjacent grid lines, symmetrically, so
+   it reads as sitting between them. The row stays two grid rows tall, so
+   nothing below it moves. */
+.btn-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  height: calc(var(--grid) * 2);
+}
+.btn-row .btn { margin-top: calc((var(--grid) - var(--btn-h)) / 2); }
+
+/* ---- section labels ---- */
+.section-label {
+  font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(var(--ink-rgb), 0.7); line-height: var(--grid);
+  margin: 0 0 var(--grid);
+}
+
+/* ---- footer ---- */
+.hr { margin: calc(var(--grid) * 2) 0 calc(var(--grid) * 0.75); border: 0; height: 1px; background: var(--color-divider); }
+.footer {
+  display: flex; justify-content: space-between; align-items: baseline;
+  height: var(--grid); font-size: 14px; line-height: var(--grid);
+  color: rgba(var(--ink-rgb), 0.5); font-family: var(--font-heading);
+}
+.footer a { color: rgba(var(--ink-rgb), 0.5); }
+.footer a:hover { color: var(--color-accent); }
+
+.cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--grid); }
+
+/* ---- narrow screens (the handoff is desktop-only; this keeps the
+       same system working on a phone) ---- */
+@media (max-width: 60rem) {
+  .col { margin-left: var(--grid); padding-right: var(--grid); }
+  .header { padding: 0 var(--grid); }
+}
+@media (max-width: 40rem) {
+  .header { height: calc(var(--grid) * 2); }
+  .nav { gap: 20px; font-size: 15px; }
+  .col { margin-left: var(--grid); padding: calc(var(--grid) * 2) var(--grid) calc(var(--grid) * 2) 0; }
+  .btn-row { flex-wrap: wrap; height: auto; gap: 12px; }
+  .cols-3 { grid-template-columns: 1fr; }
+}

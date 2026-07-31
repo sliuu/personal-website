@@ -1,177 +1,335 @@
 ---
-// src/pages/index.astro — homepage content only; chrome lives in BaseLayout
+// src/pages/index.astro — homepage content; chrome lives in BaseLayout.
+// Layout, type and spacing are ported from the classical redesign handoff
+// (handoff/portfolio-standalone.html). Two departures from that file, both
+// deliberate: the role control is a real dropdown rather than a click-to-
+// cycle button, and there are narrow-screen rules at the bottom.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
 
-const roles = ["design engineer", "UX engineer", "UX researcher", "software engineer", "UX designer"];
+const roles = ["UX Engineer", "design engineer", "prototyper", "design technologist"];
 
-const projects = [
-  // { title: "Scheduling App",                 client: "Personal", href: "/projects/scheduling-app" },
-  { title: "Youtube Ads Prototyping",        client: "Google", href: "/projects/youtube-ads-prototyping" },
-  // { title: "Easy Labeling Design",           client: "Waymo",    href: "/projects/easy-labeling-design" },
-  // { title: "Pickup & Dropoff User Research Study", client: "Waymo",    href: "/projects/pickup-dropoff-user-research" },
-  { title: "Labeling Ops Request Process Redesign",          client: "Waymo",    href: "/projects/label-request-process" },
-];
+const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
+// Lives in public/, so Astro copies it through untouched and the URL is stable.
+const resumeUrl = "/resume_2026.pdf";
 
 const work = [
-  { company: "Sabbatical", role: "Rest, Reflection & Writing",  dates: "Nov 2025 – Present" },
-  { company: "Google",     role: "UX Engineer",                 dates: "Feb 2025 – Oct 2025" },
-  { company: "Waymo",      role: "SWE & UX Research (20%)",      dates: "Nov 2022 – Feb 2025" },
-  { company: "Nuro",       role: "SWE & Analytics Engineer",     dates: "Mar 2021 – Oct 2022" },
-  { company: "Google",     role: "SWE",                          dates: "Oct 2018 – Mar 2021" },
+  {
+    num: "01",
+    title: "YouTube Ads Prototyping Tool",
+    desc: "Shipped production features in Lit & TypeScript while designing the tool's next generation — so designers and researchers could prototype ad formats without an engineer.",
+    m1: "Google · 2025",
+    m2: "Built & shipped",
+    m3: "",
+    href: "/projects/youtube-ads-prototyping",
+  },
+  {
+    num: "02",
+    title: "Label Requesting Redesign",
+    desc: "Collapsed a tribal-knowledge process with dozens of entry points into one guided flow — so ML engineers could request labeled data themselves, no labeling engineer on call.",
+    m1: "Waymo · 2024",
+    m2: "Many → one",
+    m3: "",
+    href: "/projects/label-request-process",
+  },
+];
+
+const career = [
+  { company: "Sabbatical", role: "Rest, reflection & writing", dates: "Nov 2025 – Present" },
+  { company: "Google",     role: "UX Engineer",                dates: "Feb 2025 – Oct 2025" },
+  { company: "Waymo",      role: "SWE & UX Research (20%)",    dates: "Nov 2022 – Feb 2025" },
+  { company: "Nuro",       role: "SWE & Analytics Engineer",   dates: "Mar 2021 – Oct 2022" },
+  { company: "Google",     role: "SWE",                        dates: "Oct 2018 – Mar 2021" },
 ];
 
 const loves = [
   "organizing information",
-  "complex -> obvious",
+  "complex → obvious",
   "thinking about people",
   "a really good sofa",
 ];
 ---
-<BaseLayout title="stephanie liu">
-  <div class="col">
-    <div class="section" id="header">
-      <p class="intro"><span class="name">Stephanie</span> is a</p>
-      <span class="role" id="role">
-        <button class="role-btn" id="roleBtn" aria-haspopup="listbox" aria-expanded="false">
-          <span id="roleLabel">{roles[0]}</span><span class="caret" aria-hidden="true">&#9662;</span>
-        </button>
-        <ul class="role-menu" id="roleMenu" role="listbox">
-          {roles.map((r) => <li role="option">{r}</li>)}
-        </ul>
-      </span>
-      <p class="location"> based in <span class="name">SF</span></p>
-      <p class="previously">previously @ <span class="name">Google</span>, <span class="name">Nuro</span>, <span class="name">Waymo</span></p>
-    </div>
+<BaseLayout title="Stephanie Liu">
+  <!-- HERO -->
+  <div class="eyebrow" data-snap>Stephanie Liu — design engineer, San Francisco</div>
 
-    <div class="section" id="projects">
-      <p class="label">Projects</p>
-      {projects.map((p) => (
-        <div class="project">
-          <a href={p.href}>{p.title}</a><span class="client">{p.client}</span>
-        </div>
-      ))}
-    </div>
+  <h1 class="hero" data-snap>
+    Stephanie is a <span class="role" id="role"><button
+      class="role-btn"
+      id="roleBtn"
+      aria-haspopup="listbox"
+      aria-expanded="false"
+      aria-label="Choose a role"
+    ><span id="roleLabel">{roles[0]}</span><svg class="caret" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><span class="role-menu" id="roleMenu" role="listbox" aria-label="Roles">
+      {roles.map((r, i) => <span class="role-option" role="option" aria-selected={i === 0 ? "true" : "false"}>{r}</span>)}
+    </span></span> based in San&nbsp;Francisco.
+  </h1>
 
-    <div class="section" id="work">
-      <p class="label">Work</p>
-      {work.map((w) => (
-        <div class="work-row">
-          <div><span class="company">{w.company}</span><span class="role-title">{w.role}</span></div>
-          <span class="dates">{w.dates}</span>
-        </div>
-      ))}
-    </div>
+  <p class="intro" data-snap>
+    Previously designing &amp; building tools and interfaces at Google, Waymo, and&nbsp;Nuro.
+    Currently on a sabbatical. Below are a couple of projects I&rsquo;m glad to have worked on.
+  </p>
 
-    <div class="section" id="loves">
-      <p class="label">Loves</p>
-      {loves.map((l) => <p class="love">{l}</p>)}
-    </div>
-
-    <div class="section" id="me">
-      <p class="label"></p>
-      <img class="photo" src="/me.jpg" alt="Stephanie" />
-    </div>
+  <div class="btn-row" data-snap-box>
+    <a class="btn btn-primary" href="#work">View work</a>
+    <a class="btn btn-secondary" href={resumeUrl} target="_blank" rel="noopener">Résumé (PDF)</a>
   </div>
+
+  <!-- SELECTED WORK -->
+  <section class="work" id="work" data-snap-box>
+    <h2 class="section-label" data-snap>Selected work</h2>
+    {work.map((w) => (
+      <a class="work-row" href={w.href} data-snap-box>
+        <span class="work-num">{w.num}</span>
+        <span data-snap>
+          <span class="work-title">{w.title}</span>
+          <span class="work-desc" data-snap>{w.desc}</span>
+          <span class="work-cta" data-snap>Read the case study →</span>
+        </span>
+        <span class="work-meta">
+          <span class="m1" data-snap>{w.m1}</span>
+          <span class="m2" data-snap>{w.m2}</span>
+          <span class="m3" data-snap>{w.m3}</span>
+        </span>
+      </a>
+    ))}
+  </section>
+
+  <!-- CAREER -->
+  <section class="career" data-snap-box>
+    <h2 class="section-label" data-snap>Career</h2>
+    <div class="career-list" data-snap-box>
+      {career.map((c) => (
+        <div class="career-box">
+          <div class="career-inner">
+            <span><span class="career-co">{c.company}</span> <span class="career-role">{c.role}</span></span>
+            <span class="career-date">{c.dates}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- CURRENTLY / ALSO LOVES -->
+  <section class="close" data-snap-box>
+    <div>
+      <h2 class="section-label" data-snap>Currently</h2>
+      <p class="statement" data-snap>
+        On a sabbatical through late 2026 — resting, reading, and building small things.
+        Open to conversations, not in a rush.
+      </p>
+      <!-- snap-box: absorbs any fraction the statement's wrap leaves behind -->
+      <div class="btn-row" data-snap-box>
+        <a class="btn btn-primary" href={linkedinUrl} target="_blank" rel="noopener">Get in touch ↗</a>
+        <a class="btn btn-secondary" href={resumeUrl} target="_blank" rel="noopener">Résumé (PDF)</a>
+      </div>
+    </div>
+    <div>
+      <h6 class="aside-label" data-snap>Also loves</h6>
+      <div class="loves" data-snap>
+        {loves.map((l) => <span>{l}</span>)}
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .section { margin-bottom: var(--space-7); }
-  #header { margin-top: var(--space-9); }
-
-  .name { transition: filter 0.2s ease; }
-  .name:hover { filter: brightness(1.45); }
-
-  .intro, .location, .previously {
-    line-height: 1.9;
-    font-size: var(--text-xl);
-    letter-spacing: -0.01em;
-    margin-right: var(--space-2);
-    display: inline;
+  /* ---- hero ---- */
+  .eyebrow {
+    font-family: var(--font-heading); font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--color-accent); line-height: var(--grid);
+    margin-bottom: var(--grid);
   }
-  .previously { display: block; }
+  h1.hero {
+    font-family: var(--font-heading); font-weight: 400;
+    font-size: 40px; line-height: calc(var(--grid) * 2);
+    letter-spacing: -0.01em; margin: 0 0 var(--grid); max-width: 720px;
+  }
+  p.intro {
+    font-family: var(--font-heading);
+    font-size: 20px; line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.88);
+    margin: 0 0 calc(var(--grid) * 2); max-width: 624px;
+  }
 
-  /* gold + brighten for the dropdown button and project links.
-     (nav links already inherit this from the layout's base `a` rule.) */
-
-  .project a, .role-btn { color: var(--gold); transition: filter 0.2s ease; }
-  .project a:hover, .role-btn:hover { filter: brightness(1.25); }
-
-  /* the role dropdown */
-  .role { position: relative; display: inline-flex; vertical-align: baseline; }
+  /* ---- the role dropdown ----
+     The handoff's button cycles on click; this is the same button opening a
+     real listbox instead. */
+  .role { position: relative; display: inline-block; }
   .role-btn {
-    font: inherit;
-    background: transparent;
-    border: 1px solid var(--gold);
-    border-radius: 0px;
-    padding: 0.2em 0.5em;
-    cursor: pointer;
-    font-size: var(--text-xl);
-    display: inline-flex;
-    margin-right: var(--space-1);
-    align-items: center;
-    gap: 0.4em;
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--font-heading); font-weight: 400; font-size: 0.92em;
+    color: var(--color-accent);
+    background: transparent; border: 1px solid var(--color-accent);
+    border-radius: 5px; padding: 1px 8px 3px 16px;
+    line-height: 1.1; cursor: pointer; transform: translateY(-2px);
   }
-  .role-btn .caret { font-size: 0.7em; }
+  .role-btn:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  .role-btn .caret { transition: transform 0.2s ease; }
+  .role.open .role-btn .caret { transform: rotate(180deg); }
+
   .role-menu {
-    position: absolute;
-    top: calc(100% + var(--space-1));
-    left: 0;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    background: var(--menu-bg);
-    border: 0.5px solid var(--gold);
-    border-radius: 0px;
-    min-width: 100%;
-    z-index: 5;
-    display: none;
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 5;
+    display: none; list-style: none; margin: 0; padding: 0; min-width: 100%;
+    background: var(--paper);              /* opaque, so the grid stops here */
+    border: 1px solid var(--color-divider); border-radius: 5px;
+    box-shadow: 0 2px 0 rgba(var(--ink-rgb), 0.05);
   }
   .role.open .role-menu { display: block; }
-  .role-menu li {
-    font-size: var(--text-base);
-    color: var(--gold);
-    padding: var(--space-1) var(--space-2);
-    border: 0.5px solid var(--gold);
-    border-radius: 0px;
-    cursor: pointer;
+  .role-option {
+    display: block;
+    font-family: var(--font-heading); font-size: 20px; font-weight: 400;
+    letter-spacing: 0; line-height: var(--grid); padding: 0 16px;
+    color: rgba(var(--ink-rgb), 0.72);
+    white-space: nowrap; cursor: pointer;
+  }
+  .role-option:hover,
+  .role-option[aria-selected="true"] { color: var(--color-accent); }
+  .role-option:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
+
+  /* ---- selected work ---- */
+  .work { margin-top: calc(var(--grid) * 4); scroll-margin-top: var(--grid); }
+  .work-row {
+    display: grid; grid-template-columns: 56px 1fr 200px; gap: var(--grid);
+    align-items: start;
+    padding: calc(var(--grid) * 1.5) var(--grid) calc(var(--grid) * 1.5) 0;
+    border-top: 1px solid var(--color-divider);
+    color: inherit; border-radius: 4px; transition: background .15s;
+  }
+  .work-row:last-child { border-bottom: 1px solid var(--color-divider); }
+  .work-row:hover { background: rgba(var(--accent-rgb), 0.06); }
+  .work-num {
+    font-family: var(--font-heading); font-size: 22px; line-height: var(--grid);
+    color: var(--color-accent); font-variant-numeric: tabular-nums; padding-left: 12px;
+  }
+  .work-title {
+    display: block; font-family: var(--font-heading);
+    font-size: 28px; line-height: var(--grid); color: rgb(var(--ink-rgb));
+  }
+  /* Offsets inside a snapped stack must be WHOLE grid rows. A half-row (16px)
+     margin puts the sibling on the opposite side of the rounding line, so the
+     snapper nudges it 16px the other way and the gap collapses — that was the
+     overlapping project text. */
+  .work-desc {
+    display: block; margin-top: var(--grid);
+    font-size: 15px; line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.66); max-width: 520px;
+  }
+  .work-cta {
+    display: inline-block; margin-top: var(--grid);
+    font-family: var(--font-heading); font-size: 14px; line-height: var(--grid);
+    color: var(--color-accent);
+  }
+  .work-meta { text-align: right; }
+  .work-meta .m1 {
+    display: block; font-family: var(--font-heading); font-size: 13px;
+    letter-spacing: 0.1em; text-transform: uppercase; line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.7);
+  }
+  .work-meta .m2 {
+    display: block; font-family: var(--font-heading); font-size: 26px;
+    color: rgb(var(--ink-rgb)); line-height: var(--grid);
+  }
+  .work-meta .m3 {
+    display: block; font-size: 13px; line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.7);
+  }
+
+  /* ---- career ---- */
+  .career { margin-top: calc(var(--grid) * 3); }
+  /* the top rule sandwiches the first entry between two lines */
+  .career-list {
+    display: flex; flex-direction: column;
+    border-top: 1px solid var(--color-divider);
+  }
+  /* static outer: the rule stays on the grid (border-box, so the 1px is paid
+     for out of the height). The text is centred in the box rather than
+     baseline-snapped — snapping would pull it off centre. */
+  .career-box {
+    height: calc(var(--grid) * 2);
+    border-bottom: 1px solid var(--color-divider);
+    display: flex; align-items: center;
+    transition: background .15s;
+  }
+  /* half the strength of a project row's hover — these are <div>s, so the
+     cursor stays an arrow and the fainter tint reads as "row", not "link" */
+  .career-box:hover { background: rgba(var(--accent-rgb), 0.03); }
+  .career-inner {
+    width: 100%;
+    display: flex; justify-content: space-between; align-items: baseline;
+    column-gap: var(--grid);
+    line-height: var(--grid);
+  }
+  /* the company/role group is what gives when space runs out, never the date */
+  .career-inner > span:first-child { min-width: 0; }
+  .career-co { font-family: var(--font-heading); font-size: 22px; color: rgb(var(--ink-rgb)); }
+  .career-role { font-size: 15px; color: rgba(var(--ink-rgb), 0.6); }
+  .career-date {
+    font-style: italic; font-size: 15px; color: rgba(var(--ink-rgb), 0.5);
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  .role-menu li:hover { background: var(--menu-hover); color: var(--gold); }
 
-  /* section labels */
-  .label { font-size: var(--text-sm); color: var(--muted); margin: var(--space-5) 0 var(--space-2); }
-
-  /* projects */
-  .project { margin-bottom: var(--space-2); }
-  .project a { text-decoration: underline; text-underline-offset: 3px; font-size: var(--text-lg); }
-  .project .client { color: var(--muted); font-size: var(--text-base); margin-left: var(--space-2); }
-
-  /* work table */
-  .work-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: var(--space-1) 0;
-    border-bottom: 1.5px dashed var(--line-soft);
+  /* ---- currently / also loves ---- */
+  .close {
+    margin-top: calc(var(--grid) * 4);
+    border-top: 1px solid var(--color-divider);
+    /* the border is paid for out of the padding, so the content below it
+       still starts on a grid line rather than 1px under one */
+    padding-top: calc(var(--grid) * 2 - 1px);
+    display: grid; grid-template-columns: 1fr 288px; gap: calc(var(--grid) * 2);
+    align-items: start;
   }
-  .work-row .company { font-size: var(--text-lg); color: var(--cream); transition: filter 0.2s ease; }
-  .work-row .company:hover { filter: brightness(1.25); }
-  .work-row .role-title { font-size: var(--text-base); color: var(--muted); margin-left: var(--space-1); }
-  .work-row .dates { font-size: var(--text-base); color: var(--muted); font-style: italic; white-space: nowrap; }
-  .work-row:last-child { border-bottom: none; }
+  .statement {
+    font-family: var(--font-heading); font-size: 30px;
+    line-height: calc(var(--grid) * 1.5); color: rgb(var(--ink-rgb));
+    margin: 0 0 var(--grid); max-width: 560px;
+  }
+  .aside-label {
+    font-family: var(--font-heading); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(var(--ink-rgb), 0.5); line-height: var(--grid);
+    margin: 0 0 var(--grid);
+  }
+  .loves {
+    display: flex; flex-direction: column;
+    font-family: var(--font-heading); font-size: 20px;
+    line-height: var(--grid); color: rgb(var(--ink-rgb));
+  }
 
-  /* loves */
-  .love { font-size: var(--text-lg); margin-bottom: var(--space-1); transition: filter 0.2s ease; }
-  .love:hover { filter: brightness(1.25); }
+  /* ---- narrow screens (not in the handoff, which is desktop-only).
+         Rule for every breakpoint: line-heights stay whole grid rows, so a
+         block's height is a whole number of rows however the text wraps. ---- */
+  @media (max-width: 60rem) {
+    .work-row { grid-template-columns: 56px 1fr; }
+    .work-meta { grid-column: 2; text-align: left; }
+    .close { grid-template-columns: 1fr; gap: var(--grid); }
 
-  /* photo */
-  .photo { width: 260px; height: auto; border-radius: 2px; display: block; }
+    /* Career keeps its desktop layout here — the longest row
+       ("Sabbatical / Rest, reflection & writing / Nov 2025 – Present") still
+       fits one line at 640px, so space-between holds the date on the right
+       edge. It only stacks below 40rem. */
+  }
+  @media (max-width: 40rem) {
+    /* 32px line (not 48) — three wrapped lines would otherwise land the whole
+       page on a half row and drag every border below it off the grid */
+    h1.hero { font-size: 28px; line-height: var(--grid); }
+    .role-btn { font-size: 0.85em; line-height: 1; padding: 0 6px 2px 10px; gap: 6px; }
+    p.intro { font-size: 18px; }
 
-  @media (max-width: 640px) {
-    #header { margin-top: var(--space-6); }
-    .intro, .previously { font-size: var(--text-lg); }
-    .work-row { flex-direction: column; gap: 0.2rem; }
+    .work-row { grid-template-columns: 1fr; gap: var(--grid); padding-right: 0; }
+    .work-num { padding-left: 0; }
+    .work-meta { grid-column: 1; }
+    .work-title { font-size: 24px; }
+
+    /* company / role / date each on their own row (3 × 32), in a 4-row box —
+       the spare row is slack, so a snap nudge can't push the date through
+       the rule below it */
+    .career-box { height: calc(var(--grid) * 4); }
+    .career-inner { display: block; }
+    .career-co, .career-role, .career-date { display: block; }
+
+    .statement { font-size: 24px; line-height: var(--grid); }
   }
 </style>
 
@@ -185,20 +343,33 @@ const loves = [
     throw new Error("role dropdown elements not found");
   }
 
+  // The button's width changes with the chosen role, and the h1 can rewrap —
+  // ask the layout to re-run the baseline snap whenever that happens.
+  const resnap = () => document.dispatchEvent(new CustomEvent("grid:resnap"));
+
+  const close = () => {
+    role.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+  };
+
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     const open = role.classList.toggle("open");
     btn.setAttribute("aria-expanded", String(open));
   });
-  menu.querySelectorAll("li").forEach((li) => {
-    li.addEventListener("click", () => {
-      label.textContent = li.textContent;
-      role.classList.remove("open");
-      btn.setAttribute("aria-expanded", "false");
+
+  const options = menu.querySelectorAll(".role-option");
+  options.forEach((option) => {
+    option.addEventListener("click", () => {
+      label.textContent = option.textContent;
+      options.forEach((o) => o.setAttribute("aria-selected", String(o === option)));
+      close();
+      resnap();
     });
   });
-  document.addEventListener("click", () => {
-    role.classList.remove("open");
-    btn.setAttribute("aria-expanded", "false");
+
+  document.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
   });
 </script>

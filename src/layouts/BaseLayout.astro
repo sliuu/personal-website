@@ -1,14 +1,33 @@
 ---
 // src/layouts/BaseLayout.astro
-// Shared chrome for every page: head, fonts, design tokens, background,
-// grain, cursor, and the top nav. Each page passes a `title` and its content.
+// Shared chrome for every page: head, fonts, tokens, the grid background,
+// the header, the footer, and the two grid behaviors (mouse spotlight +
+// baseline snapping). Ported from the classical redesign handoff
+// (handoff/portfolio-standalone.html).
+//
+// The whole system hangs off one knob: --grid (32px). Every vertical
+// measurement is a multiple of it, so each line box is a whole number of
+// grid rows and the stack stays aligned with the painted background.
+//
+// Global CSS lives in real stylesheets — Astro bundles these exactly as it
+// would an inline <style is:global> block. Page-specific rules stay in each
+// page's own scoped <style>.
+import '../styles/tokens.css';
+import '../styles/global.css';
+
 const {
-  title = "stephanie liu",
-  description = "stephanie liu — design engineer based in SF. Previously at Google, Nuro, and Waymo.",
+  title = "Stephanie Liu",
+  description = "Stephanie Liu — design engineer in San Francisco. Previously Google, Waymo, and Nuro.",
 } = Astro.props;
 
 const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
 const githubUrl = "https://www.github.com/sliuu";
+const sourceUrl = "https://github.com/sliuu/personal-website";  // this site's own repo
+
+// "Work" jumps to the section on the homepage; from any other page it has to
+// travel home first.
+const isHome = Astro.url.pathname === "/";
+const workHref = isHome ? "#work" : "/#work";
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL("/favicon.png", Astro.site);
@@ -28,150 +47,153 @@ const ogImage = new URL("/favicon.png", Astro.site);
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary" />
 
+    <!-- SVG first for browsers that take it (stays crisp at any size); the
+         PNG is the fallback. /favicon.ico is probed automatically. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-    <!-- is:global so these reach page content injected via <slot />.
-         Page-specific styles stay in each page's own scoped <style>. -->
-    <style is:global>
-      :root {
-        --bg: #3c1616;
-        --cream: #EEE0E0;
-        --gold: #EFBE87;
-        --muted: #C4A1A1;
-        --line: var(--muted);
-        --line-soft: #774d4d;
-        --menu-bg: #4f2222;
-        --menu-border: #6b4b3e;
-        --menu-hover: #523231;
-
-        /* spacing scale — 8px base unit */
-        --space-1: 8px;
-        --space-2: 16px;
-        --space-3: 24px;
-        --space-4: 32px;
-        --space-5: 48px;
-        --space-6: 64px;
-        --space-7: 96px;
-        --space-8: 128px;
-        --space-9: 160px;
-        --space-10: 192px;
-
-        /* type scale */
-        --text-sm: 0.9375rem;    /* 15px — labels, captions, nav */
-        --text-base: 1.0625rem;  /* 17px — body, metadata */
-        --text-lg: 1.1875rem;    /* 19px — list items, project links */
-        --text-xl: 1.5rem;       /* 24px — intro, page titles */
-      }
-
-      * { box-sizing: border-box; }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--cream);
-        font-family: "Schibsted Grotesk", system-ui, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        padding: 0;
-        cursor: url("/cursor.png") 0 0, auto;
-        image-rendering: pixelated;
-      }
-
-      /* clickable things use the system hand. (the body sets a custom pixel
-         cursor, which is inherited, so we override it back to pointer here.) */
-      a, button, .role-btn, .role-menu li { cursor: pointer; }
-
-      /* keyboard focus, in the same dashed-gold language as the callouts */
-      :focus-visible { outline: 1px dashed var(--gold); outline-offset: 3px; }
-
-      ::selection { background: var(--gold); color: var(--bg); }
-
-      /* subtle film grain over everything — delete this block to remove */
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        pointer-events: none;
-        opacity: 0.05;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      }
-
-      /* shared content wrapper — every page is centered the same way.
-         Fixed measure so line length doesn't drift with window size.
-         Padding lives here now that body padding is 0 (nav is full-bleed). */
-      .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--space-4) var(--space-7); }
-
-      /* base link behavior: gold, brighten on hover, no underline.
-         Pages add extras (e.g. underline on project links) in their own style. */
-      a { color: var(--gold); text-decoration: none; transition: filter 0.2s ease; }
-      a:hover { filter: brightness(1.25); }
-
-      /* top nav — full-bleed sticky bar, shared across all pages.
-         Transparent at the top of the page; darkens + frosts once scrolled. */
-      nav.top {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        padding: var(--space-3) var(--space-4);
-        border-bottom: 1px solid transparent;
-        transition: background 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
-      }
-      nav.top.scrolled {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        mask-image: linear-gradient(to bottom, #000000 30%, transparent 100%);
-      }
-      /* nav contents stay aligned to the same measure as page content */
-      .nav-inner {
-        /* max-width: 720px; */
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .nav-links { display: flex; gap: var(--space-4); font-size: var(--text-sm); }
-      .mark { height: 30px; width: auto; display: block; image-rendering: pixelated; }
-      
-      .cols-3 {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-4);
-      }
-      @media (max-width: 640px) {
-        .cols-3 { grid-template-columns: 1fr; }
-      }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
   </head>
 
   <body>
-    <nav class="top" id="topnav">
-      <div class="nav-inner">
-        <a href="/" class="home" aria-label="home">
-          <img src="/favicon.png" alt="" class="mark" />
-        </a>
-        <div class="nav-links">
-          <a href={githubUrl} target="_blank" rel="noopener">GitHub</a>
-          <a href={linkedinUrl} target="_blank" rel="noopener">LinkedIn</a>
+    <div class="page" data-grid-root>
+      <div class="glow"></div>
+      <div class="wrap">
+
+        <header class="header">
+          <a href="/" class="mark" aria-label="Home">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.3" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><circle cx="6.8" cy="9" r="2.4"/><circle cx="17.2" cy="9" r="2.4"/><circle cx="6.8" cy="15" r="2.4"/><circle cx="17.2" cy="15" r="2.4"/></svg>
+          </a>
+          <nav class="nav" data-snap>
+            <a href={workHref}>Work</a>
+            <a href={githubUrl} target="_blank" rel="noopener">GitHub</a>
+            <a href={linkedinUrl} target="_blank" rel="noopener">LinkedIn</a>
+          </nav>
+        </header>
+
+        <div class="col">
+          <slot />
+
+          <hr class="hr" data-snap-box />
+          <div class="footer" data-snap>
+            <span>&copy; 2026 stephanie liu</span>
+            <a href={sourceUrl} target="_blank" rel="noopener">code for this site &#8599;</a>
+          </div>
         </div>
       </div>
-    </nav>
-
-    <div class="wrap">
-      <slot />
     </div>
 
     <script>
-      // Toggle the frosted/darkened nav state once the page is scrolled.
-      const nav = document.getElementById("topnav");
-      if (nav) {
-        const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
-        onScroll();
-        window.addEventListener("scroll", onScroll, { passive: true });
+      const root = document.querySelector("[data-grid-root]");
+      if (!root) throw new Error("grid root not found");
+
+      /* 1) Mouse spotlight */
+      const glow = root.querySelector<HTMLElement>(".glow");
+      if (glow) {
+        root.addEventListener("mousemove", (e) => {
+          const r = root.getBoundingClientRect();
+          glow.style.setProperty("--mx", (e as MouseEvent).clientX - r.left + "px");
+          glow.style.setProperty("--my", (e as MouseEvent).clientY - r.top + "px");
+          glow.classList.add("is-lit");
+        });
+        root.addEventListener("mouseleave", () => { glow.classList.remove("is-lit"); });
       }
+
+      /* 2) Baseline snap onto the grid */
+
+      // Markdown bodies can't carry snap attributes by hand, so a container
+      // marked [data-snap-all] gets its text blocks tagged at runtime.
+      // Idempotent — safe to re-run on every settle pass.
+      function tagSnapTargets() {
+        root!.querySelectorAll("[data-snap-all]").forEach((container) => {
+          container
+            .querySelectorAll("p, li, dt, dd, figcaption, blockquote, h1, h2, h3, h4, h5, h6")
+            .forEach((el) => el.setAttribute("data-snap", ""));
+          // Re-pin the flow after anything of arbitrary height (images).
+          // .callout is here for its border: a box-snap puts its top edge on a
+          // line, which a baseline-snap would then shift back off.
+          container
+            .querySelectorAll("h2, h3, h4, .callout")
+            .forEach((el) => el.setAttribute("data-snap-box", ""));
+        });
+      }
+
+      let _ctx: CanvasRenderingContext2D | null = null;
+      function snapToGrid() {
+        tagSnapTargets();
+        const grid = parseFloat(getComputedStyle(root!).getPropertyValue("--grid")) * 16; // 32
+        _ctx = _ctx || document.createElement("canvas").getContext("2d");
+        const ctx = _ctx;
+        if (!ctx) return;
+
+        // Clear every baseline transform before measuring anything. An element
+        // can carry both attributes, and getBoundingClientRect() reports the
+        // transformed position — so a leftover translateY from the last pass
+        // would poison the box-edge math below.
+        root!.querySelectorAll<HTMLElement>("[data-snap]").forEach((el) => {
+          el.style.transform = "";
+        });
+
+        // (a) Box-edge snap FIRST — adjusts margin-top (reflows) so bordered rows land on the grid
+        const offsetTop = (el: HTMLElement) =>
+          el.getBoundingClientRect().top - root!.getBoundingClientRect().top;
+
+        root!.querySelectorAll<HTMLElement>("[data-snap-box]").forEach((el) => {
+          const prev = parseFloat(el.dataset.boxNudge || "0");
+          const base = parseFloat(getComputedStyle(el).marginTop) - prev; // idempotent
+          el.style.marginTop = base + "px";
+          const top = offsetTop(el);
+          let nudge = Math.round(top / grid) * grid - top;
+          el.style.marginTop = base + nudge + "px";
+
+          // Adjacent siblings' vertical margins COLLAPSE to the larger of the
+          // two. If the element above has a bigger margin-bottom than the
+          // margin-top we just set, ours is swallowed whole and the element
+          // never moves — the snap silently does nothing. Check whether it
+          // actually landed, and if not, push a whole extra row until the
+          // margin is big enough to win the collapse.
+          for (let i = 0; i < 3; i++) {
+            const now = offsetTop(el);
+            if (Math.abs(now - Math.round(now / grid) * grid) < 0.5) break;
+            nudge += grid;
+            el.style.marginTop = base + nudge + "px";
+          }
+          el.dataset.boxNudge = String(nudge);
+        });
+
+        // (b) Text baseline snap — transform (no reflow), rests glyphs on the nearest line
+        const rootTop = root!.getBoundingClientRect().top;
+        root!.querySelectorAll<HTMLElement>("[data-snap]").forEach((el) => {
+          el.style.transform = "";
+          const s = getComputedStyle(el);
+          let fs = parseFloat(s.fontSize);
+          el.querySelectorAll("*").forEach((c) => {
+            fs = Math.max(fs, parseFloat(getComputedStyle(c).fontSize));
+          });
+          const lh = parseFloat(s.lineHeight) || fs;
+          ctx.font = `${s.fontStyle} ${s.fontWeight} ${fs}px ${s.fontFamily}`;
+          const m = ctx.measureText("Hxgp");
+          const asc = m.fontBoundingBoxAscent || fs * 0.8;
+          const desc = m.fontBoundingBoxDescent || fs * 0.2;
+          const top = el.getBoundingClientRect().top - rootTop;
+          const baseline = top + (lh - (asc + desc)) / 2 + asc;
+          el.style.transform = `translateY(${Math.round(baseline / grid) * grid - baseline}px)`;
+        });
+      }
+
+      // Run snapping across a few settle passes so the first alignment holds on a cold load
+      // (fonts, layout, and metrics finish at different times). setTimeout — not rAF — because
+      // requestAnimationFrame is throttled in background/screenshot contexts and may never fire.
+      function scheduleSnaps() { snapToGrid(); [60, 200, 500].forEach((t) => setTimeout(snapToGrid, t)); }
+      if (document.readyState === "loading") addEventListener("DOMContentLoaded", scheduleSnaps);
+      else scheduleSnaps();
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(scheduleSnaps);
+      addEventListener("load", scheduleSnaps);
+      addEventListener("resize", snapToGrid);
+
+      // Pages whose content changes size (e.g. the role dropdown) ask for a re-snap.
+      document.addEventListener("grid:resnap", () => snapToGrid());
     </script>
   </body>
 </html>
