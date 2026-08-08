@@ -3,6 +3,12 @@
 // https://pixelarticons.com/
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SideRail from '../../components/SideRail.astro';
+import ProjectMeta from '../../components/ProjectMeta.astro';
+import Contents from '../../components/Contents.astro';
+import RailAction from '../../components/RailAction.astro';
+import Glyph from '../../components/Glyph.astro';
+import { EMAIL_URL } from '../../consts';
 
 // Tell Astro which pages to build — one per markdown file in content/projects/
 export async function getStaticPaths() {
@@ -15,7 +21,31 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { Content } = await render(project);   // markdown body → renderable component
+// `headings` comes out of the same call as the body, which is what makes the
+// rail's table of contents free: it is the real h2s of the real document, so
+// it cannot drift out of sync with what the page actually says.
+const { Content, headings } = await render(project);
+const d = project.data;
+
+// The metadata strip under the title. An array, not an object literal, because
+// the order is part of the design and object key order is a poor thing to lean
+// on. The last entry is conditional, so a project without a repo simply has a
+// shorter list rather than an empty row.
+//
+// `status` is deliberately NOT rendered. It is still in the schema and still
+// set on every project, because the ship status of each piece of work is worth
+// keeping written down — it just does not belong in a row of facts alongside
+// the team and the dates, where a phrase like "handed off" reads as a hedge
+// attached to the project rather than a statement about it. Each case study
+// says where it landed in its own words instead: the Outcome cell up top and
+// the closing section.
+const metaItems = [
+  { label: 'Team', value: d.team },
+  { label: 'Role', value: d.role },
+  { label: 'Timeline', value: d.date },
+  { label: 'Tools', value: d.tech.join(', ') },
+  ...(d.repo ? [{ label: 'Code', value: 'GitHub', href: d.repo }] : []),
+];
 
 // Ordered list (newest first) so we can offer a "next case study" link.
 // Exclude drafts so archived projects never surface as "Next".
@@ -24,204 +54,755 @@ const all = (await getCollection('projects'))
   .sort((a, b) => b.data.year - a.data.year || a.data.title.localeCompare(b.data.title));
 const index = all.findIndex((p) => p.id === project.id);
 const next = all[(index + 1) % all.length];   // wraps around to the first
-
-const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
 ---
-<BaseLayout title={`${project.data.title} — stephanie liu`} description={project.data.summary}>
-  <!-- data-snap-all: the markdown body can't carry snap attributes by hand,
-       so the layout's script tags its text blocks at runtime -->
-  <article data-snap-all>
-    <a class="back" href="/" aria-label="back to home" data-snap>&larr;</a>
-    <h1 data-snap>{project.data.title}</h1>
-
-    <div class="summary" data-snap data-snap-box>{project.data.summary}</div>
-    <dl class="meta-block" data-snap-box>
-      <div><dt>Team</dt><dd>{project.data.team}</dd></div>
-      <div><dt>Role</dt><dd>{project.data.role}</dd></div>
-      <div><dt>Date</dt><dd>{project.data.date}</dd></div>
-      <div><dt>Tools</dt><dd>{project.data.tech.join(", ")}</dd></div>
-      {project.data.repo && (
-        <div><dt>Code</dt><dd><a href={project.data.repo} target="_blank" rel="noopener">GitHub &#8599;</a></dd></div>
+<BaseLayout title={`${d.title} — stephanie liu`} description={d.summary}>
+  <article class="case">
+    <SideRail>
+      <Contents slot="contents" headings={headings} />
+      {d.demo && (
+        <RailAction slot="action" href={d.demo} label={d.demoLabel} note={d.demoNote} />
       )}
-    </dl>
+    </SideRail>
 
-    <Content />
+    <!-- data-snap-all sits on the MAIN column, not on the <article>: the
+         markdown body can't carry snap attributes by hand, so the layout's
+         script tags its text blocks at runtime — but the rail must stay out of
+         it. Everything in the rail is already on the grid by construction
+         (whole-row line-heights stacked from a grid-aligned origin), and a
+         rail that is also `position: sticky` would be measured mid-scroll and
+         snapped against a position it is about to leave. -->
+    <div class="case-main" data-snap-all>
+      <h1>{d.title}</h1>
+      <p class="summary">{d.summary}</p>
+      <!-- The prototype button, a second time, for the one-column breakpoint.
+           Below 72rem the rail unsticks to the TOP of the page, which puts the
+           button and its note above the title — an invitation to leave before
+           the reader knows what for. It belongs under the dek instead.
 
-    <!-- data-snap-box only: this box has a border, so its top edge is what
-         gets snapped. A data-snap here would translate the border too — the
-         links carry the baseline snap instead. -->
-    <footer class="case-footer" data-snap-box>
-      <a class="case-footer__home" href="/" data-snap>&larr; All work</a>
-      <a class="case-footer__next" href={`/projects/${next.id}`} data-snap>
-        Next: {next.data.title} &rarr;
-      </a>
-    </footer>
-    <p class="case-cta" data-snap>Want to talk? <a href={linkedinUrl} target="_blank" rel="noopener">Get in touch &#8599;</a></p>
+           Rendered twice rather than moved, because the two live in different
+           containers (<aside class="rail"> and .case-main) and no amount of
+           `order` reaches across that boundary. The alternative was lifting the
+           title and dek out of .case-main into a header sibling, which would
+           take them out of [data-snap-all] and cost them their baseline snap.
+           Same component, same frontmatter, so the two cannot drift; exactly
+           one is ever displayed, and `display: none` keeps the hidden one out
+           of the accessibility tree rather than announcing it twice.
+
+           data-snap-box by hand: the tagger only boxes h2/h3/h4/.callout, and
+           this wrapper holds a button that is exactly one grid row. -->
+      {d.demo && (
+        <div class="case-action" data-snap-box>
+          <RailAction href={d.demo} label={d.demoLabel} note={d.demoNote} />
+        </div>
+      )}
+      <ProjectMeta items={metaItems} />
+      <!-- No border and no [data-snap-box]: this is a <p> inside [data-snap-all],
+           so the layout's tagger gives it [data-snap] at runtime, and a baseline
+           transform would drag a border off the line it was placed on (the same
+           reason the footer below takes the box snap instead). -->
+      {d.confidentiality && <p class="case-note">{d.confidentiality}</p>}
+
+      <Content />
+
+      <!-- data-snap-box only: this box has a border, so its top edge is what
+           gets snapped. A data-snap here would translate the border too — the
+           links carry the baseline snap instead. -->
+      <footer class="case-footer" data-snap-box>
+        <a class="case-footer__home" href="/" data-snap>&larr; All work</a>
+        <a class="case-footer__next" href={`/projects/${next.id}`} data-snap>
+          Next: {next.data.title} &rarr;
+        </a>
+      </footer>
+      <p class="case-cta">Want to talk? <a href={EMAIL_URL}><Glyph name="mail" inline /> Get in touch</a></p>
+    </div>
   </article>
 
   <style>
-    /* Every vertical measurement here is a whole multiple of --grid (32px):
-       line-heights, margins, padding, gaps. That is what lets the snapper
-       land a block on a line and keep everything below it on lines too — a
-       half-row anywhere puts the next sibling on the wrong side of the
-       rounding and the gap collapses. Where a border eats into a whole row,
-       the row pays for it out of its own padding (calc(... - 1px)). */
+    /* Every vertical measurement here is a whole multiple of --grid, so the
+       snapper can land a block on a line and keep everything below it on lines
+       too. Where a border eats into a whole row, the row pays for it out of
+       its own padding (calc(... - 1px)).
 
-    /* Type follows the homepage's rule: --font-heading (Cormorant) for
-       headings and UI, --font-body (Lora) for prose. Without these the whole
-       page inherits Lora from `body` and reads as a different site. */
-    .back {
-      display: inline-block;
-      font-family: var(--font-heading);
-      font-size: var(--text-xl);
-      line-height: var(--grid);
-      transition: transform 0.2s ease, filter 0.2s ease;
+       Type follows the site rule (tokens.css): --font-read for the title,
+       lede, headings and prose; --font-ui for the rail, the metadata, the
+       section numerals, captions and the footer nav.
+
+       --- the frame ---------------------------------------------------
+       Two columns summing to the one width the rest of the site uses:
+
+           rail 256  +  gutter 32  +  main 800  =  1088  =  --col-max
+
+       so the header lands on the same outer edges here as everywhere else.
+       Only the rail and the gutter are declared; the main column is whatever
+       is left, so the three can't drift.
+
+       minmax(0, 1fr) rather than 1fr on the main track: a grid item's default
+       min-width is auto, so one long unbroken string (a URL in a caption, a
+       wide table) would push the track past its share and drag the rail off
+       its edge. The 0 floor makes overflow the child's problem. */
+    .case {
+      display: grid;
+      grid-template-columns: var(--rail) minmax(0, 1fr);
+      column-gap: var(--rail-gap);
     }
-    .back:hover { transform: translateX(-4px); }
-    article h1 {
-      margin: var(--grid) 0;
-      font-family: var(--font-heading);
-      font-size: var(--text-xl);
-      line-height: var(--grid);
-      color: var(--cream);
-      font-weight: 400;
+    .case-main {
+      grid-column: 2;
+      min-width: 0;
     }
-    /* the lede — the counterpart of p.intro on the homepage, so it takes the
-       same face and size */
-    .summary {
-      color: var(--muted);
+
+    /* --- the rail (components/SideRail.astro and friends) -------------
+       :global, and here rather than scoped inside each component, for the
+       same reason the panel and callout rules are: every rule that styles
+       case-study content lives in one file, so the vertical arithmetic can be
+       read top to bottom instead of chased through five components. */
+    .case :global(.rail) { grid-column: 1; }
+    /* The sticky element is the INNER div, not the <aside>. A grid item is
+       stretched to its row by default, which gives the aside the full height
+       of the article to travel in; sticking the aside itself would confine it
+       to its own content height and it would never move.
+
+       `top` clears the masthead, which is sticky and opaque: at a bare
+       var(--grid) the rail would pin under it and lose its first rows behind
+       an opaque band. Header plus one row, so the gap above the rail matches
+       the gap the header leaves everywhere else. Both terms are tokens — the
+       day the masthead changes height this follows it.
+
+       max-height + overflow: a long project (six metadata rows, six sections,
+       a button) can out-measure a laptop viewport, and a sticky element taller
+       than the screen simply never scrolls to its own bottom. This caps it and
+       lets the rail scroll internally in that case; on a normal viewport it
+       never engages. The subtraction has to account for the masthead too, or
+       the cap is a screen-height too generous. */
+    .case :global(.rail-inner) {
+      position: sticky;
+      top: calc(var(--header-h) + var(--grid));
+    }
+    /* The cap engages only on a viewport too short to hold the rail — which is
+       the only case it was ever for. It used to be unconditional, and that cost
+       two bugs, both from the scroll container existing when nothing needed to
+       scroll:
+
+       1. A scrollbar on a roomy viewport. A scroll container counts TRANSFORMED
+          descendants in its scrollable overflow, not just layout height. Every
+          element in the rail carries [data-snap], so the baseline pass gives
+          each a translateY of up to half a row (snapToGrid in BaseLayout snaps
+          to the NEAREST line, so |shift| <= --grid / 2). A downward shift on the
+          last element lands past the padding box and the rail becomes scrollable
+          by a few pixels.
+       2. The rail stealing the page's scroll. With `overscroll-behavior:
+          contain`, a wheel over the rail scrolls those few pixels INSTEAD of the
+          page and never chains. Scrolling back up the page does not reset the
+          rail's scrollTop, so its content stayed parked a few pixels above where
+          the grid put it until a reload — off the painted lines, exactly as far
+          off as the phantom overflow was deep.
+
+       Above the breakpoint there is no scroll container, so neither can happen.
+       Below it the rail genuinely does not fit and both are the correct
+       behaviour; padding-bottom absorbs the snapper's largest shift so the
+       travel is the real overflow rather than a transform artefact.
+
+       48rem, against the ~450px the tallest rail currently measures (back link,
+       label, six entries, button, note): the cap at that height is 640px, so the
+       switch happens well clear of the content. A future project whose rail
+       outgrows 640px would want this raised rather than made unconditional. */
+    @media (max-height: 48rem) {
+      .case :global(.rail-inner) {
+        max-height: calc(100vh - var(--header-h) - var(--grid) * 2);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-bottom: calc(var(--grid) / 2);
+      }
+    }
+    /* An opaque masthead swallows whatever an in-page link lands on, so every
+       anchor target the contents list can reach stops short of it. Same
+       expression as the rail's `top` above — one masthead, one clearance. */
+    .case-main :global(h2),
+    .case-main :global(h3) {
+      scroll-margin-top: calc(var(--header-h) + var(--grid));
+    }
+    /* The way out of the page. Words, not a bare arrow, so it reads as a link
+       rather than as a piece of punctuation. */
+    .case :global(.rail-back) {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: var(--text-base);
+      line-height: var(--grid);
       margin-bottom: var(--grid);
-      font-family: var(--font-heading);
+      transition: color var(--dur);
+    }
+    /* The rule belongs to the section BELOW it, never above the first one, so
+       adding or removing a section can't leave a hairline hanging over
+       nothing. Two rows of chrome either way: 1 + 31 above, 32 below.
+
+       GENERAL sibling (~), not adjacent (+): Contents.astro ships a <script>
+       for its scroll spy, and in dev Astro leaves that element in the markup
+       between the sections, which stops `+` matching. `~` doesn't care what
+       sits in the gap and still skips the first section. */
+    .case :global(.rail-section) { padding-bottom: var(--grid); }
+    .case :global(.rail-section ~ .rail-section) {
+      border-top: var(--rule);
+      padding-top: calc(var(--grid) - 1px);
+    }
+    /* :last-of-type would be wrong here — the sections are a <nav>, a <dl> and
+       a <div>, so every one of them is the last of its own type. */
+    .case :global(.rail-section:last-child) { padding-bottom: 0; }
+
+    /* --- contents (components/Contents.astro) --- */
+    /* .section-label carries the type (see global.css); the list underneath
+       is its own row, so the label doesn't also need a row of margin.
+       Off the baseline grid for the same reason .callout-label is — it drops
+       data-snap in Contents.astro rather than needing a tagger exclusion. */
+    .case :global(.rail-label) { margin-bottom: 0; }
+    .case :global(.contents-list) { list-style: none; margin: 0; padding: 0; }
+    /* A hanging numeral in its own track: the entry text starts on one edge
+       whether its number is 01 or 11.
+
+       align-items: start, NOT baseline. Baseline alignment across two font
+       sizes grows the row to fit both boxes, which makes these rows 34px
+       instead of 32 and walks the list off the grid two pixels at a time. */
+    .case :global(.contents-list a) {
+      display: grid;
+      grid-template-columns: calc(var(--grid) * 0.75) 1fr;
+      gap: calc(var(--grid) / 4);
+      align-items: start;
+      font-family: var(--font-read);
+      font-size: var(--text-base);
+      line-height: var(--grid);
+      color: var(--ink-muted);
+      transition: color var(--dur);
+    }
+    .case :global(.contents-num) {
+      font-family: var(--font-ui);
+      font-size: var(--text-xs);
+      line-height: var(--grid);
+      letter-spacing: 0.08em;
+      font-variant-numeric: tabular-nums;
+      color: rgba(var(--ink-rgb), 0.35);
+      transition: color var(--dur);
+    }
+    .case :global(.contents-list a:hover),
+    .case :global(.contents-list a.is-current) { color: var(--color-accent); }
+    /* the numeral colours with the entry, which is the whole current-state
+       signal — no dot, no bar, no weight change. A weight change would reflow
+       the rail by a pixel or two on every section boundary. */
+    .case :global(.contents-list a:hover .contents-num),
+    .case :global(.contents-list a.is-current .contents-num) { color: var(--color-accent); }
+
+    /* --- rail action (components/RailAction.astro) ---
+       .btn from global.css does the sizing (exactly one grid row); this only
+       makes it fill the rail's width. */
+    .case :global(.rail-action .btn) { justify-content: center; }
+    /* The in-column copy of the action (see the markup above) is the rail's
+       understudy: it only goes on below 72rem, where the rail has stopped
+       being a rail. */
+    .case-main .case-action { display: none; }
+    .case :global(.rail-note) {
+      /* font-family: var(--font-ui); */
+      font-style: italic;
+      font-size: var(--text-xs);
+      line-height: var(--grid);
+      color: rgba(var(--ink-rgb), 0.5);
+      margin: 0;
+    }
+
+    /* --- the confidentiality note ---
+       Italic, and therefore --font-read: Fraunces is loaded as a variable
+       range on BOTH axes (ital,wght@0,200..600;1,200..600), so this is a real
+       italic. --font-ui could not be — Epilogue is requested at 400 and 600
+       upright only, and asking it for italic gets a synthesized slant, the same
+       smearing the `strong` rule in global.css avoids by refusing 700.
+
+       --text-base, not the --text-xs the rail-note takes: at 14px an italic
+       serif turns into texture rather than a sentence, and this one has to be
+       read. Half-strength ink keeps it from competing with the dek above.
+       One clear row beneath, so the body starts where it would have anyway. */
+    .case-main .case-note {
+      font-family: var(--font-read);
+      font-style: italic;
+      font-size: var(--text-base);
+      line-height: var(--grid);
+      color: rgba(var(--ink-rgb), 0.7);
+      margin: 0 0 var(--grid);
+    }
+
+    /* --- the masthead --- */
+    .case-main h1 {
+      margin: 0px;
+      font-family: var(--font-read);
+      font-size: var(--text-3xl);
+      /* two rows, not one: at 40px a single --grid row is a line-height of
+         0.8, so a title long enough to wrap would overlap itself. */
+      line-height: calc(var(--grid) * 2);
+      color: var(--ink);
+      font-weight: 300;
+    }
+    /* the lede — the counterpart of p.intro on the homepage */
+    .case-main .summary {
+      color: var(--ink-muted);
+      margin: 0 0 var(--grid);
+      font-family: var(--font-read);
       font-size: var(--text-lg);
       line-height: var(--grid);
     }
-    /* labeled metadata row under the title — 4-column grid.
-       minmax(0, 1fr) lets columns shrink so long values wrap instead of
-       overflowing; without it, tracks default to min-content and push wide.
-       Each cell is dt + dd = two rows; the row gap is one more. */
-    .meta-block {
+
+    /* --- project metadata (components/ProjectMeta.astro) ---
+       FOUR columns spanning the full main column, so the strip is as wide as
+       the prose it sits over and the four entries every project has (team,
+       role, timeline, tools) fill one row exactly. A fifth — the repo link the
+       schema allows — wraps to a second row rather than squeezing the others.
+
+       NOT `repeat(4, 1fr)`: an equal split of 800 is 200px, and 200 is not a
+       multiple of --grid, so all three inner column edges would land between
+       painted lines. So each of the first three tracks is rounded DOWN to a
+       whole unit and the last takes the remainder: 192 / 192 / 192 / 224.
+       `down` rather than `nearest` because the tracks must not sum past the
+       box. Every divider lands on a line, and the odd track is under one unit
+       wider than its neighbours. This is now the only multi-column grid on a
+       case-study page — the summary panel used the same arithmetic until it
+       became a stack of rows.
+
+       The `repeat(4, 1fr)` above it is the fallback: a browser without round()
+       drops the second declaration at parse time and keeps the first, which is
+       off the grid but still four columns. Without it the whole property is
+       invalid and the strip collapses to one column.
+
+       No column gap: the tracked label is what separates one column from the
+       next. */
+    .case-main :global(.project-meta) {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--grid) var(--grid);
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, round(down, 25%, var(--grid))) 1fr;
+      row-gap: var(--grid);
       margin: 0 0 calc(var(--grid) * 2);
-      padding-bottom: calc(var(--grid) - 1px);
-      border-bottom: 1px solid var(--color-divider);
+      border-top: var(--rule);
+      /* the border eats its pixel out of the row, so the first label's
+         baseline still lands where a full row would have put it */
+      padding-top: calc(var(--grid) - 1px);
     }
-    /* same treatment as .section-label / .aside-label on the homepage —
-       uppercase and letterspaced, which is what makes Cormorant hold up at
-       label sizes */
-    .meta-block dt {
-      font-family: var(--font-heading); font-weight: 600;
-      font-size: var(--text-sm);
+    .case-main :global(.project-meta dt) {
+      font-family: var(--font-ui); font-weight: 400;
+      font-size: var(--text-xs);
       letter-spacing: 0.16em; text-transform: uppercase;
       line-height: var(--grid);
       color: rgba(var(--ink-rgb), 0.5);
       margin: 0;
     }
-    .meta-block dd {
+    .case-main :global(.project-meta dd) {
       margin: 0;
+      /* The value is set in the reading face, the label in the UI one: a
+         metadata value is content, not chrome. The caps-and-tracking on the
+         dt is what holds the pair together across the two faces. */
+      font-family: var(--font-read);
       font-size: var(--text-base);
       line-height: var(--grid);
-      color: var(--cream);
+      color: var(--ink);
+      /* the tracks are fixed, so a long unbroken value has to break rather
+         than push its column off the grid */
       overflow-wrap: break-word;
+      /* A quarter row of air so two adjacent values never touch. It does not
+         cost a grid line — the track edges and therefore every value's LEFT
+         edge are unmoved; this only decides where the text wraps. It is worth
+         a full row of the strip's height: at --grid the longest value
+         ("Waymo ML Infrastructure & UX") breaks to three lines, at --grid/4 to
+         two. */
+      padding-right: calc(var(--grid) / 4);
     }
 
-    /* --- project page content (markdown) ---
+    /* --- project content (markdown) ---
+       Scoped to .case-main, not to <article>: the rail is inside the same
+       article and would otherwise inherit the prose rules — its list items
+       would jump to --text-lg, its dt/dd would take the old metadata sizes.
+       One selector prefix keeps the two columns from styling each other.
+
        No h1 rule here: the title above is the page's only h1, and a :global
        one would tie on specificity and win on source order. */
-    article :global(h2) {
-      font-family: var(--font-heading);
-      font-size: 26px;
+
+    /* The section numeral is inline, in the heading's own line. Its box is a
+       whole grid unit wide — not its ink plus a gap — so the heading's WORDS
+       start at exactly 32 and the dek under them can take the same indent and
+       land on a line too. `text-indent` pulls the first line back out by that
+       unit, so the numeral still starts at the column edge and a wrapped
+       heading keeps its second line under its first.
+
+       Same treatment as .contents-num and .work-num: tracked
+       tabular figures in the UI face, in the accent. --text-xs rather than
+       matching the heading, or the figures compete with the words. It cannot
+       disturb the row: the baseline snapper reads element font sizes, not
+       pseudo-elements. decimal-leading-zero so a tenth section doesn't change
+       the numeral's width partway down. */
+    .case-main { counter-reset: section; }
+    .case-main :global(h2) {
+      font-family: var(--font-read);
+      font-size: var(--text-xl);
       line-height: var(--grid);
-      color: rgb(var(--ink-rgb));
+      color: var(--ink);
       margin: calc(var(--grid) * 2) 0 var(--grid);
-      font-weight: 500;
+      font-weight: 400;
+      counter-increment: section;
+      padding-left: var(--grid);
+      text-indent: calc(var(--grid) * -1);
     }
-    article :global(h3) {
-      font-family: var(--font-heading);
+    .case-main :global(h2)::before {
+      content: counter(section, decimal-leading-zero);
+      display: inline-block;
+      width: var(--grid);
+      text-indent: 0;
+      font-family: var(--font-ui);
+      font-size: var(--text-xs);
+      letter-spacing: 0.08em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-accent);
+    }
+    /* A dek is the heading's second line, not a paragraph after it, so the
+       row of air the heading normally leaves belongs below the pair instead.
+       :has() rather than a modifier class, so writing <Dek> in the MDX is the
+       only thing the author has to do. */
+    .case-main :global(h2:has(+ .dek)) { margin-bottom: 0; }
+    .case-main :global(.dek) {
+      font-family: var(--font-read);
+      font-style: italic;
       font-size: var(--text-lg);
       line-height: var(--grid);
-      color: rgb(var(--ink-rgb));
-      margin: var(--grid) 0 0;
-    }
-    article :global(h4) {
-      font-family: var(--font-heading);
-      font-size: var(--text-lg);
-      line-height: var(--grid);
-      color: var(--muted);
-      margin: var(--grid) 0 0;
-      font-weight: 500;
-    }
-    article :global(p),
-    article :global(li) {
-      font-size: var(--text-base);
-      line-height: var(--grid);
-      color: var(--cream);
-    }
-    article :global(p) { margin: 0 0 var(--grid); }
-    article :global(ul),
-    article :global(ol) { margin: 0 0 var(--grid); padding-left: var(--grid); }
-    /* the company/duration blurb under the title */
-    article :global(.meta) {
-      font-size: var(--text-base);
-      line-height: var(--grid);
-      color: var(--muted);
-      margin-bottom: var(--grid);
-    }
-    /* the box is a whole number of rows: half a row of padding top and
-       bottom, each minus the 1px border it sits inside. */
-    article :global(.callout) {
-      border: 1px solid var(--color-divider);
-      padding: calc(var(--grid) / 2 - 1px) calc(var(--grid) / 2);
+      color: var(--ink-muted);
       margin: 0 0 var(--grid);
     }
-    article :global(.callout p) {
-      font-size: var(--text-base);
+    /* A dek starts where its heading's WORDS start, not where the numeral
+       does — same token as the numeral's box, so it still lands on a line.
+       Adjacent to h2 only: an h3 carries no numeral and no indent. */
+    .case-main :global(h2 + .dek) { margin-left: var(--grid); }
+    .case-main :global(h3) {
+      font-family: var(--font-read);
+      font-size: var(--text-lg);
+      line-height: var(--grid);
+      color: var(--ink);
+      margin: var(--grid) 0 0;
     }
-    article :global(.callout > *:last-child) { margin-bottom: 0; }
+    .case-main :global(h4) {
+      font-family: var(--font-read);
+      font-size: var(--text-lg);
+      line-height: var(--grid);
+      color: var(--ink-muted);
+      margin: var(--grid) 0 0;
+      font-weight: 500;
+    }
+    /* --text-lg against the --grid row is a line-height of 1.6; --text-base
+       would give a very loose 2.0. */
+    .case-main :global(p),
+    .case-main :global(li) {
+      font-size: var(--text-md);
+      line-height: var(--grid);
+      color: var(--ink);
+    }
+    .case-main :global(p) { margin: 0 0 var(--grid); }
+    /* Specificity repair, not a restyle. Astro scopes the prose rule above to
+       `.case-main[data-astro-cid] p` (0,2,1), which outranks `.section-label`
+       in global.css (0,1,0) — so a label written as a <p> inside the article
+       would come out at --text-lg. This restores the two properties the prose
+       rule took and sets no new design value. */
+    .case-main :global(p.section-label) {
+      font-size: var(--text-xs);
+      line-height: var(--grid);
+    }
+    .case-main :global(ul),
+    .case-main :global(ol) { margin: 0 0 var(--grid); padding-left: var(--grid); }
+    /* the company blurb under the title */
+    .case-main :global(.meta) {
+      font-family: var(--font-ui);
+      font-size: var(--text-base);
+      line-height: var(--grid);
+      color: var(--ink-muted);
+      margin-bottom: var(--grid);
+    }
+    /* Rules, not a box: a document sets a passage apart with a rule above and
+       below it, which is what .career-list and .case-footer already do. No
+       inline padding either, so the text starts on the prose's left edge.
 
-    article :global(img) {
-      max-width: 100%;
+       A FULL row of padding, not half. The box carries [data-snap-box], which
+       puts its top edge on a grid line; half a row of padding then starts the
+       inner paragraph mid-row and the baseline pass, which rounds to the
+       NEAREST line, yanks it 16px to one side. One line of text is
+       1+31+32+31+1 = 96px, exactly three rows.
+
+       No font-size rule on purpose: the callout takes the same --text-lg and
+       full ink as body copy from the `p` rule above. */
+    .case-main :global(.callout) {
+      border-block: var(--rule);
+      padding: calc(var(--grid) - 1px) 0;
+      margin: var(--grid) 0;
+      transition: background var(--dur);
+    }
+    /* --tint-row, not --tint-link: there is nothing here to click, so it takes
+       the same wash a career row does on the homepage rather than the stronger
+       one a project row does. */
+    .case-main :global(.callout:hover) { background: var(--tint-row); }
+    /* .section-label carries the type (global.css); this changes only the
+       accent and drops the bottom margin — a label stacked on its own
+       paragraph doesn't need the row a standalone one does.
+
+       OFF THE BASELINE GRID, like a figcaption: excluded from the tagger in
+       BaseLayout. A label is chrome for the block beneath it, and the snap
+       was translating it 11.5px down into that block. Its box still takes a
+       whole row, which is what keeps the callout's bottom rule on a line —
+       only the ink inside the row moves. */
+    .case-main :global(.callout-label) {
+      color: var(--color-accent);
+      margin: 0;
+    }
+    .case-main :global(.callout > *:last-child) { margin-bottom: 0; }
+
+    /* The thesis of the case study — a rung above the prose that follows it.
+       1.33 against the --grid row, which is tight for body copy and right for
+       display type set two or three lines long. */
+    .case-main :global(.callout--challenge p:not(.callout-label)) {
+      font-size: var(--text-xl);
+      font-style: italic;
+      margin: 0;
+    }
+
+    /* --- panels (components/Panel.astro + PanelCell.astro) ---
+       A closed rectangle, unlike .callout: this block is a summary standing
+       outside the argument, and a frame is what says so. Rounded to
+       --radius-lg, the same corner the images and the video take — it is the
+       other full-width object on the page.
+
+       ROWS, not columns. Three cells across the 800px column gave each one
+       ~256px, which is four or five words to the line and a paragraph set as
+       a narrow ragged block. Stacked, each cell gets the full measure and the
+       three read in the order they are meant to: problem, then approach, then
+       outcome. That is an argument, and an argument is a list, not a rank.
+
+       Vertical arithmetic, which is the fiddly part. Take the top border as
+       line 0:
+
+         0      panel top border (1px, on the line)
+         1–31   cell padding-top      -> content starts at 32          ✓ line
+         32+c   content (whole rows)
+         ...    cell padding-bottom is a FULL unit, not 31
+         96     the divider, on the line
+         97–127 next cell's padding-top (31, paying for that divider)
+         128    its content                                            ✓ line
+
+       so a divider lands on a painted line and every cell's text starts one
+       whole unit below it. The last cell keeps the 31 from the base rule, so
+       its padding plus the panel's bottom border is one unit and the box ends
+       on a line. Total for three one-row cells: 288 = 9 rows exactly. */
+    .case-main :global(.panel) {
+      border: var(--rule);
+      border-radius: var(--radius-lg);
+      margin: calc(var(--grid) * 2) 0;
+    }
+    /* A labelled panel already has the label's row above it, so it must not
+       also take the margin — that is what a `+` selector is for, rather than
+       asking the MDX to know which case it is in. */
+    .case-main :global(.panel-label + .panel) { margin-top: 0; }
+    /* Keeps .section-label's row of margin — the accent is the only change.
+       Zeroing it puts the label's snapped baseline on the same line the panel
+       draws its top border on. A label above a RULE needs the row; a label
+       above more TEXT (.callout-label, .panel-cell__label) does not. */
+    .case-main :global(.panel-label) { color: var(--color-accent); }
+
+    /* The label HANGS in its own track rather than stacking above the text —
+       the site's one idiom for a label attached to a line, the same shape as
+       .contents-list a and the h2 section numerals.
+
+       Three units for the track, so the body starts at 128: content begins at
+       32 (border + 31 padding), and only a whole-unit track keeps the body's
+       left edge on a painted line. Three is the first that clears the widest
+       label — "APPROACH" measures 78.4px at --text-xs with 0.16em of tracking
+       — leaving 17.6px after it, against 27 for the shortest. Two units would
+       overlap; four would leave 50 and the label would stop reading as
+       attached to its line.
+
+       align-items: start, not baseline. Two font sizes on one baseline grow
+       the row to fit both boxes, which is what walks a 32px row to 34 and
+       takes the cell off the grid (same trap as .contents-list a). The label
+       and its text end up sharing a baseline anyway, without asking: both
+       carry the runtime snap, and both round to the same painted line. */
+    .case-main :global(.panel-cell) {
+      display: grid;
+      grid-template-columns: calc(var(--grid) * 3) minmax(0, 1fr);
+      align-items: start;
+      padding: calc(var(--grid) - 1px);
+    }
+    /* An unlabelled cell — the stat variant — has nothing to hang, so its body
+       takes the whole width instead of sitting in a 96px indent under a gap. */
+    .case-main :global(.panel-cell:not(:has(.panel-cell__label))) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* A full unit below the last line of text, so the divider lands ON the
+       next painted line; the following cell's 31 then pays for the stroke.
+       :not(:last-child), so the bottom cell keeps its 31 and the panel's own
+       bottom border closes the box on a line. */
+    .case-main :global(.panel-cell:not(:last-child)) {
+      padding-bottom: var(--grid);
+    }
+    .case-main :global(.panel-cell + .panel-cell) { border-top: var(--rule); }
+    /* The cell labels are .section-label (see PanelCell.astro), so the type
+       comes from global.css; only the accent and the dropped row differ. */
+    .case-main :global(.panel-cell__label) {
+      color: var(--color-accent);
+      margin: 0;
+    }
+    /* --text-lg, matching the prose. This was --text-base when a cell was
+       ~256px wide and 20px type set four or five words to the line; stacked,
+       the body column is 640px, where --text-base runs to ~85 characters and
+       --text-lg to ~66 — the comfortable measure. `:not([class])` so this
+       catches only the body copy — the label and the stat carry their own
+       type. */
+    .case-main :global(.panel-cell p:not([class])) {
+      font-size: var(--text-lg);
+      line-height: var(--grid);
+      margin: 0;
+    }
+    /* the stat variant — one figure, read at a glance. `p.` on the front so it
+       out-specifies the cell paragraph rule above rather than relying on
+       source order. */
+    .case-main :global(p.panel-cell__stat) {
+      font-family: var(--font-read);
+      font-size: var(--text-2xl);
+      line-height: var(--grid);
+      font-weight: 200;
+      color: var(--color-accent);
+      margin: 0;
+    }
+
+    /* --- pull quote (components/PullQuote.astro) ---
+       A rule down the left, not a box. 2px and in the accent: it is the only
+       mark setting the passage apart, and the 1px hairline used everywhere
+       else disappears next to 24px type. The padding pays for the border out
+       of its own row so the text still starts one whole row in. */
+    .case-main :global(.pullquote) {
+      margin: var(--grid) 0;
+      padding-left: calc(var(--grid) - 2px);
+      border-left: 2px solid var(--color-accent);
+    }
+    .case-main :global(.pullquote p) {
+      font-family: var(--font-read);
+      font-style: italic;
+      font-size: var(--text-xl);
+      line-height: var(--grid);
+      margin: 0;
+    }
+    .case-main :global(.pullquote cite) {
+      display: block;
+      font-family: var(--font-ui);
+      font-style: normal;
+      font-size: var(--text-xs);
+      line-height: var(--grid);
+      color: var(--ink-muted);
+    }
+
+    /* The <figure>, not the <img>, carries the width, so the caption inherits
+       the same edges. */
+    .case-main :global(figure) {
+      margin: var(--grid) 0;
+    }
+    /* The shadow is the picture's edge. A screenshot of a light UI has a
+       near-white background of its own, which on this paper leaves the top and
+       side edges to be guessed at — the eye finds the boundary of the content
+       inside the image instead of the boundary of the image. Faint enough that
+       it reads as the picture sitting on the page rather than hovering over
+       it; a border would say the same thing louder and put chrome around every
+       figure on the site. */
+    .case-main :global(img) {
+      display: block;
       width: 100%;
       height: auto;
+      margin: 0;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-raised);
+    }
+    /* A recording sits on the same edges as a picture, and takes the same
+       shadow — a video that lifted off the page while the screenshot above it
+       lay flat would read as two different kinds of object. */
+    .case-main :global(.video video) {
       display: block;
+      width: 100%;
+      height: auto;
+      margin: 0;
+      background: rgba(var(--ink-rgb), 0.04);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-raised);
+    }
+    /* --- a figure beside its text (components/FigureRow.astro) ---
+       9 + 1 + 15 = 25 units = the width of .case-main, so the row's outer
+       edges land exactly where every other block's do.
+
+       Nine units is 288px, and that number is chosen from the pictures: the
+       portrait screenshots are ~700px wide natively, so 288 keeps them under
+       their own resolution even on a 2x display. A wider track would scale
+       them up to fill a measure they were never captured for.
+
+       align-items: start, so the prose sets from the top edge of the picture.
+       Centred, a short paragraph floats halfway down a tall image and stops
+       looking like a caption for it. */
+    .case-main :global(.figure-row) {
+      display: grid;
+      grid-template-columns: calc(var(--grid) * 9) minmax(0, 1fr);
+      column-gap: var(--grid);
+      align-items: start;
       margin: var(--grid) 0;
-      /* border: 1px solid rgba(238, 224, 224, 0.08); */
-      /* border-radius: 2px; */
     }
-    article :global(figure) {
-      margin: var(--grid) 0;
+    /* The row owns the space above and below. The figure's own margin would
+       otherwise drop the picture a row below the text it sits beside. */
+    .case-main :global(.figure-row figure) { margin: 0; }
+    /* Same on the inside edge: the last paragraph's bottom margin would add a
+       second empty row under a block that already has one. */
+    .case-main :global(.figure-row__body > :last-child) { margin-bottom: 0; }
+    /* Mirrored. Only the placement changes — source order does not, see the
+       comment in FigureRow.astro. */
+    .case-main :global(.figure-row--right) {
+      grid-template-columns: minmax(0, 1fr) calc(var(--grid) * 9);
     }
-    article :global(figcaption) {
-      font-size: var(--text-sm);
-      line-height: var(--grid);
-      color: var(--muted);
+    .case-main :global(.figure-row--right figure) { order: 2; }
+
+    /* Captions are chrome, not prose. Width comes from the figure, so the
+       caption starts on the picture's left edge.
+
+       DELIBERATELY OFF THE GRID, and the only text on the page that is. A
+       whole-row line-height plus the baseline snap tied the caption to the
+       painted lines rather than to its picture, and since every image is an
+       arbitrary height, that set a different gap under each one — measured on
+       this page, from 12px overlapping the image to 15px below it. A ratio and
+       a fixed offset put every caption the same distance under its picture.
+       figcaption is excluded from the snapper's tagger to match (see
+       BaseLayout); leaving it in would translate the caption back off. */
+    .case-main :global(figcaption) {
+      font-family: var(--font-ui);
+      font-size: var(--text-xs);
+      line-height: var(--lh-tight);
+      color: var(--ink-muted);
+      margin-top: var(--caption-gap);
     }
-    article :global(.cols-3) {
+    /* --- three-up icon cards ----------------------------------------
+       .cols-3 plus the pixel-icon rules below. Used by the draft case studies
+       (easy-labeling-design, pickup-dropoff-user-research), so nothing on the
+       BUILT site renders these today — they are live rules for draft content,
+       not dead ones. */
+    .case-main :global(.cols-3) {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: var(--grid);
     }
-    /* inline pixel icons (fill="currentColor") — the accent is reserved for
-       these and for clickable things. One grid row tall so the icon occupies
-       a whole row; auto side margins center it in its callout. */
-    article :global(.minisvg) {
+    /* pixel icons (components/Icon.astro). One grid row tall so the icon
+       occupies a whole row; auto side margins centre it in its callout. */
+    .case-main :global(.minisvg) {
       width: var(--grid);
       height: var(--grid);
       display: block;
       margin: 0 auto var(--grid);
-      color: var(--gold);
+      color: var(--color-accent);
     }
 
     /* the challenge heading: icon + label on one line */
-    article :global(.challenge-head) {
+    .case-main :global(.challenge-head) {
       display: flex;
       align-items: center;
       gap: 0.4em;
     }
     /* inline variant — small, sits with the text, no centering.
        compound selector so it beats the base .minisvg regardless of order. */
-    article :global(.minisvg.minisvg--inline) {
+    .case-main :global(.minisvg.minisvg--inline) {
       width: 1.1em;
       height: 1.1em;
       display: inline-block;
@@ -237,22 +818,80 @@ const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
       gap: var(--grid);
       margin-top: calc(var(--grid) * 2);
       padding-top: calc(var(--grid) - 1px);
-      border-top: 1px solid var(--color-divider);
-      font-family: var(--font-heading);
-      font-size: 16px;
+      border-top: var(--rule);
+      font-family: var(--font-ui);
+      font-size: var(--text-base);
       line-height: var(--grid);
     }
     .case-footer__next { text-align: right; }
-    .case-cta {
+    .case-main .case-cta {
       font-size: var(--text-base);
       line-height: var(--grid);
-      color: var(--muted);
+      color: var(--ink-muted);
       margin: var(--grid) 0 0;
     }
 
-    @media (max-width: 640px) {
-      .meta-block { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      article :global(.cols-3) { grid-template-columns: 1fr; }
+    /* --- one column -------------------------------------------------
+       Same 72rem breakpoint the column itself uses (global.css): below it
+       there is no room for 1088px of content, so no room for two tracks of
+       it. The rail unsticks and becomes a header block above the prose. */
+    @media (max-width: 72rem) {
+      .case { grid-template-columns: minmax(0, 1fr); }
+      .case :global(.rail),
+      .case-main { grid-column: 1; }
+      .case :global(.rail-inner) {
+        position: static;
+        max-height: none;
+        overflow: visible;
+      }
+      /* The contents list is an affordance of a persistent rail. Stacked above
+         the article it is just five links you scroll past once, so it goes.
+         The headings keep their ids either way. */
+      .case :global(.contents) { display: none; }
+      .case :global(.rail-section:last-child) { padding-bottom: var(--grid); }
+      .case :global(.rail-action .btn) { width: auto; }
+
+      /* Hand the action over. Above the title it asks the reader to leave
+         before the page has said what for; under the dek it reads as the
+         obvious next move. The rail keeps only the back link up top — that one
+         is a way out of the page, so it belongs at the top of it. */
+      .case :global(.rail .rail-action) { display: none; }
+      .case-main .case-action { display: block; }
+    }
+
+    @media (max-width: 40rem) {
+      /* --text-xl over a phone-width column sets three or four words to the
+         line. Dropping to --text-lg lands it level with the prose here — the
+         rules and the accent label are doing enough to set it apart. */
+      .case-main :global(.callout--challenge p:not(.callout-label)),
+      .case-main :global(.pullquote p) {
+        font-size: var(--text-lg);
+      }
+      .case-main :global(.cols-3) { grid-template-columns: 1fr; }
+      /* A 288px picture beside prose leaves the text ~50px on a phone. The
+         row stacks instead, and the gap it loses with the column comes back
+         as a row so the picture and its text don't touch. */
+      .case-main :global(.figure-row),
+      .case-main :global(.figure-row--right) {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: var(--grid);
+      }
+      .case-main :global(.figure-row--right figure) { order: 0; }
+      /* Two, not four. Four columns of a phone are ~80px, and the longest
+         value ("Waymo ML Infrastructure & UX") would break to five lines.
+         Same rounding as the full-width case, halved. */
+      .case-main :global(.project-meta) {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: round(down, 50%, var(--grid)) 1fr;
+      }
+      /* The label stops hanging and stacks. A phone column is ~320px, so the
+         96px track plus its gap leaves under 200 for the text — and the label
+         is one word, which does not need a column of its own to be found.
+         Still whole rows: the label's line-height is one, so the cell is
+         1 + however many the body takes. */
+      .case-main :global(.panel-cell) {
+        grid-template-columns: minmax(0, 1fr);
+      }
       .case-footer { flex-direction: column; gap: 0; }
       .case-footer__next { text-align: left; }
     }

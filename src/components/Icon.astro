@@ -1,0 +1,25 @@
+---
+// One pixel icon, by name. The paths live in ./icons.ts — this is the only
+// place the <svg> wrapper around them is written.
+//
+// Content files used to paste the whole element, `d` string and all, which
+// meant the same 24×24 path existed in three files and a fix to one of them
+// fixed only that one. Import this instead: <Icon name="users" />.
+//
+// `inline` is the variant that sits inside a line of text rather than above a
+// block of it (see .minisvg--inline in pages/projects/[id].astro).
+import { icons, type IconName } from './icons';
+
+interface Props {
+  name: IconName;
+  inline?: boolean;
+}
+const { name, inline = false } = Astro.props;
+---
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  fill="currentColor"
+  class:list={['minisvg', inline && 'minisvg--inline']}
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+><path d={icons[name]} /></svg>

@@ -1,0 +1,106 @@
+---
+// src/components/Contents.astro — the rail's table of contents.
+//
+// Driven by the `headings` that `render()` returns alongside `Content`, not by
+// a hand-kept list: add an `##` to the MDX and it appears here, rename it and
+// it renames here, and the two can never drift. Astro has already slugged the
+// ids onto the real headings, so the hrefs need no work.
+//
+// The numerals are the point: the same two-digit tabular figures .work-num
+// uses, and the same numbers the h2s themselves carry (a CSS counter, see
+// [id].astro). "03" in the rail and "03" on the heading are visibly the same
+// section.
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+interface Props {
+  headings: Heading[];
+  label?: string;
+}
+const { headings, label = "Contents" } = Astro.props;
+
+// h2 only: h3/h4 are subdivisions inside a section, and listing them would
+// make the rail taller than the viewport for no navigational gain.
+const sections = headings.filter((h) => h.depth === 2);
+---
+{
+  sections.length > 0 && (
+    <nav class="rail-section contents" aria-label={label} data-contents>
+      {/* No data-snap, unlike the links below it. The label is chrome for the
+          list, not a line of it: the baseline pass was translating it 11.5px
+          down onto the first entry. Off the grid it keeps the whole row the
+          rail's padding gives it. Same call as .callout-label — see the
+          tagger in BaseLayout. */}
+      <p class="section-label rail-label">{label}</p>
+      <ol class="contents-list">
+        {sections.map((h, i) => (
+          <li>
+            {/* data-snap by hand: the layout's tagger covers text blocks
+                (p, li, dt, dd, headings) but not anchors, and here the anchor
+                IS the row — the <li> is just a wrapper around it. */}
+            <a href={`#${h.slug}`} data-contents-link={h.slug} data-snap>
+              <span class="contents-num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="contents-text">{h.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<script>
+  // Scroll spy.
+  //
+  // Deliberately a scroll handler and not an IntersectionObserver. Markdown
+  // gives a FLAT document — h2, prose, h2, prose — with no element that
+  // represents "section 3", so there is nothing whose intersection means what
+  // we want. Observing the headings alone gets it wrong the moment a section
+  // is taller than the viewport (no heading is on screen, so nothing is
+  // current). Asking "which heading did I last scroll past" answers the
+  // question directly and costs one rAF-throttled loop over ~5 elements.
+  const nav = document.querySelector<HTMLElement>("[data-contents]");
+
+  if (nav) {
+    const targets = Array.from(
+      nav.querySelectorAll<HTMLAnchorElement>("[data-contents-link]"),
+    )
+      .map((a) => ({ a, el: document.getElementById(a.dataset.contentsLink!) }))
+      .filter((t): t is { a: HTMLAnchorElement; el: HTMLElement } => !!t.el);
+
+    if (targets.length) {
+      let current: HTMLAnchorElement | null = null;
+      let queued = false;
+
+      const spy = () => {
+        queued = false;
+        // A third of the way down the viewport, not the very top: a heading
+        // becomes "current" when it has arrived at reading position, which is
+        // where the eye actually is, rather than the instant it clips the edge.
+        const line = window.innerHeight * 0.3;
+        let active = targets[0].a;
+        for (const t of targets) {
+          if (t.el.getBoundingClientRect().top <= line) active = t.a;
+        }
+        if (active === current) return;
+        current?.classList.remove("is-current");
+        active.classList.add("is-current");
+        current = active;
+      };
+      const schedule = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(spy);
+      };
+
+      window.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule);
+      // after the grid snapper has moved the headings, or the first reading is
+      // taken against pre-snap positions
+      document.addEventListener("grid:resnap", schedule);
+      spy();
+    }
+  }
+</script>

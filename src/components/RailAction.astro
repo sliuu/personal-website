@@ -1,0 +1,30 @@
+---
+// src/components/RailAction.astro — the rail's one call to action.
+//
+// Deliberately singular. The rail is navigation; a stack of buttons in it
+// would compete with the contents list for the same attention. If a project
+// ever needs two, they belong in the prose next to the thing they open.
+//
+// Reuses the global .btn, so it is exactly one grid row tall and needs no
+// sizing of its own (see --btn-h in tokens.css). `note` is the small line
+// underneath that says what you are about to open — worth the row, because an
+// unlabelled external link is a promise the page can't keep.
+interface Props {
+  href: string;
+  label: string;
+  note?: string;
+  external?: boolean;
+}
+const { href, label, note, external = true } = Astro.props;
+---
+<div class="rail-section rail-action">
+  <a
+    class="btn btn-primary"
+    href={href}
+    target={external ? "_blank" : undefined}
+    rel={external ? "noopener" : undefined}
+  >
+    {label}{external && <> &#8599;</>}
+  </a>
+  {note && <p class="rail-note" data-snap>{note}</p>}
+</div>

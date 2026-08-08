@@ -1,26 +1,30 @@
 /* src/styles/global.css — the shared chrome: reset, the painted grid, the
    cursor spotlight, the header, the content column, buttons, and the footer.
-   Everything here is global by definition; page-specific rules live in each
-   page's own scoped <style> block. Tokens come from tokens.css. */
+   Page-specific rules live in each page's own scoped <style>. */
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* pin the root size so `rem` is predictable — the grid and every spacing
-   value scale together under zoom / OS font-scaling. */
+/* Pin the root so `rem` is predictable — the grid and every spacing value
+   scale together under zoom / OS font-scaling. */
 html { font-size: 16px; scroll-behavior: smooth; }
 
 body {
   margin: 0;
   background: var(--paper);
-  color: rgb(var(--ink-rgb));
-  font-family: var(--font-body);
+  color: var(--ink);
+  font-family: var(--font-read);
+  font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Emphasis is 600, not the default 700: no 700 is loaded, so a bare `bold`
+   would leave the browser to synthesize one and smear the stroke joins. */
+strong, b { font-weight: 600; }
 
 a { color: var(--color-accent); text-decoration: none; text-underline-offset: 3px; }
 a:hover { color: var(--accent-strong); }
 
-::selection { background: rgba(138, 47, 40, 0.18); }
+::selection { background: var(--color-selection); }
 :focus-visible { outline: 1px solid var(--color-accent); outline-offset: 2px; }
 
 /* ---- the grid ---- */
@@ -28,78 +32,184 @@ a:hover { color: var(--accent-strong); }
   position: relative;
   min-height: 100vh;
   background-color: var(--paper);
-  background-image:
-    linear-gradient(var(--color-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-image: var(--grid-lines);
   background-size: var(--grid) var(--grid);
 }
 
-/* ---- mouse spotlight: a thicker copy of the grid in the accent maroon,
-       revealed in a circle. Opaque lines, so under the mask they read as
-       the grid turning red rather than as a wash over the page. ---- */
+/* ---- the load fade ----
+   Not decoration. The page paints in fallback faces, Fraunces and Epilogue
+   swap in, and only then does the baseline pass translate every block onto the
+   grid — so a cold load shows the type reflowing and settling, which is the
+   one moment the grid looks assembled rather than given. This holds the page
+   back until that has happened.
+
+   Three deliberate guards, because a page that hides itself has to be certain
+   it will show itself again:
+
+   - `.js` is set by an inline script in the head, so the rule only exists once
+     something is running that can undo it. With JS off, nothing ever hides.
+   - The reveal has a timeout backstop in BaseLayout, so a font that never
+     loads still ends in a visible page.
+   - Reduced motion opts out of the hide entirely rather than shortening it.
+     The settle is then visible, which is the honest trade: someone who asked
+     for less motion should not be served a blank page to avoid some. */
+.js .page { opacity: 0; }
+.js .page.is-ready { opacity: 1; transition: opacity var(--dur-load) ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .js .page { opacity: 1; transition: none; }
+}
+
+/* ---- mouse spotlight: a thicker copy of the grid in white, revealed in a
+       circle. Opaque lines, so under the mask they read as the grid lifting
+       lighter than the paper rather than as a wash over the page. The 1.5px
+       weight covers the 1px ink line underneath, so what you see is the line
+       going light, not a pale line sitting beside a dark one. ---- */
 .glow {
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background-image:
-    linear-gradient(rgb(var(--accent-rgb)) 1.5px, transparent 1.5px),
-    linear-gradient(90deg, rgb(var(--accent-rgb)) 1.5px, transparent 1.5px);
+    linear-gradient(var(--color-grid-lit) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, var(--color-grid-lit) 1.5px, transparent 1.5px);
   background-size: var(--grid) var(--grid);
-  opacity: 0; transition: opacity .15s;
-  -webkit-mask-image: radial-gradient(150px circle at var(--mx,-999px) var(--my,-999px), #000 0%, rgba(0,0,0,.35) 55%, transparent 75%);
-          mask-image: radial-gradient(150px circle at var(--mx,-999px) var(--my,-999px), #000 0%, rgba(0,0,0,.35) 55%, transparent 75%);
+  opacity: 0; transition: opacity var(--dur);
+
+  /* The falloff decides whether this reads as a soft glow or as a circle drawn
+     on the page. A gradient with few stops interpolates linearly and
+     terminates in a visible ring; these stops approximate a gaussian, so alpha
+     is near zero long before the radius ends and there is no edge to see. */
+  --glow-mask: radial-gradient(
+    var(--glow-radius) circle at var(--mx, -9999px) var(--my, -9999px),
+    rgba(0,0,0,1)    0%,
+    rgba(0,0,0,.85)  8%,
+    rgba(0,0,0,.60) 18%,
+    rgba(0,0,0,.38) 28%,
+    rgba(0,0,0,.22) 40%,
+    rgba(0,0,0,.12) 52%,
+    rgba(0,0,0,.06) 66%,
+    rgba(0,0,0,.02) 82%,
+    transparent    100%
+  );
+  -webkit-mask-image: var(--glow-mask);
+          mask-image: var(--glow-mask);
 }
 .glow.is-lit { opacity: var(--glow-strength); }
 
-.wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; }
+/* A stacking context and nothing else. Deliberately not width-capped: .col
+   measures its own centring against the viewport, which is the same box the
+   grid is painted on. A cap here offsets every edge below it by an arbitrary
+   half-remainder that no arithmetic downstream can put back on a line. */
+.wrap { position: relative; z-index: 1; }
 
-/* ---- header ---- */
+/* ---- header ----
+   Full-bleed and sticky, with a single grid unit of gutter — every edge on the
+   page is a multiple of --grid from the left of the viewport, so the mark
+   still lands on a vertical line.
+
+   Sticky means opaque, and opaque over a page whose background IS the grid
+   would leave a blank band across the top. So the masthead repaints the same
+   grid at the same size, anchored to its own box: the lines stay put while the
+   page scrolls beneath, and the band reads as the page continuing rather than
+   as a bar that drifts. */
 .header {
+  position: sticky; top: 0; z-index: 10;
   display: flex; justify-content: space-between; align-items: center;
-  height: calc(var(--grid) * 3);
-  padding: 0 calc(var(--grid) * 2);
+  height: var(--header-h);
+  padding-inline: var(--grid);
+  background-color: var(--paper);
+  background-image: var(--grid-lines);
+  background-size: var(--grid) var(--grid);
+  /* The outer stroke of the double rule. A border, not a shadow, so
+     box-sizing eats it out of --header-h and the masthead stays exactly two
+     rows tall. A 1px border that ADDED to the height would push the whole
+     document a pixel off the grid. */
+  border-bottom: var(--rule);
 }
+/* The inner stroke. `bottom` is measured from the padding box, which stops
+   short of the border above, so this sits --rule-gap clear of it. */
+.header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: var(--rule-gap);
+  height: 1px;
+  background: var(--color-divider);
+}
+/* Both children on one axis — see --nav-drop for the half-pixels. */
+.header > * { position: relative; top: var(--nav-drop); }
 .header .mark { display: flex; }
-.nav { display: flex; gap: 36px; font-family: var(--font-heading); font-size: 16px; line-height: var(--grid); }
-.nav a { color: rgb(var(--ink-rgb)); }
-.nav a:hover { color: var(--color-accent); }
-
-/* the content column — left edge lands on a grid line */
-.col {
-  margin-left: calc(var(--grid) * 3);
-  max-width: 928px;
-  padding: calc(var(--grid) * 3) calc(var(--grid) * 2) calc(var(--grid) * 2) 0;
+/* The row stays a full grid row tall even though the rings are smaller: the
+   row is what the header centres, and the rings centre inside it. */
+.nav {
+  display: flex; align-items: center; gap: calc(var(--grid) / 2);
+  height: var(--grid);
 }
 
-/* ---- outlined buttons (color as stroke, never a fill) ---- */
+/* The content column — centred, then quantised onto a vertical grid line.
+ *
+ * Plain `margin-inline: auto` cannot land on the grid: the column is 34 units
+ * wide, so the leftover is (100vw - 1088) and centring halves it — a multiple
+ * of --grid only when the viewport is itself a multiple of 64. At 1440 the
+ * margin is 176, five and a HALF units, so every left edge inside the column
+ * sits 16px into a cell and nothing downstream can correct it.
+ *
+ * So round the margin to the grid and let the right side take the remainder.
+ * The two margins then differ by at most one unit, which is invisible at this
+ * width; a text edge 16px off a line it is clearly reaching for is not.
+ *
+ * `nearest` rather than `down`: down always shortens the left margin, dragging
+ * the column toward the edge it is furthest from.
+ *
+ * Below --col-max the margin computes to 0 and the breakpoint's padding-inline
+ * takes over, which is one grid unit and so already on a line. */
+.col {
+  max-width: var(--col-max);
+  margin-inline: auto;
+  padding: calc(var(--grid) * 3) 0 calc(var(--grid) * 2);
+}
+@supports (margin-left: round(1px, 1px)) {
+  .col {
+    margin-inline: round(calc((100% - min(100%, var(--col-max))) / 2), var(--grid)) auto;
+  }
+}
+
+/* ---- outlined buttons (colour as stroke, never a fill) ---- */
+/* The gap only shows itself on a button that has a glyph next to its label;
+   a text-only button has nothing to put space between. */
+/* The top padding is the label's optical centring, and it has to be twice
+   --btn-label-drop: the button's height is fixed, so padding at the top takes
+   the content box down by 2d and shortens it by 2d, and the centred content
+   inside it moves by half that. The glyph is already centred correctly on its
+   own square box, so it takes the drop back out — as a transform, which moves
+   the paint without moving the layout the gap is measured from. */
 .btn {
-  display: inline-flex; align-items: center;
-  height: var(--btn-h); padding: 0 20px;
-  border: 1px solid; border-radius: 4px;
-  font-family: var(--font-heading); font-size: 16px;
+  display: inline-flex; align-items: center; gap: calc(var(--grid) / 4);
+  height: var(--btn-h);
+  padding: calc(var(--btn-label-drop) * 2) 20px 0;
+  border: 1px solid; border-radius: var(--radius);
+  font-family: var(--font-ui); font-size: var(--text-base);
   background: transparent; cursor: pointer;
 }
+.btn .glyph { transform: translateY(calc(var(--btn-label-drop) * -1)); }
 .btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
 .btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
-.btn-secondary { color: rgb(var(--ink-rgb)); border-color: rgba(var(--ink-rgb), 0.3); }
+.btn-secondary { color: var(--ink-muted); border-color: var(--color-stroke-neutral); }
 .btn-secondary:hover { border-color: var(--color-accent); color: var(--color-accent); }
-/* The button is 40px on a 32px grid, so it overhangs a row by 8px. Where that
-   8px lands is the whole question. [data-snap-box] puts the row's top edge on
-   a grid line, so centring the button in the row would put its centre on a
-   line too — and that line then cuts straight through it.
-   Instead the button is centred on a HALF row: flex-start plus a -4px offset.
-   Its edges then fall 4px outside two adjacent grid lines, symmetrically, so
-   it reads as sitting between them. The row stays two grid rows tall, so
-   nothing below it moves. */
+/* The button is exactly one grid row, so it needs no offset: the row carries
+   [data-snap-box], which puts its top edge on a painted line, and the button's
+   own edges land on that line and the next.
+   flex-start, not stretch, so the button keeps its height rather than filling
+   the row. The row is two rows tall: one for the button, one of air beneath —
+   which is where the spacing below comes from. */
 .btn-row {
   display: flex; align-items: flex-start; gap: 14px;
   height: calc(var(--grid) * 2);
 }
-.btn-row .btn { margin-top: calc((var(--grid) - var(--btn-h)) / 2); }
 
-/* ---- section labels ---- */
+/* ---- section labels ----
+   --text-xs, same as .eyebrow and .aside-label: the uppercase and the 0.16em
+   tracking give a label its presence, not its size. */
 .section-label {
-  font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+  font-family: var(--font-ui); font-weight: 600; font-size: var(--text-xs);
   letter-spacing: 0.16em; text-transform: uppercase;
-  color: rgba(var(--ink-rgb), 0.7); line-height: var(--grid);
+  color: var(--ink-muted); line-height: var(--grid);
   margin: 0 0 var(--grid);
 }
 
@@ -107,24 +217,30 @@ a:hover { color: var(--accent-strong); }
 .hr { margin: calc(var(--grid) * 2) 0 calc(var(--grid) * 0.75); border: 0; height: 1px; background: var(--color-divider); }
 .footer {
   display: flex; justify-content: space-between; align-items: baseline;
-  height: var(--grid); font-size: 14px; line-height: var(--grid);
-  color: rgba(var(--ink-rgb), 0.5); font-family: var(--font-heading);
+  height: var(--grid); font-size: var(--text-xs); line-height: var(--grid);
+  color: rgba(var(--ink-rgb), 0.5); font-family: var(--font-ui);
 }
 .footer a { color: rgba(var(--ink-rgb), 0.5); }
 .footer a:hover { color: var(--color-accent); }
 
 .cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--grid); }
 
-/* ---- narrow screens (the handoff is desktop-only; this keeps the
-       same system working on a phone) ---- */
-@media (max-width: 60rem) {
-  .col { margin-left: var(--grid); padding-right: var(--grid); }
-  .header { padding: 0 var(--grid); }
+/* ---- breakpoints ----
+   Three, and only three:
+     72rem  --col-max plus a gutter each side — the column stops floating
+     60rem  the homepage work rows drop their metadata track
+     40rem  phone: single column everywhere
+   72rem is tied to --col-max, not chosen. Raise one without the other and
+   there is a band of widths where text runs flush into the screen edge. */
+@media (max-width: 72rem) {
+  .col { padding-inline: var(--grid); }
 }
 @media (max-width: 40rem) {
-  .header { height: calc(var(--grid) * 2); }
-  .nav { gap: 20px; font-size: 15px; }
-  .col { margin-left: var(--grid); padding: calc(var(--grid) * 2) var(--grid) calc(var(--grid) * 2) 0; }
+  /* the icons keep their size; only the gap closes up */
+  .nav { gap: calc(var(--grid) / 4); }
+  /* only the vertical padding changes — the inline gutters and the centring
+     carry down from the 72rem rule */
+  .col { padding-block: calc(var(--grid) * 2); }
   .btn-row { flex-wrap: wrap; height: auto; gap: 12px; }
   .cols-3 { grid-template-columns: 1fr; }
 }

@@ -1,14 +1,70 @@
 ---
-// Case-study image with optional caption. Carries the .reveal hook so figures
-// fade up as they enter the viewport (no-ops under prefers-reduced-motion).
+// Case-study image with optional caption. Nothing draws a border: a rule
+// around every picture reads as chrome on a page that has very little of it.
+//
+// WHY THIS COMPONENT READS THE FILE. Every image here is `loading="lazy"`, and
+// a lazy image with no declared size occupies zero height until it decodes. It
+// then springs to full height in the middle of a scroll and shoves everything
+// below it down by an arbitrary number of pixels. On this site that is not just
+// the usual layout-shift complaint: the baseline snapper runs its last settle
+// pass 500ms after load and never again, so every line below a figure silently
+// comes off the grid the moment its image arrives.
+//
+// So the intrinsic size is read from the file at build time and turned into an
+// `aspect-ratio`, reserving the exact box before a byte of the image is
+// fetched. Doing it here rather than asking each <Figure> to carry width and
+// height means the numbers cannot go stale when a screenshot is re-exported.
+//
+// A missing file is not a build error. `label-requesting-old.png` is referenced
+// and absent, and has been for a while; the page should still build and say so
+// on the console rather than fall over.
+import { resolve } from "node:path";
+import sharp from "sharp";
+
 interface Props {
   src: string;
   alt: string;
   caption?: string;
 }
 const { src, alt, caption } = Astro.props;
+
+// Module scope, so a dev server does not re-read the same file on every request
+// and a build does not re-read one shared between pages.
+const dimensions = new Map<string, { width: number; height: number } | null>();
+
+async function intrinsicSize(publicPath: string) {
+  if (dimensions.has(publicPath)) return dimensions.get(publicPath)!;
+  let size: { width: number; height: number } | null = null;
+  try {
+    // Off the project root, not off import.meta.url: this component is bundled
+    // before it runs, so its own module URL is not where the source file sits.
+    const meta = await sharp(resolve(`public${publicPath}`)).metadata();
+    if (meta.width && meta.height) size = { width: meta.width, height: meta.height };
+  } catch {
+    console.warn(
+      `[Figure] no such image: public${publicPath} — the page still builds, but nothing reserves its space and the grid will drift below it.`
+    );
+  }
+  dimensions.set(publicPath, size);
+  return size;
+}
+
+const size = await intrinsicSize(src);
 ---
-<figure class="reveal">
-  <img src={src} alt={alt} loading="lazy" decoding="async" />
+<!-- No data-snap-box. A figure draws no edges, so where its box starts is
+     invisible and a margin nudge would only open an odd gap. Its bottom could
+     not be pinned anyway — an image's height is whatever the file says, and
+     forcing it to a multiple of the row would mean cropping the screenshot.
+     The caption below re-pins the flow. -->
+<figure>
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+    width={size?.width}
+    height={size?.height}
+    style={size ? `aspect-ratio: ${size.width} / ${size.height}` : undefined}
+  />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>

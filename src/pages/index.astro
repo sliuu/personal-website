@@ -1,37 +1,26 @@
 ---
 // src/pages/index.astro — homepage content; chrome lives in BaseLayout.
-// Layout, type and spacing are ported from the classical redesign handoff
-// (handoff/portfolio-standalone.html). Two departures from that file, both
-// deliberate: the role control is a real dropdown rather than a click-to-
-// cycle button, and there are narrow-screen rules at the bottom.
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Glyph from '../components/Glyph.astro';
+import Figure from '../components/Figure.astro';
+import { EMAIL_URL, RESUME_URL, SITE_TITLE } from '../consts';
 
-const roles = ["UX Engineer", "design engineer", "prototyper", "design technologist"];
+const roles = ["design engineer", "UX Engineer", "prototyper", "design technologist"];
 
-const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
-// Lives in public/, so Astro copies it through untouched and the URL is stable.
-const resumeUrl = "/resume_2026.pdf";
-
-const work = [
-  {
-    num: "01",
-    title: "YouTube Ads Prototyping Tool",
-    desc: "Shipped production features in Lit & TypeScript while designing the tool's next generation — so designers and researchers could prototype ad formats without an engineer.",
-    m1: "Google · 2025",
-    m2: "",
-    m3: "",
-    href: "/projects/youtube-ads-prototyping",
-  },
-  {
-    num: "02",
-    title: "Label Requesting Redesign",
-    desc: "Collapsed a tribal-knowledge process with dozens of entry points into one guided flow — so ML engineers could request labeled data themselves, no labeling engineer on call.",
-    m1: "Waymo · 2024",
-    m2: "",
-    m3: "",
-    href: "/projects/label-request-process",
-  },
-];
+// One source of truth: the rows are the project collection, in its own
+// declared `order`. A hand-kept copy of the titles and blurbs used to live
+// here and had already drifted from the case studies it linked to.
+const work = (await getCollection('projects'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((p, i) => ({
+    num: String(i + 1).padStart(2, '0'),
+    title: p.data.title,
+    desc: p.data.blurb ?? p.data.summary,
+    meta: `${p.data.client} · ${p.data.year}`,
+    href: `/projects/${p.id}`,
+  }));
 
 const career = [
   { company: "Sabbatical", role: "Rest, reflection & writing", dates: "Nov 2025 – Present" },
@@ -45,13 +34,11 @@ const loves = [
   "organizing information",
   "complex → obvious",
   "thinking about people",
-  "a really good sofa",
+  "unconventional furniture",
 ];
 ---
-<BaseLayout title="Stephanie Liu">
+<BaseLayout title={SITE_TITLE}>
   <!-- HERO -->
-  <div class="eyebrow" data-snap>Stephanie Liu — design engineer, San Francisco</div>
-
   <h1 class="hero" data-snap>
     Stephanie is a <span class="role" id="role"><button
       class="role-btn"
@@ -59,8 +46,15 @@ const loves = [
       aria-haspopup="listbox"
       aria-expanded="false"
       aria-label="Choose a role"
-    ><span id="roleLabel">{roles[0]}</span><svg class="caret" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><span class="role-menu" id="roleMenu" role="listbox" aria-label="Roles">
-      {roles.map((r, i) => <span class="role-option" role="option" aria-selected={i === 0 ? "true" : "false"}>{r}</span>)}
+    ><span id="roleLabel">{roles[0]}</span><svg class="caret" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><span class="role-menu" id="roleMenu" role="listbox" aria-label="Roles">
+      {roles.map((r, i) => (
+        <span
+          class="role-option"
+          role="option"
+          tabindex="-1"
+          aria-selected={i === 0 ? "true" : "false"}
+        >{r}</span>
+      ))}
     </span></span> based in San&nbsp;Francisco.
   </h1>
 
@@ -70,8 +64,9 @@ const loves = [
   </p>
 
   <div class="btn-row" data-snap-box>
-    <a class="btn btn-primary" href="#work">View work</a>
-    <a class="btn btn-secondary" href={resumeUrl} target="_blank" rel="noopener">Résumé (PDF)</a>
+    <!-- <a class="btn btn-primary" href="#work">View work</a> -->
+    <a class="btn btn-primary" href={EMAIL_URL}><Glyph name="mail" />Get in touch</a>
+    <a class="btn btn-secondary" href={RESUME_URL} target="_blank" rel="noopener">Resume (PDF)</a>
   </div>
 
   <!-- SELECTED WORK -->
@@ -79,17 +74,17 @@ const loves = [
     <h2 class="section-label" data-snap>Selected work</h2>
     {work.map((w) => (
       <a class="work-row" href={w.href} data-snap-box>
-        <span class="work-num">{w.num}</span>
-        <span data-snap>
-          <span class="work-title">{w.title}</span>
+        <span class="work-num" data-snap>{w.num}</span>
+        <!-- data-snap belongs on the children, not on this wrapper: the
+             wrapper sets no line-height, so it computes to `normal` and the
+             baseline pass falls back to `lh = fs`. That measures a 24px line
+             box where the title's is 32px and snaps the title 4px off. -->
+        <span>
+          <span class="work-title" data-snap>{w.title}</span>
           <span class="work-desc" data-snap>{w.desc}</span>
           <span class="work-cta" data-snap>Read the case study →</span>
         </span>
-        <span class="work-meta">
-          <span class="m1" data-snap>{w.m1}</span>
-          <span class="m2" data-snap>{w.m2}</span>
-          <span class="m3" data-snap>{w.m3}</span>
-        </span>
+        <span class="work-meta" data-snap>{w.meta}</span>
       </a>
     ))}
   </section>
@@ -119,8 +114,8 @@ const loves = [
       </p>
       <!-- snap-box: absorbs any fraction the statement's wrap leaves behind -->
       <div class="btn-row" data-snap-box>
-        <a class="btn btn-primary" href={linkedinUrl} target="_blank" rel="noopener">Get in touch ↗</a>
-        <a class="btn btn-secondary" href={resumeUrl} target="_blank" rel="noopener">Résumé (PDF)</a>
+        <a class="btn btn-primary" href={EMAIL_URL}><Glyph name="mail" />Get in touch</a>
+        <a class="btn btn-secondary" href={RESUME_URL} target="_blank" rel="noopener">Resume (PDF)</a>
       </div>
     </div>
     <div>
@@ -130,24 +125,60 @@ const loves = [
       </div>
     </div>
   </section>
+
+  <!-- SIGN-OFF
+       The page opens by claiming San Francisco and closes by showing it. Last
+       thing before the footer on purpose: the hero is one sentence carrying
+       the whole page, and the site's only photograph would win any argument it
+       had with that sentence for attention.
+
+       No data-snap-box, for the reason given in Figure.astro — a picture draws
+       no edges, so snapping its top only opens an odd gap, and its height is
+       whatever the file is. The flow re-pins itself immediately below: the
+       footer's <hr> carries data-snap-box (see BaseLayout). -->
+  <section class="portrait">
+    <Figure
+      src="/me.jpg"
+      alt="Stephanie standing on a rooftop at dusk, with the hills of San Francisco rising behind her"
+    />
+  </section>
 </BaseLayout>
 
 <style>
   /* ---- hero ---- */
   .eyebrow {
-    font-family: var(--font-heading); font-size: 13px;
+    font-family: var(--font-ui); font-size: var(--text-xs);
     letter-spacing: 0.16em; text-transform: uppercase;
     color: var(--color-accent); line-height: var(--grid);
     margin-bottom: var(--grid);
   }
+  /* No max-width: the headline takes the whole column, which is what lets it
+     set on one line. The longest role ("design technologist") makes the
+     sentence 1035px wide at --text-3xl with the button's chrome counted in,
+     against a 1088px column — 53px of slack. Both numbers move together: if
+     the hero rung goes up or a longer role is added, the sentence wraps to two
+     lines again rather than overflowing, so this degrades quietly. */
   h1.hero {
-    font-family: var(--font-heading); font-weight: 400;
-    font-size: 40px; line-height: calc(var(--grid) * 2);
-    letter-spacing: -0.01em; margin: 0 0 var(--grid); max-width: 720px;
+    font-family: var(--font-read); font-weight: 300;
+    font-size: var(--text-3xl); line-height: calc(var(--grid) * 2);
+    letter-spacing: -0.01em;
+    /* Lead-in above the headline, in whole --grid rows so every baseline below
+       stays on the line it was already on: three at full width, two at 60rem,
+       one at 40rem (see the breakpoints at the foot of this block). It lives
+       here rather than in .col's padding because that padding belongs to every
+       page and only the homepage opens on a 40px hero. */
+    margin: calc(var(--grid) * 3) 0 var(--grid);
+    /* The snapper puts a transform on every [data-snap] element, and a
+       transform creates a stacking context. That traps .role-menu's z-index
+       inside this h1, while p.intro below becomes a sibling context that wins
+       on DOM order — so the open dropdown rendered behind the intro text.
+       Lifting the whole h1 above its siblings is what the menu's z-index
+       can't do from in here. */
+    position: relative; z-index: 5;
   }
   p.intro {
-    font-family: var(--font-heading);
-    font-size: 20px; line-height: var(--grid);
+    font-family: var(--font-read);
+    font-size: var(--text-lg); line-height: var(--grid);
     color: rgba(var(--ink-rgb), 0.88);
     margin: 0 0 calc(var(--grid) * 2); max-width: 624px;
   }
@@ -156,83 +187,100 @@ const loves = [
      The handoff's button cycles on click; this is the same button opening a
      real listbox instead. */
   .role { position: relative; display: inline-block; }
+  /* em, not a scale rung: this button sits inside the headline, so it has to
+     track whatever size the hero is at this breakpoint rather than pick its
+     own. A shade under 1em so the box doesn't outgrow the line around it. */
   .role-btn {
     display: inline-flex; align-items: center; gap: 9px;
-    font-family: var(--font-heading); font-weight: 400; font-size: 0.92em;
+    font-family: var(--font-read); font-weight: 200; font-size: 0.92em;
     color: var(--color-accent);
     background: transparent; border: 1px solid var(--color-accent);
-    border-radius: 5px; padding: 1px 8px 3px 16px;
+    margin-left: 4px;
+    margin-right: 4px;
+    border-radius: var(--radius); padding: 4px 8px 4px 16px;
     line-height: 1.1; cursor: pointer; transform: translateY(-2px);
   }
   .role-btn:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-  .role-btn .caret { transition: transform 0.2s ease; }
+  .role-btn .caret { transition: transform calc(var(--dur) * 1.33) ease; }
   .role.open .role-btn .caret { transform: rotate(180deg); }
 
   .role-menu {
     position: absolute; top: calc(100% + 4px); left: 0; z-index: 5;
     display: none; list-style: none; margin: 0; padding: 0; min-width: 100%;
     background: var(--paper);              /* opaque, so the grid stops here */
-    border: 1px solid var(--color-divider); border-radius: 5px;
-    box-shadow: 0 2px 0 rgba(var(--ink-rgb), 0.05);
+    border: var(--rule); border-radius: var(--radius);
+    /* The heavier of the two shadows: this one floats above the page rather
+       than resting on it, unlike the figures. See tokens.css. */
+    box-shadow: var(--shadow-lift);
   }
   .role.open .role-menu { display: block; }
   .role-option {
     display: block;
-    font-family: var(--font-heading); font-size: 20px; font-weight: 400;
-    letter-spacing: 0; line-height: var(--grid); padding: 0 16px;
+    font-family: var(--font-read); font-size: var(--text-lg); font-weight: 300;
+    letter-spacing: 0; line-height: var(--grid);
+    padding: calc(var(--grid) / 4) calc(var(--grid) / 2);
     color: rgba(var(--ink-rgb), 0.72);
     white-space: nowrap; cursor: pointer;
   }
   .role-option:hover,
+  .role-option:focus,
   .role-option[aria-selected="true"] { color: var(--color-accent); }
-  .role-option:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
+  .role-option:hover,
+  .role-option:focus {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    outline: none;
+  }
 
   /* ---- selected work ---- */
   .work { margin-top: calc(var(--grid) * 4); scroll-margin-top: var(--grid); }
+  /* Every track a whole grid unit, so the title column starts on a painted
+     line. It was `56px 1fr 200px`, which put the title 88px into the column —
+     two units and three quarters. One unit is enough for the numeral (two
+     tabular figures at --text-lg measure ~22px), so the title now starts at
+     exactly two units in. The meta track is right-aligned, so only its right
+     edge shows, and the row's own padding-right lands that on a line. */
   .work-row {
-    display: grid; grid-template-columns: 56px 1fr 200px; gap: var(--grid);
+    display: grid;
+    grid-template-columns: var(--grid) 1fr calc(var(--grid) * 6);
+    gap: var(--grid);
     align-items: start;
-    padding: calc(var(--grid) * 1.5) var(--grid) calc(var(--grid) * 1.5) 0;
-    border-top: 1px solid var(--color-divider);
-    color: inherit; border-radius: 4px; transition: background .15s;
+    padding: calc(var(--grid) * 1.5) var(--grid) calc(var(--grid) * 0.5) 0;
+    border-top: var(--rule);
+    color: inherit; border-radius: var(--radius); transition: background var(--dur);
   }
-  .work-row:last-child { border-bottom: 1px solid var(--color-divider); }
-  .work-row:hover { background: rgba(var(--accent-rgb), 0.06); }
+  .work-row:last-child { border-bottom: var(--rule); }
+  .work-row:hover { background: var(--tint-link); }
   .work-num {
-    font-family: var(--font-heading); font-size: 22px; line-height: var(--grid);
-    color: var(--color-accent); font-variant-numeric: tabular-nums; padding-left: 12px;
+    font-family: var(--font-ui); font-size: var(--text-lg); line-height: var(--grid);
+    color: var(--color-accent); font-variant-numeric: tabular-nums;
   }
   .work-title {
-    display: block; font-family: var(--font-heading);
-    font-size: 28px; line-height: var(--grid); color: rgb(var(--ink-rgb));
+    display: block; font-family: var(--font-read);
+    font-size: var(--text-xl); line-height: var(--grid); color: var(--ink);
   }
   /* Offsets inside a snapped stack must be WHOLE grid rows. A half-row (16px)
      margin puts the sibling on the opposite side of the rounding line, so the
      snapper nudges it 16px the other way and the gap collapses — that was the
      overlapping project text. */
+  /* This is the pitch for each project — content, not metadata. It takes the
+     reading rung and near-full ink so it holds its own under the title; at
+     --text-base and 0.66 alpha it was ~4.6:1 against the paper and read as
+     something you could skip. 520px keeps it to ~54 characters. */
   .work-desc {
-    display: block; margin-top: var(--grid);
-    font-size: 15px; line-height: var(--grid);
-    color: rgba(var(--ink-rgb), 0.66); max-width: 520px;
+    display: block;
+    font-size: var(--text-lg); line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.8); max-width: 520px;
   }
   .work-cta {
     display: inline-block; margin-top: var(--grid);
-    font-family: var(--font-heading); font-size: 14px; line-height: var(--grid);
+    font-family: var(--font-ui); font-size: var(--text-xs); line-height: var(--grid);
     color: var(--color-accent);
   }
-  .work-meta { text-align: right; }
-  .work-meta .m1 {
-    display: block; font-family: var(--font-heading); font-size: 13px;
+  .work-meta {
+    text-align: right;
+    font-family: var(--font-ui); font-size: var(--text-xs);
     letter-spacing: 0.1em; text-transform: uppercase; line-height: var(--grid);
-    color: rgba(var(--ink-rgb), 0.7);
-  }
-  .work-meta .m2 {
-    display: block; font-family: var(--font-heading); font-size: 26px;
-    color: rgb(var(--ink-rgb)); line-height: var(--grid);
-  }
-  .work-meta .m3 {
-    display: block; font-size: 13px; line-height: var(--grid);
-    color: rgba(var(--ink-rgb), 0.7);
+    color: var(--ink-muted);
   }
 
   /* ---- career ---- */
@@ -240,20 +288,20 @@ const loves = [
   /* the top rule sandwiches the first entry between two lines */
   .career-list {
     display: flex; flex-direction: column;
-    border-top: 1px solid var(--color-divider);
+    border-top: var(--rule);
   }
   /* static outer: the rule stays on the grid (border-box, so the 1px is paid
      for out of the height). The text is centred in the box rather than
      baseline-snapped — snapping would pull it off centre. */
   .career-box {
     height: calc(var(--grid) * 2);
-    border-bottom: 1px solid var(--color-divider);
+    border-bottom: var(--rule);
     display: flex; align-items: center;
-    transition: background .15s;
+    transition: background var(--dur);
   }
   /* half the strength of a project row's hover — these are <div>s, so the
      cursor stays an arrow and the fainter tint reads as "row", not "link" */
-  .career-box:hover { background: rgba(var(--accent-rgb), 0.03); }
+  .career-box:hover { background: var(--tint-row); }
   .career-inner {
     width: 100%;
     display: flex; justify-content: space-between; align-items: baseline;
@@ -262,46 +310,81 @@ const loves = [
   }
   /* the company/role group is what gives when space runs out, never the date */
   .career-inner > span:first-child { min-width: 0; }
-  .career-co { font-family: var(--font-heading); font-size: 22px; color: rgb(var(--ink-rgb)); }
-  .career-role { font-size: 15px; color: rgba(var(--ink-rgb), 0.6); }
+  .career-co { font-family: var(--font-read); font-size: var(--text-lg); color: var(--ink); margin-right: 8px; }
+  .career-role { font-size: var(--text-base); color: rgba(var(--ink-rgb), 0.6); }
   .career-date {
-    font-style: italic; font-size: 15px; color: rgba(var(--ink-rgb), 0.5);
+    font-style: italic; font-size: var(--text-base); color: rgba(var(--ink-rgb), 0.5);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
   /* ---- currently / also loves ---- */
+  /* ---- the sign-off portrait ----
+     Cropped to 2176x896, which is 1088x448 at the column's full width — 14
+     grid rows exactly. That only holds at --col-max; below it the height is
+     whatever the ratio gives, like every other picture on the site.
+
+     The crop is a letterbox band on purpose: at 2.43:1 it reads as a rule with
+     a picture in it rather than a portrait, which is what a sign-off wants. It
+     is cut top and bottom out of a nearly square original — the empty sky above
+     the ridge and the rooftop below her — so the skyline lands just inside the
+     top edge and she is cut at the shoulders. Regenerate from .old/me-original
+     .jpg (extract top 390, height 1022, full width) if it needs to move; there
+     is no room to take more off the top without losing the ridge.
+
+     NO SHADOW, deliberately, though every figure in a case study takes one.
+     --shadow-raised exists for screenshots of light UI, whose near-white
+     background dissolves into the paper and leaves the eye to guess where the
+     image stops. This photograph has its own dark edges and a sky that reads
+     as sky; a shadow under it would be decoration solving nothing. */
+  .portrait { margin-top: calc(var(--grid) * 3); }
+  /* :global — Figure renders in its own scope, so a plain selector here can't
+     reach the markup it produces. */
+  .portrait :global(figure) { margin: 0; }
+  .portrait :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+  }
+
   .close {
     margin-top: calc(var(--grid) * 4);
-    border-top: 1px solid var(--color-divider);
+    border-top: var(--rule);
     /* the border is paid for out of the padding, so the content below it
        still starts on a grid line rather than 1px under one */
     padding-top: calc(var(--grid) * 2 - 1px);
-    display: grid; grid-template-columns: 1fr 288px; gap: calc(var(--grid) * 2);
+    display: grid; grid-template-columns: 1fr calc(var(--grid) * 9); gap: calc(var(--grid) * 2);
     align-items: start;
   }
   .statement {
-    font-family: var(--font-heading); font-size: 30px;
-    line-height: calc(var(--grid) * 1.5); color: rgb(var(--ink-rgb));
+    font-family: var(--font-read); font-size: var(--text-2xl);
+    line-height: calc(var(--grid) * 1.5); color: var(--ink);
     margin: 0 0 var(--grid); max-width: 560px;
   }
   .aside-label {
-    font-family: var(--font-heading); font-size: 12px; font-weight: 600;
+    font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600;
     letter-spacing: 0.16em; text-transform: uppercase;
     color: rgba(var(--ink-rgb), 0.5); line-height: var(--grid);
     margin: 0 0 var(--grid);
   }
   .loves {
     display: flex; flex-direction: column;
-    font-family: var(--font-heading); font-size: 20px;
-    line-height: var(--grid); color: rgb(var(--ink-rgb));
+    font-family: var(--font-read); font-size: var(--text-lg);
+    line-height: var(--grid); color: var(--ink);
   }
 
   /* ---- narrow screens (not in the handoff, which is desktop-only).
          Rule for every breakpoint: line-heights stay whole grid rows, so a
          block's height is a whole number of rows however the text wraps. ---- */
   @media (max-width: 60rem) {
-    .work-row { grid-template-columns: 56px 1fr; }
+    /* Two rows of lead-in — the hero is still at its full rung here, but the
+       column has stopped floating, so less room overhead reads as right. */
+    h1.hero { margin-top: calc(var(--grid) * 2); }
+
+    /* Drops the meta track; the numeral track keeps the width it has at full
+       size, so the title starts on the same line here as it does there. */
+    .work-row { grid-template-columns: var(--grid) 1fr; }
     .work-meta { grid-column: 2; text-align: left; }
     .close { grid-template-columns: 1fr; gap: var(--grid); }
 
@@ -311,16 +394,19 @@ const loves = [
        edge. It only stacks below 40rem. */
   }
   @media (max-width: 40rem) {
-    /* 32px line (not 48) — three wrapped lines would otherwise land the whole
-       page on a half row and drag every border below it off the grid */
-    h1.hero { font-size: 28px; line-height: var(--grid); }
+    /* Down two rungs, and a 32px line (not 48) — three wrapped lines would
+       otherwise land the whole page on a half row and drag every border below
+       it off the grid. --text-2xl (31) would sit too tight in a 32px line, so
+       the hero drops to the same rung as the work titles. */
+    /* One row of lead-in: the hero is two rungs smaller here, so the same
+       space that framed a 40px line would swamp a 25px one. */
+    h1.hero { font-size: var(--text-xl); line-height: var(--grid); margin-top: var(--grid); }
     .role-btn { font-size: 0.85em; line-height: 1; padding: 0 6px 2px 10px; gap: 6px; }
-    p.intro { font-size: 18px; }
+    p.intro { font-size: var(--text-base); }
 
     .work-row { grid-template-columns: 1fr; gap: var(--grid); padding-right: 0; }
-    .work-num { padding-left: 0; }
     .work-meta { grid-column: 1; }
-    .work-title { font-size: 24px; }
+    .work-title { font-size: var(--text-lg); }
 
     /* company / role / date each on their own row (3 × 32), in a 4-row box —
        the spare row is slack, so a snap nudge can't push the date through
@@ -329,11 +415,14 @@ const loves = [
     .career-inner { display: block; }
     .career-co, .career-role, .career-date { display: block; }
 
-    .statement { font-size: 24px; line-height: var(--grid); }
+    .statement { font-size: var(--text-xl); line-height: var(--grid); }
   }
 </style>
 
 <script>
+  // A listbox, driven by real DOM focus on the options rather than
+  // aria-activedescendant — the options are in the DOM already, so moving
+  // focus is both simpler and what a screen reader reports most reliably.
   const role = document.getElementById("role");
   const btn = document.getElementById("roleBtn");
   const menu = document.getElementById("roleMenu");
@@ -343,33 +432,89 @@ const loves = [
     throw new Error("role dropdown elements not found");
   }
 
+  const options = Array.from(menu.querySelectorAll<HTMLElement>(".role-option"));
+
   // The button's width changes with the chosen role, and the h1 can rewrap —
   // ask the layout to re-run the baseline snap whenever that happens.
   const resnap = () => document.dispatchEvent(new CustomEvent("grid:resnap"));
 
-  const close = () => {
+  const isOpen = () => role.classList.contains("open");
+  const selectedIndex = () =>
+    Math.max(0, options.findIndex((o) => o.getAttribute("aria-selected") === "true"));
+
+  function open(focusIndex = selectedIndex()) {
+    role.classList.add("open");
+    btn.setAttribute("aria-expanded", "true");
+    options[focusIndex]?.focus();
+  }
+
+  function close({ refocus = false } = {}) {
+    if (!isOpen()) return;
     role.classList.remove("open");
     btn.setAttribute("aria-expanded", "false");
-  };
+    if (refocus) btn.focus();
+  }
+
+  function choose(option: HTMLElement) {
+    label.textContent = option.textContent;
+    options.forEach((o) => o.setAttribute("aria-selected", String(o === option)));
+    close({ refocus: true });
+    resnap();
+  }
 
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const open = role.classList.toggle("open");
-    btn.setAttribute("aria-expanded", String(open));
+    isOpen() ? close() : open();
   });
 
-  const options = menu.querySelectorAll(".role-option");
-  options.forEach((option) => {
-    option.addEventListener("click", () => {
-      label.textContent = option.textContent;
-      options.forEach((o) => o.setAttribute("aria-selected", String(o === option)));
-      close();
-      resnap();
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      open(e.key === "ArrowDown" ? selectedIndex() : options.length - 1);
+    }
+  });
+
+  options.forEach((option, i) => {
+    option.addEventListener("click", (e) => {
+      e.stopPropagation();
+      choose(option);
+    });
+    option.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          options[(i + 1) % options.length].focus();
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          options[(i - 1 + options.length) % options.length].focus();
+          break;
+        case "Home":
+          e.preventDefault();
+          options[0].focus();
+          break;
+        case "End":
+          e.preventDefault();
+          options[options.length - 1].focus();
+          break;
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          choose(option);
+          break;
+        case "Escape":
+          e.preventDefault();
+          close({ refocus: true });
+          break;
+        case "Tab":
+          close();
+          break;
+      }
     });
   });
 
-  document.addEventListener("click", close);
+  document.addEventListener("click", () => close());
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
+    if (e.key === "Escape") close({ refocus: isOpen() });
   });
 </script>

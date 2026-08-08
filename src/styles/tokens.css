@@ -1,50 +1,197 @@
 /* src/styles/tokens.css — the design system's knobs.
-   Imported by BaseLayout, so every page and every scoped <style> block can
-   reach these. Nothing in here paints anything; see global.css for that. */
+   Imported by BaseLayout, so every page and every scoped <style> can reach
+   these. Nothing here paints anything; see global.css for that.
+
+   Everything vertical derives from --grid. Line-heights are always a whole
+   multiple of it, so a block is a whole number of rows however its text wraps,
+   and the runtime snapper (BaseLayout) can rest baselines on the painted
+   lines. A half-row anywhere breaks the block below it. */
 
 :root {
   --grid: 2rem;              /* 32px at a 16px root — the one knob */
+
+  /* --- colour ------------------------------------------------------- */
   --ink-rgb: 38,34,28;       /* text as R,G,B so one var drives solid + translucent */
-  --paper: #eae4d8;
+  --ink: rgb(var(--ink-rgb));
+  --ink-muted: rgba(var(--ink-rgb), 0.7);
+  --paper: #f9f8f7;
   --color-accent: #8a2f28;   /* maroon */
   --accent-rgb: 168,64,54;   /* the lighter maroon, as R,G,B */
   --accent-strong: rgb(var(--accent-rgb));
   --color-divider: rgba(var(--accent-rgb), 0.28);  /* rules carry the maroon, faintly */
-  --color-stroke-neutral: rgba(var(--ink-rgb), 0.18);  /* strokes that shouldn't
-                                                          compete with the maroon */
-  --color-grid: rgba(var(--ink-rgb), 0.035);  /* the painted grid lines */
-  --glow-strength: 0.15;     /* how hot the lit grid gets under the cursor —
-                                kept low: the lines pass behind the text */
+  --color-stroke-neutral: rgba(var(--ink-rgb), 0.3);  /* strokes that shouldn't
+                                                         compete with the maroon */
+  --color-grid: rgba(var(--ink-rgb), 0.035);       /* the painted grid lines */
+  --color-grid-lit: #fff;    /* the spotlight's copy of the grid. Lighter than
+                                the paper, so under the cursor the lines lift
+                                out of the page instead of darkening into it. */
+  --color-selection: rgba(var(--accent-rgb), 0.18);
 
-  --btn-h: 40px;             /* deliberately not a grid multiple — see .btn-row */
+  /* Hover washes. Which one a row takes says what it is: --tint-link on
+     something that navigates, --tint-row on something that doesn't (a career
+     entry, a callout) where a strong wash would promise a click that isn't
+     there. Both stay under 0.08 or the maroon reads as a fill. */
+  --tint-link: rgba(var(--accent-rgb), 0.06);
+  --tint-row:  rgba(var(--accent-rgb), 0.03);
 
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-body: 'Lora', serif;
+  /* --- shared primitives -------------------------------------------- */
+  /* One hairline, two radii, one duration. Every rule on the site is this
+     weight and this colour; a double rule earns emphasis from repetition,
+     never from getting heavier.
 
-  /* --- legacy aliases -----------------------------------------------
-     The case-study pages still speak the old token vocabulary. Mapping
-     them onto the new palette keeps those pages coherent until they are
-     rebuilt. */
-  --bg: var(--paper);
-  --cream: rgb(var(--ink-rgb));
-  --muted: rgba(var(--ink-rgb), 0.7);
-  --gold: var(--color-accent);
-  --line: var(--color-divider);
-  --line-soft: var(--color-divider);
+     --radius is for controls — a button, an input, a pill — where the corner
+     is a detail. --radius-lg is for the full-width objects in a case study:
+     the images, the video and the summary panel all take the same corner, so
+     a picture and the block of text beside it read as the same kind of thing
+     sitting on the page. */
+  --rule: 1px solid var(--color-divider);
+  --radius: 4px;
+  --radius-lg: 12px;
 
-  --space-1: calc(var(--grid) / 4);    /* 8px  */
-  --space-2: calc(var(--grid) / 2);    /* 16px */
-  --space-3: calc(var(--grid) * 0.75); /* 24px */
-  --space-4: var(--grid);              /* 32px */
-  --space-5: calc(var(--grid) * 1.5);  /* 48px */
-  --space-6: calc(var(--grid) * 2);    /* 64px */
-  --space-7: calc(var(--grid) * 3);    /* 96px */
-  --space-8: calc(var(--grid) * 4);    /* 128px */
-  --space-9: calc(var(--grid) * 5);    /* 160px */
-  --space-10: calc(var(--grid) * 6);   /* 192px */
+  /* Two shadows, one recipe. Both are tinted with --ink-rgb rather than black,
+     so they stay in the paper's family instead of going grey, and both are two
+     layers: a tight one that seats the object against the page, and a wide
+     soft one that does the lifting.
 
-  --text-sm: 13px;
-  --text-base: 15px;
-  --text-lg: 20px;
-  --text-xl: 30px;
+     --shadow-raised is for something IN the flow that needs an edge it can't
+     draw for itself — a screenshot whose own background is near enough to the
+     paper to dissolve into it. It replaces the border a figure deliberately
+     doesn't have (see Figure.astro): an edge you infer rather than one drawn
+     as chrome around every picture.
+
+     --shadow-lift is for something floating ABOVE the flow — the role menu,
+     which has to read as detached from the page rather than resting on it. */
+  --shadow-raised:
+    0 1px 2px rgba(var(--ink-rgb), 0.05),
+    0 4px 12px rgba(var(--ink-rgb), 0.07);
+  --shadow-lift:
+    0 1px 2px rgba(var(--ink-rgb), 0.05),
+    0 6px 18px rgba(var(--ink-rgb), 0.07);
+  --dur: 0.15s;
+
+  /* The one duration that isn't a hover. --dur is tuned to feel instant under
+     a pointer; the load fade has the opposite job — it covers the font swap
+     and the first baseline pass, so it has to outlast them without reading as
+     a curtain going up. See .page.is-ready in global.css. */
+  --dur-load: 0.4s;
+
+  /* The two gradients that paint the grid. Declared once and consumed by
+     .page and .header, which have to draw the same lines at the same size —
+     see the sticky-masthead note in global.css. */
+  --grid-lines:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+
+  /* Captions are the one text on the site that is deliberately OFF the grid.
+     A caption belongs to the picture above it, and an image is an arbitrary
+     number of pixels tall, so a caption snapped to the nearest line sits a
+     different distance from every picture. These two put it the same distance
+     under every one instead. --lh-tight is a ratio, not a row: a wrapped
+     caption has to set as a block of its own, not as two grid rows. */
+  --caption-gap: calc(var(--grid) / 4);   /* 8px */
+  --lh-tight: 1.4;
+
+  /* --- the cursor spotlight ----------------------------------------- */
+  --glow-strength: 0.5;      /* half alpha, so the lit line lands between the
+                                paper and the white rather than on the white,
+                                and the ink line under it still shows through.
+                                At full strength the lines flip to a hard white
+                                and the spotlight reads as a scrubbed patch;
+                                here it reads as the grid catching light. */
+  --glow-radius: 450px;      /* the outer edge of the falloff, not the visible
+                                size — alpha is ~0.02 by 82%, so it reads
+                                roughly 285px wide with no rim */
+
+  /* --- layout ------------------------------------------------------- */
+  /* Exactly one grid row, so a button's top and bottom edges land on painted
+     lines. Its own token because .btn-row reads it to size itself. */
+  --btn-h: var(--grid);      /* 32px */
+
+  /* Optical centring for a .btn label. Epilogue's ascent (0.790em) clears its
+     cap height (0.738em) by almost nothing while its descent runs 0.235em, so
+     a line box centred in the button leaves the caps 1.46px high at
+     --text-base — visible next to a glyph, which centres on its own square.
+     Measured from the font's hhea and OS/2 tables, not eyeballed:
+     (ascent + descent)/2 - capHeight/2. Fira Sans came out at 0.15px, which is
+     why this token didn't exist before. A different --font-ui needs a new
+     number here, or none. */
+  --btn-label-drop: 1.5px;
+
+  /* The content width, and the only width on the page below the masthead.
+     34 grid units, and it has to stay a whole number of them: .col centres
+     itself and rounds the margin to --grid (see global.css), so a column of
+     34 units starting on a line also ends on one.
+
+     The 72rem breakpoint in global.css has to stay in step with this number
+     (--col-max + a gutter each side), or there is a band of viewport widths
+     where text runs flush into the edge of the screen. */
+  --col-max: calc(var(--grid) * 34);    /* 1088px */
+
+  /* The case-study rail: 8 + 1 + 25 = 34 units = --col-max, so a project page
+     keeps the same outer edges as the homepage. Only two of the three are
+     declared — the main column is whatever is left, so they can't drift.
+
+     Cost, recorded: the main column is 800px, ~83 characters, over the
+     comfortable 45–75. It is carried by the 32px leading on 20px type. The
+     honest fix if it ever has to come back is a narrower --col-max for
+     project pages only, which costs edge alignment with the rest of the site
+     — not a wider rail, whose ink does not grow with its box. */
+  --rail: calc(var(--grid) * 8);        /* 256px */
+  --rail-gap: var(--grid);              /* 32px */
+
+  /* Two rows, not three. At three the nav occupied the middle row and the
+     icons floated at 48.5 — the midpoint between two painted lines. At two
+     they centre on the line at 32, and the bottom rule lands on the line at
+     64. The masthead is sticky and opaque, so the rail parks under this and
+     in-page anchors clear it. */
+  --header-h: calc(var(--grid) * 2);    /* 64px */
+
+  /* The gap inside the double rule under the masthead. An eighth of a row:
+     wide enough to read as two strokes, tight enough to read as one edge. */
+  --rule-gap: calc(var(--grid) / 8);    /* 4px */
+
+  /* --- nav icons (components/IconLink.astro) ------------------------- */
+  --icon-btn: 28px;          /* the ring: under a full row, so it never touches a line */
+  --icon-size: 16px;         /* the glyph inside it */
+  --icon-stroke: 1.5;        /* heavier than the mark's 1.1: these draw smaller */
+  /* 0.45 put the glyphs at ~2.6:1 on the paper — under the 3:1 WCAG asks of a
+     graphical object. 0.65 is ~4.5:1. */
+  --color-icon: rgba(var(--ink-rgb), 0.65);
+  /* The painted grid draws each line on the first pixel of its tile, so the
+     line the icons sit on occupies y=32–33 and its true middle is 32.5. The
+     masthead's content box is 63px (two rows less the 1px rule), so dead
+     centre is 31.5. Both header children take this drop, so the mark and the
+     icons stay on one axis. */
+  --nav-drop: 1px;
+
+  /* --- type --------------------------------------------------------- */
+  /* Two faces, one axis: --font-read for everything you READ, --font-ui for
+     everything you USE (nav, buttons, eyebrows, labels, captions, metadata).
+     Every font-family in this codebase picks one of these two. */
+  --font-read: 'Fraunces', serif;
+  --font-ui: 'Epilogue', sans-serif;
+
+  /* Six rungs anchored on the 16px root: 14 16 20 24 32 40. Never write a raw
+     font-size — pick a rung, and if none fits, add one here.
+
+     The four display rungs are simple fractions of --grid (½, ⅝, ¾, 1, 1¼ of
+     32), which is why type at any size belongs to the same drawing as the
+     background. --text-xs is the one rung set by eye.
+
+     Why prose is --text-lg and not --text-base: line-height is always a whole
+     --grid row, so 32px is the smallest leading any text can take. That makes
+     the size decide the ratio — 16px is 2.00, 20px is 1.60, 24px is 1.33 —
+     and only 20px lands in the comfortable 1.45–1.65 band. The grid and the
+     body size are locked together; a 24px grid would want 16px body. So
+     --text-base is the UI size, not the reading size.
+
+     px, not rem, because global.css pins the root to 16px — the two are the
+     same number, and px keeps these readable next to --grid. */
+  --text-xs: 14px;    /* eyebrows, uppercase labels, captions, dates, meta */
+  --text-base: 16px;  /* UI text: buttons, metadata values, footers, hints */
+  --text-md: 18px;   
+  --text-lg: 20px;    /* everything you READ: prose, ledes, h3/h4 */
+  --text-xl: 24px;    /* work titles, case-study h2 */
+  --text-2xl: 32px;   /* the closing statement */
+  --text-3xl: 40px;   /* the homepage hero and a case-study h1 */
 }

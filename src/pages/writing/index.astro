@@ -3,16 +3,57 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const posts = (await getCollection('writing'))
+  .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
 ---
-<BaseLayout title="writing">
-  <h1>writing</h1>
-  <ul>
-    {posts.map((post) => (
-      <li>
-        <a href={`/writing/${post.id}`}>{post.data.title}</a>
-        — <time>{post.data.pubDate.toDateString()}</time>
-      </li>
-    ))}
-  </ul>
+<BaseLayout title="Writing — stephanie liu" description="Essays by Stephanie Liu.">
+  <h2 class="section-label" data-snap>Writing</h2>
+
+  {posts.length === 0 ? (
+    <p class="empty" data-snap>Nothing published yet.</p>
+  ) : (
+    <ul class="post-list">
+      {posts.map((post) => (
+        <li class="post-row">
+          <a href={`/writing/${post.id}`} data-snap>{post.data.title}</a>
+          <time datetime={post.data.pubDate.toISOString()} data-snap>
+            {dateFormat.format(post.data.pubDate)}
+          </time>
+        </li>
+      ))}
+    </ul>
+  )}
 </BaseLayout>
+
+<style>
+  .empty {
+    font-size: var(--text-lg);
+    line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.6);
+    margin: 0;
+  }
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: var(--rule);
+  }
+  .post-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    column-gap: var(--grid);
+    height: calc(var(--grid) * 2);
+    border-bottom: var(--rule);
+  }
+  .post-row a { font-size: var(--text-lg); line-height: var(--grid); }
+  .post-row time {
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.5);
+    white-space: nowrap;
+  }
+</style>

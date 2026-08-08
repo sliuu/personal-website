@@ -1,18 +1,27 @@
 ---
-// The "Challenge:" callout that opens every case study.
-import { icons } from './icons';
-
+// The "Challenge" callout that opens every case study.
+//
+// The pixel speech-bubble is gone. It was 24×24 pixel art blown up to a 32px
+// box on a page where every other line — the mark, the nav rings, the rules —
+// is drawn at a hairline, so it was the one aliased thing on the page. The
+// label does that job with a device the site already owns: tracked uppercase
+// in --font-ui, the same treatment as .section-label and the metadata <dt>s.
+// It carries the accent, which is what makes the block read as set apart
+// rather than as a paragraph that happens to have rules around it.
+//
+// .section-label supplies the type; .callout-label overrides only colour and
+// margin (see pages/projects/[id].astro).
+//
+// The label stacks above the text (a hanging label wants a 128px margin, and
+// the centred text block leaves 96px), and the text sets a rung above body
+// copy. This is the thesis of the case study; it should not be the same size
+// as the paragraph that follows it.
 interface Props {
   text: string;
 }
 const { text } = Astro.props;
 ---
-<div class="callout">
-  <h4 class="challenge-head">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg minisvg--inline" viewBox="0 0 24 24" aria-hidden="true">
-      <path d={icons.chat} />
-    </svg>
-    <span>Challenge:</span>
-  </h4>
+<div class="callout callout--challenge">
+  <p class="section-label callout-label">Challenge</p>
   <p>{text}</p>
 </div>

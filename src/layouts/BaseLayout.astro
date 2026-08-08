@@ -14,23 +14,21 @@
 // page's own scoped <style>.
 import '../styles/tokens.css';
 import '../styles/global.css';
+import IconLink from '../components/IconLink.astro';
+import Mark from '../components/Mark.astro';
+import {
+  SITE_TITLE, SITE_DESCRIPTION,
+  GITHUB_URL, LINKEDIN_URL, EMAIL_URL, SOURCE_URL,
+} from '../consts';
 
-const {
-  title = "Stephanie Liu",
-  description = "Stephanie Liu — design engineer in San Francisco. Previously Google, Waymo, and Nuro.",
-} = Astro.props;
-
-const linkedinUrl = "https://www.linkedin.com/in/stephanieliu14";
-const githubUrl = "https://www.github.com/sliuu";
-const sourceUrl = "https://github.com/sliuu/personal-website";  // this site's own repo
-
-// "Work" jumps to the section on the homepage; from any other page it has to
-// travel home first.
-const isHome = Astro.url.pathname === "/";
-const workHref = isHome ? "#work" : "/#work";
+const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL("/favicon.png", Astro.site);
+// 1200x630, the 1.91:1 every card renderer crops toward, and cropped in on the
+// right of the frame so a face survives at thumbnail size — the wide version
+// on the homepage would put her about twelve pixels tall in a Slack unfurl.
+// Was /favicon.png, which previewed every shared link as a 512px icon.
+const ogImage = new URL("/me-og.jpg", Astro.site);
 ---
 <html lang="en">
   <head>
@@ -45,7 +43,10 @@ const ogImage = new URL("/favicon.png", Astro.site);
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image:alt" content="Stephanie on a rooftop at dusk, with the hills of San Francisco behind her" />
+    <!-- summary_large_image, not summary: the card is now a 1.91:1 photograph,
+         and `summary` would letterbox it into a small square thumbnail. -->
+    <meta name="twitter:card" content="summary_large_image" />
 
     <!-- SVG first for browsers that take it (stays crisp at any size); the
          PNG is the fallback. /favicon.ico is probed automatically. -->
@@ -53,62 +54,126 @@ const ogImage = new URL("/favicon.png", Astro.site);
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+    <!-- Fraunces (variable, 200-600 used) for --font-read; Epilogue 400/600
+         for --font-ui. No 700 is loaded, so nothing gets a synthesized bold.
+         Fraunces is requested as a range, not discrete weights: font-weight 500
+         is used by h4 and a discrete list would leave it synthesized. Epilogue
+         stays discrete — --font-ui only ever sets 400 and 600, and a range
+         would ship the whole 100-900 axis to serve two of them. -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,200..600;1,200..600&family=Epilogue:wght@400;600&display=swap" rel="stylesheet" />
+
+    <!-- Gates the load fade on JS being alive. Inline and in the head so the
+         class lands before first paint — a deferred module would flip it after
+         the page had already shown, which is the flash the fade exists to
+         avoid. is:inline keeps Astro from bundling and deferring it. -->
+    <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
 
   <body>
     <div class="page" data-grid-root>
       <div class="glow"></div>
+      <!-- Outside .wrap on purpose. The masthead is sticky, so it sits above
+           the column that scrolls rather than inside it. (.wrap used to cap
+           the page at 1280 as well, which was the other half of the reason;
+           that cap is gone now — it was pushing every edge below it off the
+           vertical grid. See .col in global.css.) -->
+      <header class="header">
+        <a href="/" class="mark" aria-label="Home">
+          <!-- currentColor: the `a` rule in global.css already paints this
+               the accent, and hands it the hover brightening for free. -->
+          <Mark />
+        </a>
+        <!-- No data-snap here any more: baseline snapping measures font
+             metrics, and there is no text left to measure. The row lands on
+             the grid by construction instead — see .nav in global.css. -->
+        <nav class="nav">
+          <IconLink href={GITHUB_URL} icon="github" label="GitHub" />
+          <IconLink href={LINKEDIN_URL} icon="linkedin" label="LinkedIn" />
+          <IconLink href={EMAIL_URL} icon="mail" label="Email" />
+        </nav>
+      </header>
+
       <div class="wrap">
-
-        <header class="header">
-          <a href="/" class="mark" aria-label="Home">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.3" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><circle cx="6.8" cy="9" r="2.4"/><circle cx="17.2" cy="9" r="2.4"/><circle cx="6.8" cy="15" r="2.4"/><circle cx="17.2" cy="15" r="2.4"/></svg>
-          </a>
-          <nav class="nav" data-snap>
-            <a href={workHref}>Work</a>
-            <a href={githubUrl} target="_blank" rel="noopener">GitHub</a>
-            <a href={linkedinUrl} target="_blank" rel="noopener">LinkedIn</a>
-          </nav>
-        </header>
-
         <div class="col">
           <slot />
 
           <hr class="hr" data-snap-box />
           <div class="footer" data-snap>
             <span>&copy; 2026 stephanie liu</span>
-            <a href={sourceUrl} target="_blank" rel="noopener">code for this site &#8599;</a>
+            <a href={SOURCE_URL} target="_blank" rel="noopener">code for this site &#8599;</a>
           </div>
         </div>
       </div>
     </div>
 
     <script>
-      const root = document.querySelector("[data-grid-root]");
+      const root = document.querySelector<HTMLElement>("[data-grid-root]");
       if (!root) throw new Error("grid root not found");
 
-      /* 1) Mouse spotlight */
+      /* 1) Mouse spotlight. Writing --mx/--my repaints a viewport-sized mask,
+            so coalesce moves into one write per frame. */
       const glow = root.querySelector<HTMLElement>(".glow");
-      if (glow) {
+      if (glow && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        let pending: MouseEvent | null = null;
         root.addEventListener("mousemove", (e) => {
-          const r = root.getBoundingClientRect();
-          glow.style.setProperty("--mx", (e as MouseEvent).clientX - r.left + "px");
-          glow.style.setProperty("--my", (e as MouseEvent).clientY - r.top + "px");
-          glow.classList.add("is-lit");
+          const first = pending === null;
+          pending = e;
+          if (!first) return;
+          requestAnimationFrame(() => {
+            const e2 = pending!;
+            pending = null;
+            const r = root.getBoundingClientRect();
+            glow.style.setProperty("--mx", e2.clientX - r.left + "px");
+            glow.style.setProperty("--my", e2.clientY - r.top + "px");
+            glow.classList.add("is-lit");
+          });
         });
         root.addEventListener("mouseleave", () => { glow.classList.remove("is-lit"); });
       }
 
       /* 2) Baseline snap onto the grid */
 
+      // Measured, not parsed. An unregistered custom property computes to its
+      // literal token string, so reading --grid gives "2rem" — any arithmetic
+      // on that also hardcodes the unit and the root font size, and silently
+      // returns nonsense the day the token is authored in px. A probe element
+      // sized by the token reports whatever the token actually resolves to.
+      const probe = document.createElement("div");
+      probe.style.cssText =
+        "position:absolute;visibility:hidden;pointer-events:none;width:var(--grid);height:0";
+      function gridSize() {
+        root!.appendChild(probe);
+        const px = probe.getBoundingClientRect().width;
+        probe.remove();
+        return px || 32;
+      }
+
       // Markdown bodies can't carry snap attributes by hand, so a container
-      // marked [data-snap-all] gets its text blocks tagged at runtime.
-      // Idempotent — safe to re-run on every settle pass.
+      // marked [data-snap-all] gets its text blocks tagged at runtime. Runs
+      // once — the tagged content is static after hydration.
       function tagSnapTargets() {
         root!.querySelectorAll("[data-snap-all]").forEach((container) => {
           container
-            .querySelectorAll("p, li, dt, dd, figcaption, blockquote, h1, h2, h3, h4, h5, h6")
+            // Two exclusions, one reason: chrome belongs to the block it
+            // labels, not to the grid.
+            //
+            // No figcaption. A caption belongs to the picture above it: an
+            // image is an arbitrary number of pixels tall, so snapping the
+            // caption to the nearest line set its distance from the image by
+            // whatever the image height happened to leave — measured across
+            // one page, anywhere from 12px OVERLAPPING the picture to 15px
+            // below it. A fixed offset is the even one.
+            //
+            // No .callout-label. The label sits one row above its text and
+            // the snap was translating it 11.5px DOWN — closing a 27px gap to
+            // 15px and crowding the thing it introduces. The label rides its
+            // own row instead, which the callout's padding already put in the
+            // right place. (Its sibling in the rail, .rail-label, drops the
+            // attribute in Contents.astro for the same reason.) Costs nothing
+            // below it: the baseline pass is a transform, not a reflow.
+            //
+            // See figcaption and .callout-label in pages/projects/[id].astro.
+            .querySelectorAll("p:not(.callout-label), li, dt, dd, blockquote, h1, h2, h3, h4, h5, h6")
             .forEach((el) => el.setAttribute("data-snap", ""));
           // Re-pin the flow after anything of arbitrary height (images).
           // .callout is here for its border: a box-snap puts its top edge on a
@@ -119,58 +184,59 @@ const ogImage = new URL("/favicon.png", Astro.site);
         });
       }
 
-      let _ctx: CanvasRenderingContext2D | null = null;
-      function snapToGrid() {
+      let ctx: CanvasRenderingContext2D | null = null;
+      let boxes: HTMLElement[] = [];
+      let lines: HTMLElement[] = [];
+
+      function collect() {
         tagSnapTargets();
-        const grid = parseFloat(getComputedStyle(root!).getPropertyValue("--grid")) * 16; // 32
-        _ctx = _ctx || document.createElement("canvas").getContext("2d");
-        const ctx = _ctx;
+        boxes = Array.from(root!.querySelectorAll<HTMLElement>("[data-snap-box]"));
+        lines = Array.from(root!.querySelectorAll<HTMLElement>("[data-snap]"));
+      }
+
+      function snapToGrid() {
+        const grid = gridSize();
+        ctx = ctx || document.createElement("canvas").getContext("2d");
         if (!ctx) return;
 
         // Clear every baseline transform before measuring anything. An element
         // can carry both attributes, and getBoundingClientRect() reports the
         // transformed position — so a leftover translateY from the last pass
         // would poison the box-edge math below.
-        root!.querySelectorAll<HTMLElement>("[data-snap]").forEach((el) => {
-          el.style.transform = "";
-        });
+        for (const el of lines) el.style.transform = "";
 
-        // (a) Box-edge snap FIRST — adjusts margin-top (reflows) so bordered rows land on the grid
-        const offsetTop = (el: HTMLElement) =>
-          el.getBoundingClientRect().top - root!.getBoundingClientRect().top;
-
-        root!.querySelectorAll<HTMLElement>("[data-snap-box]").forEach((el) => {
+        // (a) Box-edge snap FIRST — adjusts margin-top (reflows) so bordered
+        // rows land on the grid. Read-then-write per element is unavoidable
+        // here: each nudge moves everything below it, so element N+1 cannot be
+        // measured until N has been placed.
+        const rootRect = () => root!.getBoundingClientRect().top;
+        for (const el of boxes) {
           const prev = parseFloat(el.dataset.boxNudge || "0");
           const base = parseFloat(getComputedStyle(el).marginTop) - prev; // idempotent
           el.style.marginTop = base + "px";
-          const top = offsetTop(el);
+          const top = el.getBoundingClientRect().top - rootRect();
           let nudge = Math.round(top / grid) * grid - top;
           el.style.marginTop = base + nudge + "px";
 
           // Adjacent siblings' vertical margins COLLAPSE to the larger of the
-          // two. If the element above has a bigger margin-bottom than the
-          // margin-top we just set, ours is swallowed whole and the element
-          // never moves — the snap silently does nothing. Check whether it
-          // actually landed, and if not, push a whole extra row until the
-          // margin is big enough to win the collapse.
+          // two, so a nudge smaller than the margin above is swallowed whole
+          // and the element never moves. Push whole extra rows until it wins.
           for (let i = 0; i < 3; i++) {
-            const now = offsetTop(el);
+            const now = el.getBoundingClientRect().top - rootRect();
             if (Math.abs(now - Math.round(now / grid) * grid) < 0.5) break;
             nudge += grid;
             el.style.marginTop = base + nudge + "px";
           }
           el.dataset.boxNudge = String(nudge);
-        });
+        }
 
-        // (b) Text baseline snap — transform (no reflow), rests glyphs on the nearest line
-        const rootTop = root!.getBoundingClientRect().top;
-        root!.querySelectorAll<HTMLElement>("[data-snap]").forEach((el) => {
-          el.style.transform = "";
+        // (b) Text baseline snap — transform (no reflow), so every element can
+        // be measured before any is moved. Batch the reads, then the writes.
+        const rootTop = rootRect();
+        const shifts: number[] = [];
+        for (const el of lines) {
           const s = getComputedStyle(el);
-          let fs = parseFloat(s.fontSize);
-          el.querySelectorAll("*").forEach((c) => {
-            fs = Math.max(fs, parseFloat(getComputedStyle(c).fontSize));
-          });
+          const fs = parseFloat(s.fontSize);
           const lh = parseFloat(s.lineHeight) || fs;
           ctx.font = `${s.fontStyle} ${s.fontWeight} ${fs}px ${s.fontFamily}`;
           const m = ctx.measureText("Hxgp");
@@ -178,22 +244,69 @@ const ogImage = new URL("/favicon.png", Astro.site);
           const desc = m.fontBoundingBoxDescent || fs * 0.2;
           const top = el.getBoundingClientRect().top - rootTop;
           const baseline = top + (lh - (asc + desc)) / 2 + asc;
-          el.style.transform = `translateY(${Math.round(baseline / grid) * grid - baseline}px)`;
-        });
+          shifts.push(Math.round(baseline / grid) * grid - baseline);
+        }
+        lines.forEach((el, i) => { el.style.transform = `translateY(${shifts[i]}px)`; });
       }
 
-      // Run snapping across a few settle passes so the first alignment holds on a cold load
-      // (fonts, layout, and metrics finish at different times). setTimeout — not rAF — because
-      // requestAnimationFrame is throttled in background/screenshot contexts and may never fire.
-      function scheduleSnaps() { snapToGrid(); [60, 200, 500].forEach((t) => setTimeout(snapToGrid, t)); }
+      function resnap() { collect(); snapToGrid(); }
+
+      // Settle passes so the first alignment holds on a cold load (fonts,
+      // layout and metrics finish at different times). setTimeout — not rAF —
+      // because requestAnimationFrame is throttled in background tabs and
+      // screenshot contexts and may never fire.
+      let settleTimers: number[] = [];
+      function scheduleSnaps() {
+        settleTimers.forEach(clearTimeout);
+        resnap();
+        settleTimers = [60, 200, 500].map((t) => setTimeout(snapToGrid, t));
+      }
       if (document.readyState === "loading") addEventListener("DOMContentLoaded", scheduleSnaps);
       else scheduleSnaps();
-      (document.fonts ? document.fonts.ready : Promise.resolve()).then(scheduleSnaps);
-      addEventListener("load", scheduleSnaps);
-      addEventListener("resize", snapToGrid);
 
-      // Pages whose content changes size (e.g. the role dropdown) ask for a re-snap.
-      document.addEventListener("grid:resnap", () => snapToGrid());
+      /* 3) Reveal. The page is held at opacity 0 by .js .page (global.css)
+            until the faces have loaded and the first baseline pass has run, so
+            the settle happens behind the fade instead of in front of the
+            reader. resnap() inside scheduleSnaps is synchronous, so calling
+            reveal on the next line means the grid is already applied.
+
+            The timeout is not a nicety. fonts.ready can hang on a slow or
+            blocked Google Fonts response, and the failure mode of this whole
+            arrangement is a permanently blank page — so the reveal fires on
+            whichever comes first. 1s is past a warm load and short enough that
+            a cold one degrades to "fonts swap in visibly", the behaviour the
+            site had before the fade. */
+      /* Two frames, not zero. A transition needs a painted starting value: on
+         a warm font cache fonts.ready resolves in the first microtask batch,
+         before the browser has drawn a single frame at opacity 0, and the
+         reveal then has no `from` to animate out of — the page snaps in and
+         the fade never runs. One rAF gets us into a frame, the second lands
+         after it has been painted. (The snap passes below still use setTimeout
+         for the reason given above; this one can use rAF because the 1s
+         backstop covers the throttled-tab case where it never fires.) */
+      const reveal = () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => root.classList.add("is-ready")),
+        );
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+        scheduleSnaps();
+        reveal();
+      });
+      setTimeout(() => root.classList.add("is-ready"), 1000);
+      addEventListener("load", scheduleSnaps);
+
+      // Resize fires in bursts and a pass forces layout, so run at most one
+      // per frame.
+      let queued = false;
+      addEventListener("resize", () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => { queued = false; snapToGrid(); });
+      });
+
+      // Pages whose content changes size (e.g. the role dropdown) ask for a
+      // re-snap. Re-collects, since the change may have added or removed rows.
+      document.addEventListener("grid:resnap", resnap);
     </script>
   </body>
 </html>

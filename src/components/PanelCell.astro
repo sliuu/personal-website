@@ -1,0 +1,24 @@
+---
+// src/components/PanelCell.astro — one cell of a <Panel>.
+//
+// Two shapes, one component, because they are the same object read at two
+// sizes: a small tracked label over a short paragraph ("Problem / Approach /
+// Outcome"), or a large figure over a caption (the stat row). Splitting them
+// into two components would duplicate the padding and divider arithmetic,
+// which is the only fiddly part.
+//
+// The body is a slot rather than a prop so it can hold a link or emphasis, and
+// so it reads naturally when written in MDX.
+interface Props {
+  label?: string;
+  stat?: string;
+}
+const { label, stat } = Astro.props;
+---
+<div class="panel-cell">
+  {/* .section-label is the site's one small-label treatment — tracked sans
+      caps, the same thing TEAM/ROLE and CHALLENGE wear. */}
+  {label && <p class="section-label panel-cell__label">{label}</p>}
+  {stat && <p class="panel-cell__stat">{stat}</p>}
+  <slot />
+</div>

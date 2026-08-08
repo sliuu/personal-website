@@ -1,7 +1,8 @@
 ---
 // A bordered callout with an optional pixel icon — the site's "card" primitive.
 // Used inside case studies, usually three-up in a .cols-3 grid.
-import { icons, type IconName } from './icons';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
 
 interface Props {
   icon?: IconName;
@@ -10,10 +11,6 @@ interface Props {
 const { icon, text } = Astro.props;
 ---
 <div class="callout">
-  {icon && (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg" viewBox="0 0 24 24" aria-hidden="true">
-      <path d={icons[icon]} />
-    </svg>
-  )}
+  {icon && <Icon name={icon} />}
   <p>{text}</p>
 </div>

@@ -16,6 +16,11 @@ Prefer variables and reusable components over repeated literals and markup.
   custom property before writing a raw value. If a number appears in more than
   one place — a colour, a size, a duration — promote it to a token rather than
   repeating it. Everything vertical derives from the one `--grid` knob.
+- **Never write a raw `font-size`.** Type comes from the scale in
+  `tokens.css`: `--text-xs` through `--text-3xl`, one ratio (1.25) anchored on
+  the 16px root. If no rung fits, the design needs a new rung — add it to the
+  scale, don't write a one-off. The only exception is an `em` size that has to
+  track its parent (the role button inside the hero).
 - **Shared markup lives in `src/components/`.** If a pattern shows up twice,
   make it a component instead of copying it. Content files import these
   (`Callout.astro`, `Challenge.astro`, `Figure.astro`) rather than hand-rolling

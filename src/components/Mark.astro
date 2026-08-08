@@ -1,0 +1,31 @@
+---
+// The site mark — seven nodes on a hex. The header's logo, and the only place
+// this drawing appears.
+//
+// Size and stroke stay props rather than becoming constants: a hairline does
+// not survive being scaled down, so anything that draws this smaller than the
+// header's 28px has to bring a heavier stroke with it or the circles turn to
+// grey fuzz. Same reasoning that makes --icon-stroke heavier than this (see
+// tokens.css). The defaults are the header's.
+//
+// Colour comes from `currentColor`, so the mark takes the accent from the <a>
+// in the header and brightens with it on hover.
+interface Props {
+  size?: number | string;
+  stroke?: number | string;
+}
+const { size = 28, stroke = 1.1 } = Astro.props;
+---
+<svg
+  width={size} height={size} viewBox="0 0 24 24"
+  fill="none" stroke="currentColor" stroke-width={stroke}
+  aria-hidden="true"
+>
+  <circle cx="12" cy="12" r="2.4" />
+  <circle cx="12" cy="6" r="2.4" />
+  <circle cx="12" cy="18" r="2.4" />
+  <circle cx="6.8" cy="9" r="2.4" />
+  <circle cx="17.2" cy="9" r="2.4" />
+  <circle cx="6.8" cy="15" r="2.4" />
+  <circle cx="17.2" cy="15" r="2.4" />
+</svg>

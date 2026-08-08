@@ -1,12 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-     stroke="#8a2f28" stroke-width="1.6">
+     stroke="#8a2f28" stroke-width="1.35">
   <!-- The header mark. Geometry matches the inline SVG in BaseLayout.astro;
-       the stroke is heavier (1.6 vs 1.3) because a favicon renders at 16px,
-       where the original hairline all but disappears. Colors are hardcoded —
+       the stroke is heavier (1.35 vs 1.1) because a favicon renders at 16px,
+       where the header's hairline all but disappears. Colors are hardcoded —
        a standalone SVG can't reach the site's CSS custom properties.
        The paper tile keeps the maroon legible on a dark tab strip, and
-       matches favicon.png / favicon.ico. -->
-  <rect width="24" height="24" fill="#eae4d8" stroke="none"/>
+       matches favicon.png / favicon.ico.
+
+       The corner is 5 of 24 units — a fifth of the tile, near the 22% every
+       app icon uses, and the one number to change if it wants to be softer
+       still. It is deliberately NOT one of the radius tokens in tokens.css:
+       those are absolute pixels for objects sitting on the page, and this mark
+       renders at anything from 16px in a tab to 512px in a bookmark grid, so
+       its corner has to scale with it instead.
+
+       Regenerate favicon.png and favicon.ico from this file after changing it,
+       or the tab and the bookmark disagree.
+
+       (Keep double hyphens out of this comment. XML forbids them inside one,
+       and an invalid comment takes the whole favicon down with it.) -->
+  <rect width="24" height="24" rx="5" ry="5" fill="#eae4d8" stroke="none"/>
   <circle cx="12" cy="12" r="2.4"/>
   <circle cx="12" cy="6" r="2.4"/>
   <circle cx="12" cy="18" r="2.4"/>

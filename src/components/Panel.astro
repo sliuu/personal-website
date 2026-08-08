@@ -1,0 +1,25 @@
+---
+// src/components/Panel.astro — a row of cells bracketed by rules.
+//
+// A closed rectangle — hairlines on all four sides, with the cells divided
+// from each other inside it. Unlike .callout, which is open at the ends: this
+// block is a summary standing outside the argument, and a frame is what says
+// so. Padding arithmetic lives with .panel in [id].astro.
+//
+// The cells STACK. There is no column count to pass any more: a panel is a
+// list of rows, each one a hanging label beside its text, and it takes as
+// many as it is given.
+interface Props {
+  label?: string;
+}
+const { label } = Astro.props;
+---
+{label && <p class="section-label panel-label">{label}</p>}
+<!-- data-snap-box, carried by the component rather than added at runtime: the
+     layout's tagger only box-snaps h2/h3/h4/.callout, and this is the other
+     block on the page with a border that has to land on a painted line. It
+     gets no data-snap — a baseline transform would drag the rules off the
+     line the box-snap just put them on (same reason as .callout). -->
+<div class="panel" data-snap-box>
+  <slot />
+</div>

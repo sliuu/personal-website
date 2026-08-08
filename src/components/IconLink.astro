@@ -1,0 +1,63 @@
+---
+// src/components/IconLink.astro — a nav link that is an icon instead of a word.
+//
+// Stroked, not filled, and drawn on the same 24×24 box as the header mark, so
+// the row reads as one set. --icon-stroke is heavier than the mark's 1.1:
+// these render at --icon-size (16px) where the mark renders at 28, and a
+// hairline that survives 28px disappears at 16.
+//
+// The link is the tap target, not the glyph — a --icon-btn square (28px, just
+// under a full grid row so the ring never touches a painted line), so the
+// icons keep a hit area without visible padding.
+//
+// The glyphs themselves live in Glyph.astro; the mail one is shared with the
+// "Get in touch" buttons.
+import Glyph from './Glyph.astro';
+
+export interface Props {
+  href: string;
+  /** Announced to screen readers and shown as the native tooltip. */
+  label: string;
+  icon: 'github' | 'linkedin' | 'mail';
+}
+const { href, label, icon } = Astro.props;
+
+// mailto: and in-page anchors stay in the tab; anything with a scheme leaves.
+const isExternal = href.startsWith('http');
+---
+<a
+  class="icon-link"
+  href={href}
+  aria-label={label}
+  title={label}
+  target={isExternal ? '_blank' : undefined}
+  rel={isExternal ? 'noopener' : undefined}
+>
+  <Glyph name={icon} />
+</a>
+
+<style>
+  /* A ring, slightly under a full grid row so it floats between two lines
+     rather than sitting tangent to them. The ring is also the tap target, so
+     the glyph gets a comfortable hit area without any visible padding. */
+  .icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-btn);
+    height: var(--icon-btn);
+    border: 1px solid var(--color-stroke-neutral);
+    border-radius: 50%;
+    color: var(--color-icon);
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  }
+  /* same hover language as .work-row and .career-box: a faint accent wash */
+  .icon-link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: rgba(var(--accent-rgb), 0.06);
+  }
+  /* The glyph's own size and stroke are Glyph.astro's — Astro scopes styles
+     per component, so a rule written here could not reach it anyway. This
+     ring wants the default --icon-size, so it overrides nothing. */
+</style>

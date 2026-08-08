@@ -1,0 +1,21 @@
+---
+// src/components/PullQuote.astro — a sentence lifted out of the flow.
+//
+// A rule down the left rather than a box, for the same reason <Panel> and
+// .callout use rules: this is a document. The rule is 2px and in the accent —
+// heavier than the hairlines everywhere else, because it is the only thing
+// marking the passage and a 1px line at this type size disappears.
+//
+// `cite` is optional and NOT decoration: if the words are someone else's, they
+// need attributing. If they are the author's own summary of the work, leave it
+// off and don't wrap the text in quotation marks — an unattributed sentence in
+// quote marks reads as a research participant who may not exist.
+interface Props {
+  cite?: string;
+}
+const { cite } = Astro.props;
+---
+<blockquote class="pullquote">
+  <p><slot /></p>
+  {cite && <cite>{cite}</cite>}
+</blockquote>

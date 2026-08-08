@@ -7,18 +7,14 @@ summary: "A design proposal for a Waymo-internal tool that would let any team �
 tech: ["Figma"]
 date: "Aug – Oct 2024"
 year: 2024
-duration: "3 months"
 status: "Design proposal · handed off"
 order: 3
-featured: true
 draft: true
 ---
 
-WIP 
-{/*
 import Challenge from '../../components/Challenge.astro';
-import Callout from '../../components/Callout.astro';
 import Figure from '../../components/Figure.astro';
+import Icon from '../../components/Icon.astro';
 
 This is a design proposal I led at Waymo — a tool the labeling team needed, designed end-to-end and handed off. I left Waymo before it shipped.
 
@@ -39,19 +35,15 @@ The existing labeling stack was built for specialists running large production j
 
 I started by interviewing users across the spectrum and shadowing them through their actual workflows — what was hard, what was easy, what they needed but couldn't name:
 
-<div class="cols-3">
-  <Callout icon="users" text="Highly technical users with experience using labeling tools" />
-  <Callout icon="user" text="A technical user with no experience using labeling tools" />
-  <Callout icon="user" text="A non-technical user with little experience using labeling tools" />
-</div>
+- Highly technical users with experience using labeling tools
+- A technical user with no experience using labeling tools
+- A non-technical user with little experience using labeling tools
 
 Three pain points came up again and again, and they became the design's requirements:
 
-<div class="cols-3">
-  <Callout icon="puzzle" text="High setup complexity for less technical users" />
-  <Callout icon="arrowTurn" text="Difficulty transitioning between tools" />
-  <Callout icon="chart" text="Challenges tracking iterative experiments" />
-</div>
+- High setup complexity for less technical users
+- Difficulty transitioning between tools
+- Challenges tracking iterative experiments
 
 ## The proposed design
 
@@ -78,8 +70,6 @@ I left Waymo before Easy Labeling shipped. What the proposal gave the team:
 - **Integration-first adoption.** Import and export paths from existing tools, so using Easy Labeling never required abandoning a workflow — the design's answer to why previous tools stayed specialist-only.
 
 The underlying problem — making a data-heavy internal tool feel obvious to someone who isn't an engineer — is the throughline of my work. [TODO: link the shipped data-viz tool here as the version of this story I carried from design through production.]
-*/}
-
 
 
 {
@@ -98,7 +88,7 @@ To support in this effort as the labeling team, we wanted to work on:
 2. Allowing users to self-label Waymo run data as ground truth for fine-tuning AI models
 
 <div class="callout">
-  <h4 class="challenge-head"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg minisvg--inline" viewBox="0 0 24 24"><path d="M22 22h-2v-2h2v2Zm-2-2h-2v-2h2v2Zm-6-2H6v-2h8v2Zm4 0h-2v-2h2v2ZM6 16H4v-2h2v2Zm10 0h-2v-2h2v2ZM4 14H2V6h2v8Zm14 0h-2V6h2v8ZM6 6H4V4h2v2Zm10 0h-2V4h2v2Zm-2-2H6V2h8v2Z"/></svg><span>Challenge:</span></h4>
+  <h4 class="challenge-head"><Icon name="chat" inline /><span>Challenge:</span></h4>
 
   Design a labeling interface that enables non-technical and technical users to experiment with auto-labeling and self-labeling Waymo data
 </div>
@@ -110,15 +100,15 @@ what was easy, and what they needed for their workflows.
 
 <div class="cols-3">
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg" viewBox="0 0 24 24"><path d="M2 22H0v-4h2v4Zm14 0h-2v-4h2v4Zm8 0h-2v-4h2v4ZM4 18H2v-2h2v2Zm10 0h-2v-2h2v2Zm8 0h-2v-2h2v2Zm-10-2H4v-2h8v2Zm8 0h-4v-2h4v2Zm-9-4H5v-2h6v2Zm8 0h-4v-2h4v2ZM5 10H3V4h2v6Zm8 0h-2V4h2v6Zm8 0h-2V4h2v6ZM11 4H5V2h6v2Zm8 0h-4V2h4v2Z"/></svg>
+    <Icon name="users" />
     <p>Highly technical users with experience using labeling tools</p>
   </div>
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg" viewBox="0 0 24 24"><path d="M6 22H4v-4h2v4Zm14 0h-2v-4h2v4ZM8 18H6v-2h2v2Zm10 0h-2v-2h2v2Zm-2-2H8v-2h8v2Zm-1-4H9v-2h6v2Zm-6-2H7V4h2v6Zm8 0h-2V4h2v6Zm-2-6H9V2h6v2Z"/></svg>
+    <Icon name="user" />
     <p>A technical user with no experience using labeling tools</p>
   </div>
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="minisvg" viewBox="0 0 24 24"><path d="M6 22H4v-4h2v4Zm14 0h-2v-4h2v4ZM8 18H6v-2h2v2Zm10 0h-2v-2h2v2Zm-2-2H8v-2h8v2Zm-1-4H9v-2h6v2Zm-6-2H7V4h2v6Zm8 0h-2V4h2v6Zm-2-6H9V2h6v2Z"/></svg>
+    <Icon name="user" />
     <p>A non-technical user with little experience using labeling tools</p>
   </div>
 </div>
@@ -126,15 +116,15 @@ what was easy, and what they needed for their workflows.
 From there, I identified the key user pain points we'd need to address in the final design:
 <div class="cols-3">
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M4 20h3v-2h4v4h2v-4h4v2h-2v4H9v-4H7v2H2v-5h2v3Zm18 2h-5v-2h3v-3h2v5ZM6 11H2v2h4v4H4v-2H0V9h4V7h2v4Zm14-2h4v6h-4v2h-2v-4h4v-2h-4V7h2v2Zm-6 7h-4v-2h4v2Zm-4-2H8v-4h2v4Zm6 0h-2v-4h2v4Zm-2-4h-4V8h4v2ZM7 4H4v3H2V2h5v2Zm8 0h2V2h5v5h-2V4h-3v2h-4V2h-2v4H7V4h2V0h6v4Z"/></svg>
+    <Icon name="puzzle" />
     <p>High setup complexity for less technical users</p>
   </div>
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M14 16H6v-2h8v-4h2v2h2v2h2v2h-2v2h-2v2h-2v-4Zm-8-2H4V4h2v10Z"/></svg>
+    <Icon name="arrowTurn" />
     <p>Difficulty transitioning between tools</p>
   </div>
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M20 22H4v-2h16v2ZM4 20H2V4h2v16Zm18 0h-2V4h2v16ZM9 17H7v-6h2v6Zm4 0h-2V7h2v10Zm4 0h-2v-4h2v4Zm3-13H4V2h16v2Z"/></svg>
+    <Icon name="chart" />
     <p>Challenges tracking iterative experiments</p>
   </div>
 </div>
@@ -172,15 +162,15 @@ We also added options on existing tools to import data into “Easy Labeling” 
 
 <div class="cols-3">
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M9 11h2v2H9zm4 0h2v2h-2zM7 7h10v2H7zM5 9h2v6H5zm2 6h10v2H7zm10-6h2v6h-2zm-6-4h2v2h-2zM4 2h4v2H4zm0 18h4v2H4zM16 2h4v2h-4zm0 18h4v2h-4zM2 4h2v4H2zm0 12h2v4H2zM20 4h2v4h-2zm0 12h2v4h-2z"/></svg>
+    <Icon name="spark" />
     <p>Enabled technical and non-technical users to experiment with AI labeling tools</p>
   </div>
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M6 21h2V3H6z"/><path d="M4 7h6V5H4zM2 9h10V7H2zm8 2h6v2h-6zm0 4h9v2h-9zm0 4h12v2H10z"/></svg>
+    <Icon name="indent" />
     <p>Faster access to ground truth data for fine tuning through self-labeling</p>
   </div>
   <div class="callout">
-    <svg xmlns="http://www.w3.org/2000/svg" class="minisvg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 20H2v-4h2v-2h4v6Zm7 0H9v-8h2v-2h4v10Zm7 0h-6V6h2V4h4v16Z"/></svg>
+    <Icon name="barsRising" />
     <p>Streamlined the labeling process from different tools</p>
   </div>
 </div>

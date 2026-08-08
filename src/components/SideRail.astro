@@ -1,0 +1,37 @@
+---
+// src/components/SideRail.astro — the case-study side rail.
+//
+// The frame only. What goes in it is passed as named slots, each expected to
+// be a .rail-section (see Contents / RailAction) — the rule between sections
+// is drawn by the section itself off a sibling selector, so adding or dropping
+// one never leaves a hanging line. Styling lives in pages/projects/[id].astro
+// with the rest of the case-study rules.
+//
+// The back link is not a slot because it is not optional: it is the way out of
+// the page.
+interface Props {
+  backHref?: string;
+  backLabel?: string;
+}
+const { backHref = "/", backLabel = "All work" } = Astro.props;
+---
+<aside class="rail">
+  <!-- Everything in here carries [data-snap], written by hand in each
+       component, and deliberately NOT [data-snap-all]: the layout's tagger
+       snaps every `li` it finds, but in the contents list the <li> is a
+       wrapper around a grid <a> that is the real row. Snapping both nests two
+       baseline transforms and the first entry lands on the label's line.
+
+       The snap is measured in page space, so the rail is exact at rest. Once
+       `position: sticky` pins it, it rides the viewport and the block floats
+       against the painted lines behind it. That is the accepted trade — the
+       alternative, recomputing `top` per frame to hold the rail congruent to
+       the grid, is a sawtooth: the rail scrolls with the page for 32px then
+       jumps 32px to catch up, stuttering the whole left side of the page once
+       per row while you read. -->
+  <div class="rail-inner">
+    <a class="rail-back" href={backHref} data-snap>&larr; {backLabel}</a>
+    <slot name="contents" />
+    <slot name="action" />
+  </div>
+</aside>

@@ -1,0 +1,69 @@
+---
+// src/components/Glyph.astro — the STROKED icon set, by name.
+//
+// Sibling to Icon.astro, which draws the filled pixel-art set from icons.ts.
+// Two sets, two jobs: the pixel icons label blocks of content, these label
+// chrome (the header's links, the "Get in touch" buttons). Drawn on the same
+// 24×24 box as the header mark so a row of them reads as one set.
+//
+// The paths used to live inline in IconLink.astro. They moved here when the
+// mail glyph needed a second home on the contact buttons — a copy would have
+// meant two mail icons to keep in sync.
+//
+// Sizing lives here rather than in the caller because Astro scopes styles per
+// component: a `.icon-link svg` rule in IconLink can't reach an svg this file
+// renders. Callers set --glyph-size instead, which inherits normally.
+interface Props {
+  name: 'github' | 'linkedin' | 'mail';
+  /** Sits on a line of text rather than alone in a box — see .case-cta. */
+  inline?: boolean;
+}
+const { name, inline = false } = Astro.props;
+---
+<svg
+  class:list={['glyph', inline && 'glyph--inline']}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {name === 'github' && (
+    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+  )}
+  {name === 'linkedin' && (
+    <>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </>
+  )}
+  {name === 'mail' && (
+    <>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m2 6 10 7 10-7" />
+    </>
+  )}
+</svg>
+
+<style>
+  /* stroke-width lives here, not on the element: a presentation attribute is
+     parsed as an SVG value and would take var(--icon-stroke) literally. As a
+     CSS property it resolves like any other custom property. */
+  .glyph {
+    display: block;
+    width: var(--glyph-size, var(--icon-size));
+    height: var(--glyph-size, var(--icon-size));
+    stroke-width: var(--icon-stroke);
+    /* Never let a flex parent squeeze the box out of square. */
+    flex: none;
+  }
+  /* Inline: the glyph joins a run of text, so it sits on the baseline instead
+     of on its own line. The nudge is in em so it tracks whatever size the
+     surrounding text is set at. */
+  .glyph--inline {
+    display: inline-block;
+    vertical-align: -0.18em;
+  }
+</style>

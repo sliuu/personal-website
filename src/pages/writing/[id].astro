@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('writing');
+  const posts = (await getCollection('writing')).filter((post) => !post.data.draft);
   return posts.map((post) => ({
     params: { id: post.id },
     props: { post },
@@ -12,11 +12,47 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+
+const dateFormat = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
 ---
-<BaseLayout title={post.data.title}>
-  <article>
+<BaseLayout title={`${post.data.title} — stephanie liu`} description={post.data.description}>
+  <article class="post" data-snap-all>
     <h1>{post.data.title}</h1>
-    <time>{post.data.pubDate.toDateString()}</time>
+    <time datetime={post.data.pubDate.toISOString()}>{dateFormat.format(post.data.pubDate)}</time>
     <Content />
   </article>
 </BaseLayout>
+
+<style>
+  .post h1 {
+    margin: 0;
+    font-size: var(--text-3xl);
+    line-height: calc(var(--grid) * 2);
+    font-weight: 300;
+  }
+  .post time {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    line-height: var(--grid);
+    color: rgba(var(--ink-rgb), 0.5);
+    margin-bottom: var(--grid);
+  }
+  .post :global(p),
+  .post :global(li) { font-size: var(--text-lg); line-height: var(--grid); }
+  .post :global(p) { margin: 0 0 var(--grid); }
+  .post :global(h2) {
+    font-size: var(--text-xl);
+    line-height: var(--grid);
+    font-weight: 200;
+    margin: calc(var(--grid) * 2) 0 var(--grid);
+  }
+  .post :global(ul),
+  .post :global(ol) { margin: 0 0 var(--grid); padding-left: var(--grid); }
+</style>

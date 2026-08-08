@@ -1,0 +1,38 @@
+---
+// src/components/FigureRow.astro — a figure that sits beside its text.
+//
+// For the portrait screenshots. A UI sidebar panel is captured at ~700px wide
+// and taller than it is wide; run at the full 800px measure it is both scaled
+// past its own resolution and given more of the page than a sidebar is worth,
+// while the paragraph explaining it sits a screen below. Set in a narrow
+// column with the prose alongside, it stays near its native size and its
+// explanation is at eye level with it.
+//
+// COMPOSES <Figure>, rather than reimplementing it. The build-time intrinsic
+// size read is the whole reason that component exists — without it a lazy
+// image occupies zero height until it decodes and every line below it comes
+// off the baseline grid (see Figure.astro). A second image component would be
+// a second place to forget that.
+//
+// Layout lives in pages/projects/[id].astro with the other case-study rules,
+// per the note above `.case :global(.rail)` there: every rule that styles
+// case-study content stays in one file so the vertical arithmetic can be read
+// top to bottom.
+import Figure from "./Figure.astro";
+
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  /** Which side the picture takes; the text takes the other. */
+  side?: "left" | "right";
+}
+const { src, alt, caption, side = "left" } = Astro.props;
+---
+<!-- The picture stays FIRST in source order whichever side it is shown on —
+     `side="right"` moves it with `order`, so a screen reader still meets the
+     image before the text that discusses it. -->
+<div class:list={["figure-row", side === "right" && "figure-row--right"]}>
+  <Figure src={src} alt={alt} caption={caption} />
+  <div class="figure-row__body"><slot /></div>
+</div>

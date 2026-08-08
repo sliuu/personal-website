@@ -1,0 +1,47 @@
+---
+// src/components/ProjectMeta.astro — the project's metadata, as a strip
+// directly under the title and its lede.
+//
+// Four columns across the full width of the main column — one per entry, for
+// the four every project has. Each column edge lands on a vertical line the
+// way the prose does, and a long value is absorbed by the row's height rather
+// than by the column count. Values keep a whole-row line-height, so a value
+// that wraps to two lines costs two rows and nothing below it leaves the grid.
+// (Track arithmetic: see .project-meta in [id].astro.)
+//
+// An entry with `href` renders its value as a link. That is the one reason
+// this takes an array of objects rather than a plain record — the ordering
+// matters too, and object key order is a bad thing to depend on.
+interface MetaItem {
+  label: string;
+  value: string;
+  href?: string;
+}
+interface Props {
+  items: MetaItem[];
+}
+const { items } = Astro.props;
+---
+{/* data-snap-box, not data-snap: the strip carries a rule along its top, and
+    a box edge is what has to land on the line — a baseline translate would
+    move the rule with it. The dt/dd inside take the baseline snap. They would
+    be tagged anyway by the [data-snap-all] on .case-main, but the component
+    says it itself so it does not depend on where it is mounted. */}
+<dl class="project-meta" data-snap-box>
+  {
+    items.map((item) => (
+      <div class="project-meta__row">
+        <dt data-snap>{item.label}</dt>
+        <dd data-snap>
+          {item.href ? (
+            <a href={item.href} target="_blank" rel="noopener">
+              {item.value}
+            </a>
+          ) : (
+            item.value
+          )}
+        </dd>
+      </div>
+    ))
+  }
+</dl>

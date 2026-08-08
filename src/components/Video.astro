@@ -1,0 +1,76 @@
+---
+// src/components/Video.astro — a screen recording, on the same terms as a
+// Figure: the <figure> carries the column width so an optional caption
+// inherits the picture's left edge, and nothing draws a border.
+//
+// Autoplays, muted, on a loop — the recording is the argument the section is
+// making, so it should be making it by the time you have read the heading.
+// That is only defensible because the files are small: `autoplay` with
+// `preload="auto"` fetches the whole file for every visitor, including the
+// ones who never scroll this far, so the size is a tax on the page and not
+// just on the reader who watches.
+//
+// The bound is bytes, NOT length. The YouTube walkthrough runs 2 minutes and
+// is here in full, because it steps through one complete loop of the flow and
+// a cut of it would argue less. It costs 2.2MB — h.264, 1600 wide, 30fps, no
+// audio track at all — against the label-request clip's 1.6MB at 32 seconds.
+// Both are cheap; length was never the thing to measure. What would break
+// this is a recording that arrives uncompressed: the same file straight off
+// the screen recorder was 54MB, and that is the number to refuse.
+//
+// `muted` is what makes autoplay legal at all — every browser blocks an
+// unmuted one — and `playsinline` stops iOS taking a tapped video fullscreen
+// and throwing the reader out of the page. `controls` stays: autoplay decides
+// how it STARTS, not whether you can stop it, and a 32-second walkthrough is
+// long enough that someone will want to scrub back.
+//
+// Reduced motion is handled in the script below rather than by withholding
+// `autoplay`: the attribute is what makes this work with no JS at all, so the
+// guard subtracts motion from the people who asked for less of it instead of
+// making everyone else depend on a script running.
+//
+// Height is whatever the file's aspect ratio gives, exactly as with an image,
+// so this cannot be a whole number of grid rows — see the note in Figure.astro.
+// `aspect-ratio` is set from the props so the space is reserved before the
+// metadata loads and the page below does not jump.
+interface Props {
+  src: string;
+  /** Describes the recording for anyone who cannot watch it. */
+  alt: string;
+  caption?: string;
+  width: number;
+  height: number;
+}
+const { src, alt, caption, width, height } = Astro.props;
+---
+<figure class="video">
+  <video
+    src={src}
+    aria-label={alt}
+    controls
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    width={width}
+    height={height}
+    style={`aspect-ratio: ${width} / ${height}`}></video>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  // Honour prefers-reduced-motion. A looping video is motion that never stops,
+  // which is the case the media query most clearly covers. The markup carries
+  // `autoplay` so it works without JS, so the browser may already have started
+  // by the time this runs — pause and rewind rather than trying to prevent it.
+  // `loop` comes off too, or a manual play would still never end on its own.
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll<HTMLVideoElement>(".video video").forEach((v) => {
+      v.autoplay = false;
+      v.loop = false;
+      v.pause();
+      v.currentTime = 0;
+    });
+  }
+</script>
