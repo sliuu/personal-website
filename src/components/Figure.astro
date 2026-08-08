@@ -25,8 +25,21 @@ interface Props {
   src: string;
   alt: string;
   caption?: string;
+  /**
+   * Drops the shadow. For a picture that already has its own edges — a
+   * photograph, a dark screenshot, anything on a background that is not
+   * near-white. The shadow is there to draw an edge the image does not have
+   * (see the note over `.case-main img` in pages/projects/[id].astro); on a
+   * picture that has one it is decoration.
+   *
+   * The shadow itself is a case-study rule, not something this component
+   * applies, so this only emits the hook the page rule looks for. Outside
+   * `.case-main` — the homepage portrait — there is no shadow to turn off and
+   * the prop does nothing.
+   */
+  flat?: boolean;
 }
-const { src, alt, caption } = Astro.props;
+const { src, alt, caption, flat = false } = Astro.props;
 
 // Module scope, so a dev server does not re-read the same file on every request
 // and a build does not re-read one shared between pages.
@@ -56,7 +69,7 @@ const size = await intrinsicSize(src);
      not be pinned anyway — an image's height is whatever the file says, and
      forcing it to a multiple of the row would mean cropping the screenshot.
      The caption below re-pins the flow. -->
-<figure>
+<figure class:list={[flat && "figure--flat"]}>
   <img
     src={src}
     alt={alt}

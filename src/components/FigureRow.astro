@@ -26,13 +26,15 @@ interface Props {
   caption?: string;
   /** Which side the picture takes; the text takes the other. */
   side?: "left" | "right";
+  /** Forwarded to <Figure>; see the note on the prop there. */
+  flat?: boolean;
 }
-const { src, alt, caption, side = "left" } = Astro.props;
+const { src, alt, caption, side = "left", flat = false } = Astro.props;
 ---
 <!-- The picture stays FIRST in source order whichever side it is shown on —
      `side="right"` moves it with `order`, so a screen reader still meets the
      image before the text that discusses it. -->
 <div class:list={["figure-row", side === "right" && "figure-row--right"]}>
-  <Figure src={src} alt={alt} caption={caption} />
+  <Figure src={src} alt={alt} caption={caption} flat={flat} />
   <div class="figure-row__body"><slot /></div>
 </div>

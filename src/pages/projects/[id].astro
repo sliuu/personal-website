@@ -712,6 +712,17 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-raised);
     }
+    /* <Figure flat /> opts out. The reasoning above is about screenshots of
+       light UI, and it does not hold for a photograph or a dark screenshot,
+       which carry their own edges — there the shadow is decoration solving
+       nothing. It has to be an override rather than the prop applying the
+       shadow itself, because the shadow is a property of case-study context
+       and not of the component: the same <Figure> on the homepage takes none.
+       One class of specificity above the rule it undoes, which is why this
+       cannot be a bare `.figure--flat img`. */
+    .case-main :global(.figure--flat img) {
+      box-shadow: none;
+    }
     /* A recording sits on the same edges as a picture, and takes the same
        shadow — a video that lifted off the page while the screenshot above it
        lay flat would read as two different kinds of object. */

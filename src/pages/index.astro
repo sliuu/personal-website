@@ -320,17 +320,19 @@ const loves = [
 
   /* ---- currently / also loves ---- */
   /* ---- the sign-off portrait ----
-     Cropped to 2176x896, which is 1088x448 at the column's full width — 14
-     grid rows exactly. That only holds at --col-max; below it the height is
-     whatever the ratio gives, like every other picture on the site.
+     Nearly the whole photograph, sized down and centred rather than cropped
+     into a band: it is the one picture of a person on the site, and shrinking
+     it is what keeps it from competing with the writing. Cropping it did that
+     too, but at the cost of the frame the photo was actually composed as.
 
-     The crop is a letterbox band on purpose: at 2.43:1 it reads as a rule with
-     a picture in it rather than a portrait, which is what a sign-off wants. It
-     is cut top and bottom out of a nearly square original — the empty sky above
-     the ridge and the rooftop below her — so the skyline lands just inside the
-     top edge and she is cut at the shoulders. Regenerate from .old/me-original
-     .jpg (extract top 390, height 1022, full width) if it needs to move; there
-     is no room to take more off the top without losing the ridge.
+     The file is 1536x1024, displayed at 768x512 — 24 columns by 16 rows, and
+     the reason the box is that size is that 24:16 reduces to 3:2, which is
+     within half a percent of the original's 1.508. So the crop is 13px off the
+     width and nothing at all off the height. Any other grid box would have cost
+     real picture: 22x15 is 1.467, which is 40px of sky or rooftop gone.
+
+     Below --col-max the image gives way and goes full width, like every other
+     picture on the site; the 768 is a ceiling, not a fixed size.
 
      NO SHADOW, deliberately, though every figure in a case study takes one.
      --shadow-raised exists for screenshots of light UI, whose near-white
@@ -340,7 +342,10 @@ const loves = [
   .portrait { margin-top: calc(var(--grid) * 3); }
   /* :global — Figure renders in its own scope, so a plain selector here can't
      reach the markup it produces. */
-  .portrait :global(figure) { margin: 0; }
+  .portrait :global(figure) {
+    margin: 0 auto;
+    max-width: calc(var(--grid) * 24);
+  }
   .portrait :global(img) {
     display: block;
     width: 100%;

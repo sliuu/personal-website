@@ -33,6 +33,18 @@ import Video from '../../components/Video.astro';
   caption="The redesigned youtube ads prototyping tool, stepping through creating a new project, adding elements, linking actions, custom code and CSS themes, and editing components."
 />
 
+<Panel>
+  <PanelCell label="Problem">
+    Prototyping a new ad format meant writing HTML/CSS/JS, so every test cost a UX engineer's hours.
+  </PanelCell>
+  <PanelCell label="Approach">
+    Built production features while interviewing the designers and researchers who weren't using it.
+  </PanelCell>
+  <PanelCell label="Outcome">
+    A components-first redesign that made prototyping accessible through reusable building blocks and a user-friendly interface.
+  </PanelCell>
+</Panel>
+
 ## The problem
 <Dek>Even small changes to prototypes for research studies required engineering hours.</Dek>
 
@@ -61,7 +73,10 @@ While the new design took shape, I kept building the current tool and building *
 
 **I also talked to the people the tool was eventually meant to serve.** UX designers and researchers weren't just untrained on it; they were unconvinced. They had UX engineers to build prototypes for them; learning a new tool was a cost with no obvious payoff.
 
-**That reframed the bar for the redesign: it couldn't just be *possible* for non-engineers to use — it had to be *easier than asking us*.** I also ran a competitive analysis of Framer and ProtoPie, to see how they reduced complexity for non-engineers and what patterns we could borrow.
+**That reframed the bar for the redesign: it couldn't just be *possible* for non-engineers to use — it had to be *easier than asking us*.** This meant we couldn't expect non-engineers to write code and handle the hard cases, but we could expect them to do any of the parts that would be easier to do than wait for someone else to do.
+
+<Figure flat src="/yt-ads-prototyping/flow.png" alt="" />
+
 
 ## Design principles
 <Dek>Templates, components, familiar language, and the obvious path is the easy path</Dek>
@@ -83,36 +98,35 @@ The redesign came down to a few commitments:
 
 **My benchmark flow was a first-time user's first fifteen minutes**: they would start with a template, add pre-made YouTube components to a board, wire up simple interactions, and then be able to export a working prototype. This path should feel intuitive and effortless. Advanced usage through custom components, variables, conditional logic, etc. would stay available, but never in the way.
 
+**A new user logs in with no projects**, and is immediately guided to start a new project using a template.
+<Figure src="/yt-ads-prototyping/new-user.png" alt="The page a new user sees who has no projects" caption="" />
 
-<Figure src="/yt-ads-prototyping/index.png" alt="The redesigned index page with all projects" caption="A redesigned home for prototyping projects that scales with a search bar and sorting, and easy affordances for creating a new project." />
+**Templates make starting from scratch more approachable**, and empower the user to start creating.
+<Figure src="/yt-ads-prototyping/new-project.png" alt="The Start new project page" />
 
+**Sections are borrowed from known tools like Figma**, so users can reason about the interface without learning a new interaction grammar. Layers and variants (for experiments) on the left, data that applies to the entire project on the bottom left, and properties and options that apply to only the selected element on the right. 
+<Figure src="/yt-ads-prototyping/prototype-editing.png" alt="The redesigned editing screen showing distinct sections and clearer interactions" />
 
-<Figure src="/yt-ads-prototyping/new-project.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." />
+**A long list of custom components is searchable across teams**, so users can build with building blocks provided by UX engineers without needing to know how to code.
+<Figure src="/yt-ads-prototyping/browse-custom-components.png" alt="The new custom components view when adding elements to a screen" caption="" />
 
-
-<Figure src="/yt-ads-prototyping/prototype-editing.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." />
-
-
-<Figure src="/yt-ads-prototyping/browse-custom-components.png" alt="The new custom components marketplace view" caption="Interactions are bold and obvious — here, exporting a finished prototype." />
-
-<Figure src="/yt-ads-prototyping/component-editing.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." />
-
-
-
+**The components editing screen** is visually distinct from the prototyping editing screen, but keeps the same conventions. Users are encouraged to create their own components for reuse.
+<Figure src="/yt-ads-prototyping/components-editor.png" alt="The component editing page" />
 
 
-<FigureRow src="/yt-ads-prototyping/data-sidebar.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first.">
-Hello
-</FigureRow>
-
-<FigureRow src="/yt-ads-prototyping/themes-side-bar.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." >
+<FigureRow src="/yt-ads-prototyping/data-side-bar.png" alt="The redesigned data sidebar" caption="">
+**Data, code, and themes are unique to this tool.** They allow the user to have a lot of **fine-tuned control** over the prototype, and may require a UX engineer for tail-end use cases. But the redesign surfaces the most common options first, and hides advanced settings until they're needed.
 </FigureRow>
 
 
-<Figure src="/yt-ads-prototyping/add-data-source.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." />
+
+**Data sources are added and linked to Youtube streams** to make the project real and usable without needing to write code.
+<Figure src="/yt-ads-prototyping/add-data-source.png" alt="The redesigned tool showing distinct sections and clearer interactions"  />
 
 
-<Figure src="/yt-ads-prototyping/add-an-action.png" alt="The redesigned tool showing distinct sections and clearer interactions" caption="Distinct sections, clearer interactions, and YouTube components surfaced first." />
+**Actions allow for interactivity without writing code,** but the option to trigger scripts is still available for advanced users and custom interactions.
+<Figure src="/yt-ads-prototyping/add-action.png" alt="The redesigned tool showing distinct sections and clearer interactions" />
+
 
 ## Where it goes next
 <Dek>A division of labor, not full self-serve</Dek>
