@@ -28,8 +28,16 @@ const { backHref = "/", backLabel = "All work" } = Astro.props;
        alternative, recomputing `top` per frame to hold the rail congruent to
        the grid, is a sawtooth: the rail scrolls with the page for 32px then
        jumps 32px to catch up, stuttering the whole left side of the page once
-       per row while you read. -->
-  <div class="rail-inner">
+       per row while you read.
+
+       [data-snap-sticky] is what makes the first half of that paragraph true.
+       Without it "measured in page space" was aspirational: a pinned element
+       reports where it is PAINTED, so any pass that ran while the page was
+       scrolled snapped the rail against the viewport instead, and rows that
+       rounded opposite ways ended up a whole span apart. The snapper switches
+       this element to `position: static` for the length of its measurements —
+       see the note over `pinned` in BaseLayout. -->
+  <div class="rail-inner" data-snap-sticky>
     <a class="rail-back" href={backHref} data-snap>&larr; {backLabel}</a>
     <slot name="contents" />
     <slot name="action" />

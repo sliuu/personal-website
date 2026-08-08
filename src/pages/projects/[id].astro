@@ -67,10 +67,16 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     <!-- data-snap-all sits on the MAIN column, not on the <article>: the
          markdown body can't carry snap attributes by hand, so the layout's
          script tags its text blocks at runtime — but the rail must stay out of
-         it. Everything in the rail is already on the grid by construction
-         (whole-row line-heights stacked from a grid-aligned origin), and a
-         rail that is also `position: sticky` would be measured mid-scroll and
-         snapped against a position it is about to leave. -->
+         it: the tagger would snap every `li` in the contents list, and there
+         the <li> is only a wrapper around the <a> that is the real row (see
+         SideRail).
+
+         The rail's rows ARE snapped, just by hand rather than by the tagger —
+         line-height alone gives a row a 32px box, not a baseline on a painted
+         line. What keeps that honest against `position: sticky` is
+         [data-snap-sticky] on .rail-inner, which has the snapper measure the
+         rail unpinned; this comment used to claim the rail was excluded from
+         the pass altogether, and it never was. -->
     <div class="case-main" data-snap-all>
       <h1>{d.title}</h1>
       <p class="summary">{d.summary}</p>

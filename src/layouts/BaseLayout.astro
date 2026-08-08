@@ -205,6 +205,47 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
         // would poison the box-edge math below.
         for (const el of lines) el.style.transform = "";
 
+        // Measure sticky subtrees where they LIVE, not where they are pinned.
+        //
+        // Every position below is `rect.top - rootRect()`. Once `position:
+        // sticky` engages, an element's rect stops moving while the grid root's
+        // top keeps scrolling away, so that subtraction returns the pinned
+        // position PLUS scrollY — a place the element occupies only while the
+        // page sits at that exact offset. Snap against it and the corrections
+        // are computed for a frame the element leaves the moment you scroll.
+        //
+        // It does not merely offset the block uniformly, which is why the
+        // symptom is uneven rather than a clean shift: the correction is
+        // Math.round(baseline / grid) * grid - baseline, and adding the same
+        // scroll offset to every row does not rotate all the roundings
+        // together. Two rows whose baselines differ by a non-multiple of the
+        // grid can round OPPOSITE ways, opening or closing a full row between
+        // them. The rail has exactly those residuals — the section seam is a
+        // 1px border plus (grid - 1px) of padding, and its contents rows align
+        // to `start` across two type tracks.
+        //
+        // The bug this fixes: coming back to a project page through history.
+        // The browser restores the old scroll position before the later settle
+        // passes run, so every pass after the first measured a pinned rail and
+        // left it visibly off the lines until a reload. A fresh load starts at
+        // scroll 0, where the rail is at rest, and never showed it.
+        //
+        // Safe because static and sticky produce an IDENTICAL layout box —
+        // sticky changes only where the box is painted — so nothing else on the
+        // page moves while this is in force, and no frame is painted in
+        // between: everything from here to the end of the function is
+        // synchronous. An internal scroll offset poisons the same arithmetic
+        // the same way (a rail scrolled inside itself reports its rows shifted
+        // by scrollTop), so it is zeroed and restored alongside.
+        const pinned = Array.from(
+          root!.querySelectorAll<HTMLElement>("[data-snap-sticky]"),
+        );
+        const parked = pinned.map((el) => el.scrollTop);
+        for (const el of pinned) {
+          el.style.position = "static";
+          el.scrollTop = 0;
+        }
+
         // (a) Box-edge snap FIRST — adjusts margin-top (reflows) so bordered
         // rows land on the grid. Read-then-write per element is unavoidable
         // here: each nudge moves everything below it, so element N+1 cannot be
@@ -247,6 +288,16 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
           shifts.push(Math.round(baseline / grid) * grid - baseline);
         }
         lines.forEach((el, i) => { el.style.transform = `translateY(${shifts[i]}px)`; });
+
+        // Sticky back on. After the writes, not before: the transforms above
+        // are relative to each element's layout position, which is what was
+        // just measured, so restoring earlier would change nothing — but doing
+        // it last keeps the whole measure-and-place sequence in one frame of
+        // reference.
+        pinned.forEach((el, i) => {
+          el.style.position = "";
+          el.scrollTop = parked[i];
+        });
       }
 
       function resnap() { collect(); snapToGrid(); }
