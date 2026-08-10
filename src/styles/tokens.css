@@ -14,7 +14,11 @@
   --ink-rgb: 38,34,28;       /* text as R,G,B so one var drives solid + translucent */
   --ink: rgb(var(--ink-rgb));
   --ink-muted: rgba(var(--ink-rgb), 0.7);
-  --paper: #f9f8f7;
+  /* Warm off-white. The hue is the same 30° orange it always was — only the
+     saturation moved (14% -> 38% HSL), so the paper gets warmer without the
+     page changing colour. Lightness is held at ~97% on purpose: ink on paper
+     stays at 14.8:1, so the warmth costs nothing in contrast. */
+  --paper: #faf7f4;
   --color-accent: #8a2f28;   /* maroon */
   --accent-rgb: 168,64,54;   /* the lighter maroon, as R,G,B */
   --accent-strong: rgb(var(--accent-rgb));
@@ -22,9 +26,12 @@
   --color-stroke-neutral: rgba(var(--ink-rgb), 0.3);  /* strokes that shouldn't
                                                          compete with the maroon */
   --color-grid: rgba(var(--ink-rgb), 0.035);       /* the painted grid lines */
-  --color-grid-lit: #fff;    /* the spotlight's copy of the grid. Lighter than
+  --color-grid-lit: #fffdfa; /* the spotlight's copy of the grid. Lighter than
                                 the paper, so under the cursor the lines lift
-                                out of the page instead of darkening into it. */
+                                out of the page instead of darkening into it.
+                                Warmed off pure white with the paper: a #fff
+                                line on a tinted sheet reads blue, which would
+                                make the spotlight a cold patch on a warm page. */
   --color-selection: rgba(var(--accent-rgb), 0.18);
 
   /* Hover washes. Which one a row takes says what it is: --tint-link on
