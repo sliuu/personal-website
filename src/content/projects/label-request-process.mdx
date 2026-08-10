@@ -55,7 +55,7 @@ import Video from '../../components/Video.astro';
 
 That worked when the company was small. As Waymo grew, it became a bottleneck with a labeling engineer required every time someone needed something new.
 
-<Challenge text="Can ML engineers request labels directly from Labeling Ops without requiring multiple bugs, discussions, and help from labeling engineers? " />
+<Challenge text="Can ML engineers request labels directly from Labeling Ops without requiring multiple bugs, discussions, and help from labeling engineers?" />
 
 ## Research
 <Dek>Cognitive walkthroughs, a heuristic evaluation, and interviews.</Dek>
@@ -71,11 +71,11 @@ I worked on several different forms of research to understand the current proces
 
 **Charting the current process revealed the first problem** before any interview did. Documentation pointed to several possible starting points, and each of those led to a different path through the request process. Multiple entry points, redundant documentation, internal vocabulary, and required steps that only applied to advanced users made the process painful for new users.
 
+<Figure flat src="/labeling-requests/label-request-flow.png" alt="Flow chart of the existing labeling request process, showing many divergent entry points" />
+
 <PullQuote>
   Multiple entry points, redundant documentation, internal vocabulary, and required steps that only applied to advanced users made the process painful for new users.
 </PullQuote>
-
-<Figure flat src="/labeling-requests/label-request-flow.png" alt="Flow chart of the existing labeling request process, showing many divergent entry points"  />
 
 From there I inventoried every piece of information a request actually needs, grouped the related settings, and separated what users change constantly from the advanced settings they touch infrequently.
 
@@ -93,15 +93,15 @@ Components of the redesign:
 - **Streamlined continuous and one-time data importing**
 
 **The new wizard breaks up a long process into saveable, manageable steps**, and hides advanced features unless needed.
-<Figure src="/labeling-requests/labeling-request-basics.jpg" alt="Prototype of the redesigned label request wizard" caption="" />
+<Figure src="/labeling-requests/labeling-request-basics.jpg" alt="Step 1 of 7 in the redesigned wizard, 'First, the basics': naming the request, choosing a production or experimental environment, a description, owners and team, with advanced settings tucked behind a toggle at the bottom" caption="" />
 
-**The redesigned quality-control step uses plain-language documentation** for each method
+**The redesigned quality-control step uses plain-language documentation** for each method.
 <Figure src="/labeling-requests/labeling-request-quality-control.jpg" alt="The redesigned quality-control step" caption="" />
 
-**A new section for configuring labeling questions right in the labeling request flow**, and shows a preview of what the labeler will see.
-<Figure src="/labeling-requests/label-request-proto.png" alt="Prototype of the redesigned label request wizard" caption="" />
+**A new section configures labeling questions right in the labeling request flow**, and shows a preview of what the labeler will see.
+<Figure src="/labeling-requests/label-request-proto.png" alt="Step 4 of the wizard, 'What will labelers answer?': reusing, copying, or writing the question set, with a live preview of the questions as the labeler will see them" caption="" />
 
-**A review step provides feedback before saving**
+**A review step provides feedback before saving.**
 <Figure src="/labeling-requests/labeling-requests-review.jpg" alt="Review step" caption="" />
 
 **The new dashboard for tracking labeling requests**, instead of using the overloaded bug tracker.

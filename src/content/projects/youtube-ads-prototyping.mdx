@@ -29,8 +29,8 @@ import Video from '../../components/Video.astro';
   src="/yt-ads-prototyping/recording.mp4"
   width={1600}
   height={916}
-  alt="Screen recording of the redesigned youtube ads prototyping tool, stepping through creating a new project, adding elements, linking actions, and creating custom components"
-  caption="The redesigned youtube ads prototyping tool, stepping through creating a new project, adding elements, linking actions, custom code and CSS themes, and editing components."
+  alt="Screen recording of the redesigned YouTube ads prototyping tool, stepping through creating a new project, adding elements, linking actions, and creating custom components"
+  caption="The redesigned YouTube ads prototyping tool, stepping through creating a new project, adding elements, linking actions, custom code and CSS themes, and editing components."
 />
 
 <Panel>
@@ -60,6 +60,10 @@ I worked on this tool from both sides. **As a UX engineer on the team, I built a
 
 ## Research
 
+<PullQuote>
+  UX designers and researchers weren't just untrained on the tool — they were unconvinced.
+</PullQuote>
+
 While the new design took shape, I kept building the current tool and building *with* it:
 
 - Built functioning prototypes of YouTube Shorts ad formats used in live user research studies.
@@ -67,15 +71,11 @@ While the new design took shape, I kept building the current tool and building *
 
 **Working in the tool daily helped make the redesign concrete**, and learning the tool drove the beginning stages of research.
 
-<PullQuote>
-  UX designers and researchers weren't just untrained on the tool — they were unconvinced. 
-</PullQuote>
+**I also talked to the people it was eventually meant to serve.** UX designers and researchers weren't just untrained on the tool — they were unconvinced. They had UX engineers to build prototypes for them; learning a new tool was a cost with no obvious payoff.
 
-**I also talked to the people the tool was eventually meant to serve.** UX designers and researchers weren't just untrained on it; they were unconvinced. They had UX engineers to build prototypes for them; learning a new tool was a cost with no obvious payoff.
+**That reframed the bar for the redesign: it couldn't just be *possible* for non-engineers to use — it had to be *easier than asking us*.** This meant we couldn't expect non-engineers to write code and handle the hard cases, but we could expect them to do the parts that were easier to do than to wait for someone else to do them.
 
-**That reframed the bar for the redesign: it couldn't just be *possible* for non-engineers to use — it had to be *easier than asking us*.** This meant we couldn't expect non-engineers to write code and handle the hard cases, but we could expect them to do any of the parts that would be easier to do than wait for someone else to do.
-
-<Figure flat src="/yt-ads-prototyping/flow.png" alt="" />
+<Figure flat src="/yt-ads-prototyping/flow.png" alt="A two-column diagram of the division of labor, with arrows running both ways. Researchers and designers start from templates, assemble screens and variants, set element options, and run studies; UX engineers build custom elements, author new templates, grow the shared library, and keep a code hatch for edge cases." />
 
 
 ## Design principles
@@ -83,7 +83,7 @@ While the new design took shape, I kept building the current tool and building *
 
 The redesign came down to a few commitments:
 
-- **Start from YouTube templates and components, not empty boxes**: nobody in Ads needs to begin from scratch, it's always an iteration
+- **Start from YouTube templates and components, not empty boxes**: nobody in Ads needs to begin from scratch — it's always an iteration
 - **Rich components with smart options**: UX engineers build components that are flexible and powerful, and the tool surfaces these options without requiring code
 - **Reveal complexity progressively**: hide advanced settings until they're asked for
 - **Group functionality**: so screens read as a handful of decisions, not a wall of settings
@@ -120,12 +120,12 @@ The redesign came down to a few commitments:
 
 
 
-**Data sources are added and linked to Youtube streams** to make the project real and usable without needing to write code.
-<Figure src="/yt-ads-prototyping/add-data-source.png" alt="The redesigned tool showing distinct sections and clearer interactions"  />
+**Data sources are added and linked to YouTube streams** to make the project real and usable without needing to write code.
+<Figure src="/yt-ads-prototyping/add-data-source.png" alt="The 'Add data source' dialog, building a reusable pool of content from a YouTube search: a source name, a search query, the number of results to pull, and a safe-search toggle" />
 
 
 **Actions allow for interactivity without writing code,** but the option to trigger scripts is still available for advanced users and custom interactions.
-<Figure src="/yt-ads-prototyping/add-action.png" alt="The redesigned tool showing distinct sections and clearer interactions" />
+<Figure src="/yt-ads-prototyping/add-action.png" alt="The 'Add an action' dialog, with an on-click trigger and 'Go to screen' selected. The other actions offered are opening a URL, logging an event, showing or hiding an element, and running a script." />
 
 
 ## Where it goes next
@@ -133,15 +133,15 @@ The redesign came down to a few commitments:
 
 I left Google in October 2025, before the redesign shipped. The production features I built along the way are part of the live tool.
 
-<PullQuote>
-The goal isn't to remove engineers from the loop — it's to move us to the highest-leverage part of it. Researchers and designers own the assembly while engineers grow the library underneath them.
-</PullQuote>
-
 What the work established:
 
 - **A sharper problem definition.** The goal isn't to remove engineers from the loop — it's to move us to the highest-leverage part of it. Researchers and designers own the assembly; engineers grow the library underneath them.
 - **A tested design direction.** Components-first authoring, progressive disclosure, and a Figma-native interaction grammar, validated against the exact moments where real users stalled.
 - **The case for the audience.** The research documented *why* designers and researchers weren't converting, giving the team a target for the next version rather than a hunch.
+
+<PullQuote>
+The goal isn't to remove engineers from the loop — it's to move us to the highest-leverage part of it. Researchers and designers own the assembly; engineers grow the library underneath them.
+</PullQuote>
 
 ## Takeaways
 Designing a tool while maintaining its production codebase is my favorite way to work — the design and the implementation inform each other in both directions.
