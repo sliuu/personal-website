@@ -9,5 +9,15 @@
 // Keep it to a single line in the 800px main column (~65 characters at
 // --text-lg). Two lines is a lede, and a lede belongs at the top of the page,
 // not at the top of a section.
+//
+// A dek is the heading's second line, so the rule that closes a section header
+// belongs under the PAIR — which means the dek draws it, and the h2 stands its
+// own rule down whenever one of these follows it (see the `h2:has(+ .dek)`
+// rule in pages/projects/[id].astro).
+//
+// Split into a box and a span for the same reason SectionHeading.astro is: the
+// box draws the rule and box-snaps, the span inside takes the baseline
+// transform. A border on a baseline-snapped element gets dragged off the grid.
+// The tagger skips p.dek so it doesn't put data-snap back on the box.
 ---
-<p class="dek"><slot /></p>
+<p class="dek" data-snap-box><span class="dek__text" data-snap><slot /></span></p>

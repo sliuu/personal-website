@@ -159,7 +159,7 @@ const loves = [
      the hero rung goes up or a longer role is added, the sentence wraps to two
      lines again rather than overflowing, so this degrades quietly. */
   h1.hero {
-    font-family: var(--font-read); font-weight: 300;
+    font-family: var(--font-read); font-weight: var(--weight-display);
     font-size: var(--text-3xl); line-height: calc(var(--grid) * 2);
     letter-spacing: -0.01em;
     /* Lead-in above the headline, in whole --grid rows so every baseline below
@@ -179,6 +179,7 @@ const loves = [
   p.intro {
     font-family: var(--font-read);
     font-size: var(--text-lg); line-height: var(--grid);
+    font-weight: var(--weight-display);
     color: rgba(var(--ink-rgb), 0.88);
     margin: 0 0 calc(var(--grid) * 2); max-width: 624px;
   }
@@ -192,7 +193,7 @@ const loves = [
      own. A shade under 1em so the box doesn't outgrow the line around it. */
   .role-btn {
     display: inline-flex; align-items: center; gap: var(--space-2);
-    font-family: var(--font-read); font-weight: 300; font-size: 0.92em;
+    font-family: var(--font-read); font-weight: var(--weight-display); font-size: 0.92em;
     color: var(--color-accent);
     background: transparent; border: 1px solid var(--color-accent);
     margin-right: var(--space-1);
@@ -216,7 +217,7 @@ const loves = [
   .role.open .role-menu { display: block; }
   .role-option {
     display: block;
-    font-family: var(--font-read); font-size: var(--text-lg); font-weight: 300;
+    font-family: var(--font-read); font-size: var(--text-lg); font-weight: var(--weight-display);
     letter-spacing: 0; line-height: var(--grid);
     padding: var(--space-2) var(--space-4);
     color: rgba(var(--ink-rgb), 0.72);
@@ -269,6 +270,7 @@ const loves = [
   .work-desc {
     display: block;
     font-size: var(--text-base); line-height: var(--grid);
+    font-weight: var(--weight-display);
     font-style: italic;
     color: rgba(var(--ink-rgb), 0.8); max-width: 520px;
   }
@@ -365,6 +367,7 @@ const loves = [
   }
   .statement {
     font-family: var(--font-read); font-size: var(--text-xl);
+    font-weight: var(--weight-display);
     line-height: calc(var(--grid) * 1.5); color: var(--ink);
     margin: 0 0 var(--grid); max-width: 560px;
   }
@@ -377,6 +380,7 @@ const loves = [
   .loves {
     display: flex; flex-direction: column;
     font-family: var(--font-read); font-size: var(--text-lg);
+    font-weight: var(--weight-display);
     line-height: var(--grid); color: var(--ink);
   }
 

@@ -32,7 +32,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
     margin: 0;
     font-size: var(--text-3xl);
     line-height: calc(var(--grid) * 2);
-    font-weight: 300;
+    font-weight: var(--weight-display);
   }
   .post time {
     display: block;
@@ -50,7 +50,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
   .post :global(h2) {
     font-size: var(--text-xl);
     line-height: var(--grid);
-    font-weight: 300;
+    font-weight: var(--weight-display);
     margin: calc(var(--grid) * 2) 0 var(--grid);
   }
   .post :global(ul),

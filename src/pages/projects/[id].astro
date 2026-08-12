@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import SideRail from '../../components/SideRail.astro';
 import ProjectMeta from '../../components/ProjectMeta.astro';
 import Contents from '../../components/Contents.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
 import RailAction from '../../components/RailAction.astro';
 import Glyph from '../../components/Glyph.astro';
 import { EMAIL_URL } from '../../consts';
@@ -108,7 +109,11 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
            reason the footer below takes the box snap instead). -->
       {d.confidentiality && <p class="case-note">{d.confidentiality}</p>}
 
-      <Content />
+      {/* Every `## Heading` in the MDX renders as SectionHeading, which is a
+          plain <h2> plus the span the grid needs. The `headings` used by the
+          rail come from render()'s markdown AST, not the DOM, so overriding
+          the component here does not touch the contents list. */}
+      <Content components={{ h2: SectionHeading }} />
 
       <!-- data-snap-box only: this box has a border, so its top edge is what
            gets snapped. A data-snap here would translate the border too — the
@@ -340,7 +345,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
          0.8, so a title long enough to wrap would overlap itself. */
       line-height: calc(var(--grid) * 2);
       color: var(--ink);
-      font-weight: 300;
+      font-weight: var(--weight-display);
     }
     /* the lede — the counterpart of p.intro on the homepage */
     .case-main .summary {
@@ -349,6 +354,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       font-family: var(--font-read);
       font-size: var(--text-lg);
       line-height: var(--grid);
+      font-weight: var(--weight-display);
     }
 
     /* --- project metadata (components/ProjectMeta.astro) ---
@@ -437,6 +443,9 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
        pseudo-elements. decimal-leading-zero so a tenth section doesn't change
        the numeral's width partway down. */
     .case-main { counter-reset: section; }
+    /* The h2 is a BOX that draws a rule; the span inside is the text. The
+       indent, the numeral and the baseline transform all belong to the span —
+       see SectionHeading.astro for why they have to be separated. */
     .case-main :global(h2) {
       font-family: var(--font-read);
       font-size: var(--text-xl);
@@ -445,14 +454,42 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       margin: calc(var(--grid) * 2) 0 var(--grid);
       font-weight: 400;
       counter-increment: section;
+      /* --- the rule under a section header ---
+         var(--rule), the site's hairline, which is already the maroon at 0.28
+         (--color-divider in tokens.css). Not a new colour and not full accent:
+         the numeral beside it is the only thing on a heading that carries the
+         accent at full strength, and two of them would compete.
+
+         One clear row between the words and the rule: 32 (the text row) + 31
+         (padding) + 1 (border) = 64, so the h2's own box is exactly two rows
+         and the rule lands on a painted line. The padding pays for the border
+         out of its own row, the same arithmetic .callout uses. */
+      padding-bottom: calc(var(--grid) - 1px);
+      border-bottom: var(--rule);
+    }
+    .case-main :global(.section-heading__text) {
+      display: block;          /* text-indent does not apply to an inline */
       padding-left: var(--grid);
       text-indent: calc(var(--grid) * -1);
     }
-    .case-main :global(h2)::before {
+    .case-main :global(.section-heading__text)::before {
       content: counter(section, decimal-leading-zero);
       display: inline-block;
       width: var(--grid);
       text-indent: 0;
+      /* line-height: 1 is load-bearing, and it is why the heading's box is 32
+         and not 36. An inline-block contributes its OWN height to the line box
+         and aligns its baseline to the parent's. Inheriting line-height:32px
+         made this numeral a 32px-tall box hung from a baseline 24.5px down, so
+         it overhung the bottom of the 32px row by ~4px and stretched the row
+         to 36 — which put the rule below it 4px off the grid on every heading
+         that draws one. At line-height:1 the box is 14px, it fits the row
+         whole, and the numeral does not move: vertical-align is still baseline,
+         so the figures sit exactly where they always did.
+
+         Invisible before this heading drew a rule, which is why it survived —
+         nothing downstream measured the h2's height. */
+      line-height: 1;
       font-family: var(--font-ui);
       font-size: var(--text-xs);
       letter-spacing: 0.08em;
@@ -463,19 +500,44 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
        row of air the heading normally leaves belongs below the pair instead.
        :has() rather than a modifier class, so writing <Dek> in the MDX is the
        only thing the author has to do. */
-    .case-main :global(h2:has(+ .dek)) { margin-bottom: 0; }
+    /* The heading stands its rule down when a dek follows: a dek is the
+       heading's second line, so the rule that closes the header belongs under
+       the pair, and the dek draws it instead. Both the row of air and the
+       border go, or the pair would be split by the very line meant to close
+       it. */
+    .case-main :global(h2:has(+ .dek)) {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+    /* display: block, and it is load-bearing: the baseline snapper moves text
+       with a transform, and transforms DO NOT APPLY to non-replaced inline
+       elements. An inline span here silently swallows its own translateY and
+       the dek stops snapping. Same reason .section-heading__text is a block. */
+    .case-main :global(.dek__text) { display: block; }
     .case-main :global(.dek) {
       font-family: var(--font-read);
       font-style: italic;
       font-size: var(--text-lg);
       line-height: var(--grid);
+      font-weight: var(--weight-display);
       color: var(--ink-muted);
       margin: 0 0 var(--grid);
+      /* the header's rule, inherited from the h2 — same arithmetic as there:
+         32 (text row) + 31 (padding) + 1 (border) = two rows. */
+      padding-bottom: calc(var(--grid) - 1px);
+      border-bottom: var(--rule);
     }
     /* A dek starts where its heading's WORDS start, not where the numeral
        does — same token as the numeral's box, so it still lands on a line.
-       Adjacent to h2 only: an h3 carries no numeral and no indent. */
-    .case-main :global(h2 + .dek) { margin-left: var(--grid); }
+       Adjacent to h2 only: an h3 carries no numeral and no indent.
+
+       padding, not margin: the dek carries the header's rule now, and a left
+       MARGIN would pull the rule's left end 32px in with the text while the
+       heading's own rule starts at the column edge. Padding indents the words
+       and leaves the border spanning the full column. The text lands in exactly
+       the same place either way — same content width, same start. */
+    .case-main :global(h2 + .dek) { padding-left: var(--grid); }
     .case-main :global(h3) {
       font-family: var(--font-read);
       font-size: var(--text-lg);
@@ -491,8 +553,30 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       margin: var(--grid) 0 0;
       font-weight: 500;
     }
-    /* --text-lg against the --grid row is a line-height of 1.6; --text-base
-       would give a very loose 2.0. */
+    /* --text-base, and the nominal 2.00 line-height ratio it makes against the
+       --grid row is NOT loose. This rule was briefly moved to --text-lg on the
+       reasoning that 2.00 was too open and 1.60 sat in the comfortable
+       1.45–1.65 band. That reasoning ignores the face.
+
+       Merriweather's x-height measures 0.555em — against Georgia's 0.481 and
+       Times' 0.447, one of the largest of any text serif, because it was drawn
+       for screens. Both rules of thumb are calibrated on an ordinary x-height
+       (~0.48), so both have to be read through that 1.15x:
+
+         --text-base  16px  reads as ~18.5px Georgia  ratio 32/18.5 = 1.73
+         --text-lg    20px  reads as ~23px   Georgia  ratio 32/23   = 1.39
+
+       So --text-base is the rung that lands in the band, and --text-lg is
+       BELOW it — under-leaded, and visibly oversized on the page. A large
+       x-height wants more leading, not less, which is the opposite of what the
+       nominal ratio suggests.
+
+       The cost is the measure: 800px at 16px runs ~94 characters, over the
+       comfortable 45–75. That is the known trade recorded on --rail in
+       tokens.css, and the open leading here is what pays for it — a long line
+       is carried by the leading that walks the eye back to the next one. The
+       honest fix if it ever has to come back is a narrower measure, not a
+       smaller column of bigger type. */
     .case-main :global(p),
     .case-main :global(li) {
       font-size: var(--text-base);
@@ -529,8 +613,9 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
        NEAREST line, yanks it 16px to one side. One line of text is
        1+31+32+31+1 = 96px, exactly three rows.
 
-       No font-size rule on purpose: the callout takes the same --text-lg and
-       full ink as body copy from the `p` rule above. */
+       No font-size rule on purpose: the callout takes the same --text-base and
+       full ink as body copy from the `p` rule above, and follows it if it ever
+       moves. */
     .case-main :global(.callout) {
       border-block: var(--rule);
       padding: calc(var(--grid) - 1px) 0;
@@ -562,6 +647,14 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     .case-main :global(.callout--challenge p:not(.callout-label)) {
       font-size: var(--text-xl);
       font-style: italic;
+      /* Weight, not colour, carries the optical correction here. Both fix the
+         same complaint — 24px reads heavier than the prose around it — but they
+         say different things: a lighter WEIGHT says "this is display type", a
+         muted COLOUR says "this matters less". This is the thesis of the case
+         study, so it keeps full ink and takes the correction in weight alone.
+         (The dek is muted because it genuinely is secondary; the pull quote
+         keeps its mute because it is an aside lifted out of the argument.) */
+      font-weight: var(--weight-display);
       margin: 0;
     }
 
@@ -649,12 +742,15 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       color: var(--color-accent);
       margin: 0;
     }
-    /* --text-lg, matching the prose. This was --text-base when a cell was
-       ~256px wide and 20px type set four or five words to the line; stacked,
-       the body column is 640px, where --text-base runs to ~85 characters and
-       --text-lg to ~66 — the comfortable measure. `:not([class])` so this
-       catches only the body copy — the label and the stat carry their own
-       type. */
+    /* One rung ABOVE the prose, deliberately — a panel is a thing you look at
+       rather than read through, and it is the only place on a case study where
+       body copy gets a narrow enough column to carry the larger size. This was
+       --text-base when a cell was ~256px wide and 20px type set four or five
+       words to the line; stacked, the body column is 640px, where --text-lg
+       runs to ~66 characters — comfortable, and well inside the ~94 the main
+       column takes at --text-base. So this does NOT track the prose rule and
+       shouldn't be collapsed into it. `:not([class])` so this catches only the
+       body copy — the label and the stat carry their own type. */
     .case-main :global(.panel-cell p:not([class])) {
       font-size: var(--text-lg);
       line-height: var(--grid);
@@ -667,7 +763,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       font-family: var(--font-read);
       font-size: var(--text-2xl);
       line-height: var(--grid);
-      font-weight: 300;
+      font-weight: var(--weight-display);
       color: var(--color-accent);
       margin: 0;
     }
@@ -687,6 +783,10 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       font-style: italic;
       font-size: var(--text-xl);
       line-height: var(--grid);
+      /* Display weight for the size, and it keeps the mute as well — unlike the
+         Challenge, a pull quote IS an aside, so both readings are true of it. */
+      font-weight: var(--weight-display);
+      color: var(--ink-muted);
       margin: 0;
     }
     .case-main :global(.pullquote cite) {
@@ -878,8 +978,9 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
 
     @media (max-width: 40rem) {
       /* --text-xl over a phone-width column sets three or four words to the
-         line. Dropping to --text-lg lands it level with the prose here — the
-         rules and the accent label are doing enough to set it apart. */
+         line. --text-lg is one rung down and still one rung clear of the
+         prose, so the quote keeps a size step to stand on and the rules and
+         accent label no longer have to carry the distinction alone. */
       .case-main :global(.callout--challenge p:not(.callout-label)),
       .case-main :global(.pullquote p) {
         font-size: var(--text-lg);

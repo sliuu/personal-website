@@ -54,13 +54,18 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Merriweather (variable, 300-600 used) for --font-read; Epilogue 400/600
-         for --font-ui. No 700 is loaded, so nothing gets a synthesized bold.
+    <!-- Merriweather (variable, 300-700 used) for --font-read; Epilogue 400/600
+         for --font-ui. Every weight either face is asked for is loaded, so
+         nothing gets a synthesized bold.
          Merriweather is requested as a range, not discrete weights: font-weight 500
-         is used by h4 and a discrete list would leave it synthesized. Epilogue
-         stays discrete — --font-ui only ever sets 400 and 600, and a range
-         would ship the whole 100-900 axis to serve two of them. -->
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300..600;1,300..600&family=Epilogue:wght@400;600&display=swap" rel="stylesheet" />
+         is used by h4 and a discrete list would leave it synthesized. The range
+         runs to 700 because `strong` is 700 (see global.css). Widening it cost
+         nothing — Merriweather's axis is 300..900 and Google serves one variable
+         file whatever subrange you name; the number here only sets the
+         @font-face descriptor. Epilogue stays discrete — --font-ui only ever
+         sets 400 and 600, and a range would ship the whole 100-900 axis to
+         serve two of them. -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300..700;1,300..700&family=Epilogue:wght@400;600&display=swap" rel="stylesheet" />
 
     <!-- Gates the load fade on JS being alive. Inline and in the head so the
          class lands before first paint — a deferred module would flip it after
@@ -173,7 +178,17 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
             // below it: the baseline pass is a transform, not a reflow.
             //
             // See figcaption and .callout-label in pages/projects/[id].astro.
-            .querySelectorAll("p:not(.callout-label), li, dt, dd, blockquote, h1, h2, h3, h4, h5, h6")
+            //
+            // The three :not()s below are one rule, not three exceptions: an
+            // element that DRAWS A RULE cannot take a baseline transform,
+            // because the transform carries the border with it and off the
+            // line the box-snap put it on. Each of them box-snaps instead and
+            // hands the baseline shift to a child — h2.section-heading and
+            // p.dek to a span, blockquote.pullquote to its <p>. Their
+            // components tag those children by hand. (.callout has always
+            // worked this way; it just never needed a :not() here, being a
+            // <div> this selector doesn't match.)
+            .querySelectorAll("p:not(.callout-label):not(.dek), li, dt, dd, blockquote:not(.pullquote), h1, h2:not(.section-heading), h3, h4, h5, h6")
             .forEach((el) => el.setAttribute("data-snap", ""));
           // Re-pin the flow after anything of arbitrary height (images).
           // .callout is here for its border: a box-snap puts its top edge on a

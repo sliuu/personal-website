@@ -13,13 +13,27 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-read);
-  font-weight: 300;
+  /* Merriweather is drawn with Regular as its text weight — the Light cut is a
+     display weight, and at reading sizes on warm paper it loses stroke, doubly
+     so under the antialiasing below. Everything set larger than prose takes
+     --weight-display instead, stated on the element rather than inherited from
+     here (see tokens.css). Costs nothing to load: Merriweather comes in as a
+     variable range on both axes. */
+  font-weight: var(--weight-prose);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Emphasis is 600, not the default 700: no 700 is loaded, so a bare `bold`
-   would leave the browser to synthesize one and smear the stroke joins. */
-strong, b { font-weight: 600; }
+/* 700 against a 400 body — a 300-point delta, the same distance emphasis kept
+   when the body was 300 and this was 600. It has to be that far: most bold in
+   the case studies is a full-sentence lead-in doing heading work, not inline
+   emphasis, so it carries structure and has to read at a glance.
+
+   A real 700, not a synthesized one — Merriweather is requested to 700 in
+   BaseLayout. Safe to set globally because no `strong` ever lands in a
+   --font-ui context: all bold comes from MDX prose, which is --font-read.
+   Epilogue is still loaded at 400/600 only, so if a `strong` ever does end up
+   inside UI type, this rule needs scoping to prose rather than widening. */
+strong, b { font-weight: 700; }
 
 a { color: var(--color-accent); text-decoration: none; text-underline-offset: 3px; }
 a:hover { color: var(--accent-strong); }

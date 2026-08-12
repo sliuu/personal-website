@@ -190,6 +190,24 @@
   --font-read: 'Merriweather', serif;
   --font-ui: 'Epilogue', sans-serif;
 
+  /* Two weights, one axis — the same split as the two faces above, and for the
+     same reason. --weight-prose is for copy you read THROUGH, at prose size;
+     --weight-display is for type you LOOK AT: headings, ledes, deks, pull
+     quotes, the subtitles on the homepage.
+
+     Why they differ: a face at a larger size reads heavier at the same nominal
+     weight, because stroke mass grows with the size while the eye judges the
+     block's overall blackness. Families answer this with display cuts drawn
+     lighter than text cuts, and Merriweather's 300 IS a display cut — which is
+     exactly why it was wrong under body copy and right above it.
+
+     These are tokens because the alternative already failed once: every one of
+     these elements used to inherit its weight from `body`, so moving the body
+     weight silently dragged the whole display scale along with it. A weight
+     that matters is now stated where it applies. */
+  --weight-prose: 400;
+  --weight-display: 300;
+
   /* Six rungs anchored on the 16px root: 14 16 20 24 32 40. Never write a raw
      font-size — pick a rung, and if none fits, add one here.
 
@@ -197,18 +215,27 @@
      32), which is why type at any size belongs to the same drawing as the
      background. --text-xs is the one rung set by eye.
 
-     Why prose is --text-lg and not --text-base: line-height is always a whole
-     --grid row, so 32px is the smallest leading any text can take. That makes
-     the size decide the ratio — 16px is 2.00, 20px is 1.60, 24px is 1.33 —
-     and only 20px lands in the comfortable 1.45–1.65 band. The grid and the
-     body size are locked together; a 24px grid would want 16px body. So
-     --text-base is the UI size, not the reading size.
+     Why prose is --text-base: line-height is always a whole --grid row, so
+     32px is the smallest leading any text can take, which makes the SIZE
+     decide the ratio — 16px is 2.00, 20px is 1.60, 24px is 1.33. Read
+     nominally, only 20px lands in the comfortable 1.45–1.65 band, and prose
+     was briefly moved there on exactly that arithmetic. It was wrong, because
+     the band assumes an ordinary x-height and Merriweather does not have one:
+     0.555em, against Georgia's 0.481 and Times' 0.447. Every size here is
+     optically 1.15x its nominal value, so the ratios have to be read through
+     that — 16px behaves like 18.5px on a 32px row (1.73, inside the band) and
+     20px like 23px (1.39, under it, and plainly too big on the page).
+
+     The general rule this leaves: a face with a large x-height wants MORE
+     leading than the ratio suggests, so it wants a SMALLER size on a fixed
+     row. Swapping --font-read for a face with ordinary metrics is the one
+     change that would make --text-lg the right prose rung.
 
      px, not rem, because global.css pins the root to 16px — the two are the
      same number, and px keeps these readable next to --grid. */
   --text-xs: 14px;    /* eyebrows, uppercase labels, captions, dates, meta */
-  --text-base: 16px;  /* UI text: buttons, metadata values, footers, hints */
-  --text-lg: 20px;    /* everything you READ: prose, ledes, h3/h4 */
+  --text-base: 16px;  /* everything you READ, plus UI text: buttons, meta, footers */
+  --text-lg: 20px;    /* one step up: ledes, deks, h3/h4, work titles */
   --text-xl: 24px;    /* work titles, case-study h2 */
   --text-2xl: 32px;   /* the closing statement */
   --text-3xl: 40px;   /* the homepage hero and a case-study h1 */

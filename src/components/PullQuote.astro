@@ -15,7 +15,19 @@ interface Props {
 }
 const { cite } = Astro.props;
 ---
-<blockquote class="pullquote">
-  <p><slot /></p>
+<!-- data-snap-box, and the tagger skips blockquote.pullquote so this does NOT
+     also get data-snap. It used to get only the latter, which is what put it
+     off the grid: the accent rule is a border, a baseline transform carries
+     borders with it, and nothing was pinning the box to a line in the first
+     place. Now the box snaps and the <p> inside takes the baseline shift —
+     the same split .callout, Panel and SectionHeading use.
+
+     No <p> around the slot. MDX already wraps the block content between the
+     tags in one, and <p><p>text</p></p> is not parseable nesting — the browser
+     split it into THREE paragraphs, the real one plus an empty one either
+     side, each of which the tagger then dutifully snapped. They were invisible
+     (empty blocks draw no line box) but they were being measured. -->
+<blockquote class="pullquote" data-snap-box>
+  <slot />
   {cite && <cite>{cite}</cite>}
 </blockquote>

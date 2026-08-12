@@ -1,0 +1,30 @@
+---
+// src/components/SectionHeading.astro — the <h2> of a case study, rendered
+// with a rule under it. Wired up as the MDX `h2` override in
+// pages/projects/[id].astro, so writing `## Research` in the MDX is still the
+// only thing the author does.
+//
+// WHY THE SPAN. The rule is a border on the h2's box, and the h2's box has to
+// land on a painted line. The baseline snapper moves text with a transform,
+// and a transform carries the border with it — so an h2 that is both
+// box-snapped and baseline-snapped would have its rule dragged back off the
+// line the box-snap just put it on. Splitting the two jobs fixes it: the h2
+// keeps its box (box-snap, draws the rule) and the span inside takes the
+// baseline shift. Same division as .callout and its inner <p>, and .dek does
+// it too — see Dek.astro.
+//
+// data-snap-box and data-snap are both by hand rather than from the layout's
+// tagger, which cannot tell these two apart: it would put data-snap on the h2
+// itself, which is the thing we are avoiding. The tagger skips
+// `h2.section-heading` for that reason (see BaseLayout.astro).
+//
+// The numeral rides on the span, not the h2 — it belongs with the words, so
+// it has to take the same baseline shift they do.
+interface Props {
+  id?: string;
+}
+const { id } = Astro.props;
+---
+<h2 id={id} class="section-heading" data-snap-box>
+  <span class="section-heading__text" data-snap><slot /></span>
+</h2>
