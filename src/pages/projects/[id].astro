@@ -216,7 +216,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
         max-height: calc(100vh - var(--header-h) - var(--grid) * 2);
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding-bottom: calc(var(--grid) / 2);
+        padding-bottom: var(--space-4);
       }
     }
     /* An opaque masthead swallows whatever an in-page link lands on, so every
@@ -269,7 +269,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     .case :global(.contents-list a) {
       display: grid;
       grid-template-columns: calc(var(--grid) * 0.75) 1fr;
-      gap: calc(var(--grid) / 4);
+      gap: var(--space-2);
       align-items: start;
       font-family: var(--font-read);
       font-size: var(--text-base);
@@ -312,8 +312,8 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     }
 
     /* --- the confidentiality note ---
-       Italic, and therefore --font-read: Fraunces is loaded as a variable
-       range on BOTH axes (ital,wght@0,200..600;1,200..600), so this is a real
+       Italic, and therefore --font-read: Merriweather is loaded as a variable
+       range on BOTH axes (ital,wght@0,300..600;1,300..600), so this is a real
        italic. --font-ui could not be — Epilogue is requested at 400 and 600
        upright only, and asking it for italic gets a synthesized slant, the same
        smearing the `strong` rule in global.css avoids by refusing 700.
@@ -333,7 +333,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
 
     /* --- the masthead --- */
     .case-main h1 {
-      margin: 0px;
+      margin: 0;
       font-family: var(--font-read);
       font-size: var(--text-3xl);
       /* two rows, not one: at 40px a single --grid row is a line-height of
@@ -411,7 +411,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
          a full row of the strip's height: at --grid the longest value
          ("Waymo ML Infrastructure & UX") breaks to three lines, at --grid/4 to
          two. */
-      padding-right: calc(var(--grid) / 4);
+      padding-right: var(--space-2);
     }
 
     /* --- project content (markdown) ---
@@ -495,7 +495,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
        would give a very loose 2.0. */
     .case-main :global(p),
     .case-main :global(li) {
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       line-height: var(--grid);
       color: var(--ink);
     }
@@ -667,7 +667,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       font-family: var(--font-read);
       font-size: var(--text-2xl);
       line-height: var(--grid);
-      font-weight: 200;
+      font-weight: 300;
       color: var(--color-accent);
       margin: 0;
     }

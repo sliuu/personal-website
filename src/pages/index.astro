@@ -191,13 +191,13 @@ const loves = [
      track whatever size the hero is at this breakpoint rather than pick its
      own. A shade under 1em so the box doesn't outgrow the line around it. */
   .role-btn {
-    display: inline-flex; align-items: center; gap: 9px;
-    font-family: var(--font-read); font-weight: 200; font-size: 0.92em;
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    font-family: var(--font-read); font-weight: 300; font-size: 0.92em;
     color: var(--color-accent);
     background: transparent; border: 1px solid var(--color-accent);
-    margin-left: 4px;
-    margin-right: 4px;
-    border-radius: var(--radius); padding: 4px 8px 4px 16px;
+    margin-right: var(--space-1);
+    border-radius: var(--radius);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
     line-height: 1.1; cursor: pointer; transform: translateY(-2px);
   }
   .role-btn:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
@@ -205,7 +205,7 @@ const loves = [
   .role.open .role-btn .caret { transform: rotate(180deg); }
 
   .role-menu {
-    position: absolute; top: calc(100% + 4px); left: 0; z-index: 5;
+    position: absolute; top: calc(100% + var(--space-1)); left: 0; z-index: 5;
     display: none; list-style: none; margin: 0; padding: 0; min-width: 100%;
     background: var(--paper);              /* opaque, so the grid stops here */
     border: var(--rule); border-radius: var(--radius);
@@ -218,7 +218,7 @@ const loves = [
     display: block;
     font-family: var(--font-read); font-size: var(--text-lg); font-weight: 300;
     letter-spacing: 0; line-height: var(--grid);
-    padding: calc(var(--grid) / 4) calc(var(--grid) / 2);
+    padding: var(--space-2) var(--space-4);
     color: rgba(var(--ink-rgb), 0.72);
     white-space: nowrap; cursor: pointer;
   }
@@ -244,7 +244,7 @@ const loves = [
     grid-template-columns: var(--grid) 1fr calc(var(--grid) * 6);
     gap: var(--grid);
     align-items: start;
-    padding: calc(var(--grid) * 1.5) var(--grid) calc(var(--grid) * 0.5) 0;
+    padding: calc(var(--grid) * 1.5) var(--space-6) var(--space-4) 0;
     border-top: var(--rule);
     color: inherit; border-radius: var(--radius); transition: background var(--dur);
   }
@@ -268,7 +268,8 @@ const loves = [
      something you could skip. 520px keeps it to ~54 characters. */
   .work-desc {
     display: block;
-    font-size: var(--text-lg); line-height: var(--grid);
+    font-size: var(--text-base); line-height: var(--grid);
+    font-style: italic;
     color: rgba(var(--ink-rgb), 0.8); max-width: 520px;
   }
   .work-cta {
@@ -310,7 +311,7 @@ const loves = [
   }
   /* the company/role group is what gives when space runs out, never the date */
   .career-inner > span:first-child { min-width: 0; }
-  .career-co { font-family: var(--font-read); font-size: var(--text-lg); color: var(--ink); margin-right: 8px; }
+  .career-co { font-family: var(--font-read); font-size: var(--text-lg); color: var(--ink); margin-right: var(--space-2); }
   .career-role { font-size: var(--text-base); color: rgba(var(--ink-rgb), 0.6); }
   .career-date {
     font-style: italic; font-size: var(--text-base); color: rgba(var(--ink-rgb), 0.5);
@@ -363,7 +364,7 @@ const loves = [
     align-items: start;
   }
   .statement {
-    font-family: var(--font-read); font-size: var(--text-2xl);
+    font-family: var(--font-read); font-size: var(--text-xl);
     line-height: calc(var(--grid) * 1.5); color: var(--ink);
     margin: 0 0 var(--grid); max-width: 560px;
   }
@@ -406,7 +407,11 @@ const loves = [
     /* One row of lead-in: the hero is two rungs smaller here, so the same
        space that framed a 40px line would swamp a 25px one. */
     h1.hero { font-size: var(--text-xl); line-height: var(--grid); margin-top: var(--grid); }
-    .role-btn { font-size: 0.85em; line-height: 1; padding: 0 6px 2px 10px; gap: 6px; }
+    .role-btn {
+      font-size: 0.85em; line-height: 1;
+      padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+      gap: var(--space-2);
+    }
     p.intro { font-size: var(--text-base); }
 
     .work-row { grid-template-columns: 1fr; gap: var(--grid); padding-right: 0; }

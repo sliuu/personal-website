@@ -37,7 +37,7 @@ a:hover { color: var(--accent-strong); }
 }
 
 /* ---- the load fade ----
-   Not decoration. The page paints in fallback faces, Fraunces and Epilogue
+   Not decoration. The page paints in fallback faces, Merriweather and Epilogue
    swap in, and only then does the baseline pass translate every block onto the
    grid — so a cold load shows the type reflowing and settling, which is the
    one moment the grid looks assembled rather than given. This holds the page
@@ -138,7 +138,7 @@ a:hover { color: var(--accent-strong); }
 /* The row stays a full grid row tall even though the rings are smaller: the
    row is what the header centres, and the rings centre inside it. */
 .nav {
-  display: flex; align-items: center; gap: calc(var(--grid) / 2);
+  display: flex; align-items: center; gap: var(--space-4);
   height: var(--grid);
 }
 
@@ -180,9 +180,9 @@ a:hover { color: var(--accent-strong); }
    own square box, so it takes the drop back out — as a transform, which moves
    the paint without moving the layout the gap is measured from. */
 .btn {
-  display: inline-flex; align-items: center; gap: calc(var(--grid) / 4);
+  display: inline-flex; align-items: center; gap: var(--space-2);
   height: var(--btn-h);
-  padding: calc(var(--btn-label-drop) * 2) 20px 0;
+  padding: calc(var(--btn-label-drop) * 2) var(--space-5) 0;
   border: 1px solid; border-radius: var(--radius);
   font-family: var(--font-ui); font-size: var(--text-base);
   background: transparent; cursor: pointer;
@@ -199,7 +199,7 @@ a:hover { color: var(--accent-strong); }
    the row. The row is two rows tall: one for the button, one of air beneath —
    which is where the spacing below comes from. */
 .btn-row {
-  display: flex; align-items: flex-start; gap: 14px;
+  display: flex; align-items: flex-start; gap: var(--space-4);
   height: calc(var(--grid) * 2);
 }
 
@@ -237,10 +237,10 @@ a:hover { color: var(--accent-strong); }
 }
 @media (max-width: 40rem) {
   /* the icons keep their size; only the gap closes up */
-  .nav { gap: calc(var(--grid) / 4); }
+  .nav { gap: var(--space-2); }
   /* only the vertical padding changes — the inline gutters and the centring
      carry down from the 72rem rule */
   .col { padding-block: calc(var(--grid) * 2); }
-  .btn-row { flex-wrap: wrap; height: auto; gap: 12px; }
+  .btn-row { flex-wrap: wrap; height: auto; gap: var(--space-3); }
   .cols-3 { grid-template-columns: 1fr; }
 }

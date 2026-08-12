@@ -82,6 +82,18 @@
      a curtain going up. See .page.is-ready in global.css. */
   --dur-load: 0.4s;
 
+  /* --- spacing ------------------------------------------------------ */
+  /* A compact 4px scale derived from the baseline grid. Use these for
+     ordinary gaps, padding and margins; full-page vertical rhythm continues
+     to use --grid directly. Pixel values remain appropriate for borders and
+     documented optical corrections. */
+  --space-1: calc(var(--grid) / 8);       /* 4px */
+  --space-2: calc(var(--grid) / 4);       /* 8px */
+  --space-3: calc(var(--grid) * 3 / 8);   /* 12px */
+  --space-4: calc(var(--grid) / 2);       /* 16px */
+  --space-5: calc(var(--grid) * 5 / 8);   /* 20px */
+  --space-6: var(--grid);                 /* 32px */
+
   /* The two gradients that paint the grid. Declared once and consumed by
      .page and .header, which have to draw the same lines at the same size —
      see the sticky-masthead note in global.css. */
@@ -175,7 +187,7 @@
   /* Two faces, one axis: --font-read for everything you READ, --font-ui for
      everything you USE (nav, buttons, eyebrows, labels, captions, metadata).
      Every font-family in this codebase picks one of these two. */
-  --font-read: 'Fraunces', serif;
+  --font-read: 'Merriweather', serif;
   --font-ui: 'Epilogue', sans-serif;
 
   /* Six rungs anchored on the 16px root: 14 16 20 24 32 40. Never write a raw
@@ -196,7 +208,6 @@
      same number, and px keeps these readable next to --grid. */
   --text-xs: 14px;    /* eyebrows, uppercase labels, captions, dates, meta */
   --text-base: 16px;  /* UI text: buttons, metadata values, footers, hints */
-  --text-md: 18px;   
   --text-lg: 20px;    /* everything you READ: prose, ledes, h3/h4 */
   --text-xl: 24px;    /* work titles, case-study h2 */
   --text-2xl: 32px;   /* the closing statement */

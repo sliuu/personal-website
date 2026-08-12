@@ -54,13 +54,13 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Fraunces (variable, 200-600 used) for --font-read; Epilogue 400/600
+    <!-- Merriweather (variable, 300-600 used) for --font-read; Epilogue 400/600
          for --font-ui. No 700 is loaded, so nothing gets a synthesized bold.
-         Fraunces is requested as a range, not discrete weights: font-weight 500
+         Merriweather is requested as a range, not discrete weights: font-weight 500
          is used by h4 and a discrete list would leave it synthesized. Epilogue
          stays discrete — --font-ui only ever sets 400 and 600, and a range
          would ship the whole 100-900 axis to serve two of them. -->
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,200..600;1,200..600&family=Epilogue:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300..600;1,300..600&family=Epilogue:wght@400;600&display=swap" rel="stylesheet" />
 
     <!-- Gates the load fade on JS being alive. Inline and in the head so the
          class lands before first paint — a deferred module would flip it after
