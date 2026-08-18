@@ -159,6 +159,8 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     .case-main {
       grid-column: 2;
       min-width: 0;
+      /* Shortens the measure from the right only — see --main-inset. */
+      margin-right: var(--main-inset);
     }
 
     /* --- the rail (components/SideRail.astro and friends) -------------
@@ -641,15 +643,17 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     }
     .case-main :global(.callout > *:last-child) { margin-bottom: 0; }
 
-    /* The thesis of the case study — a rung above the prose that follows it.
-       1.33 against the --grid row, which is tight for body copy and right for
-       display type set two or three lines long. */
+    /* The thesis of the case study — one rung above the prose that follows it.
+       --text-lg, not --text-xl: 24px is optically ~27.5px in Merriweather's
+       metrics (see the x-height note in tokens.css) and reads as a headline
+       rather than as a sentence with weight behind it. 20px keeps the step up
+       from the prose while still setting as a line you read. */
     .case-main :global(.callout--challenge p:not(.callout-label)) {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       font-style: italic;
       /* Weight, not colour, carries the optical correction here. Both fix the
-         same complaint — 24px reads heavier than the prose around it — but they
-         say different things: a lighter WEIGHT says "this is display type", a
+         same complaint — the size reads heavier than the prose around it — but
+         they say different things: a lighter WEIGHT says "this is display type", a
          muted COLOUR says "this matters less". This is the thesis of the case
          study, so it keeps full ink and takes the correction in weight alone.
          (The dek is muted because it genuinely is secondary; the pull quote
@@ -781,7 +785,9 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     .case-main :global(.pullquote p) {
       font-family: var(--font-read);
       font-style: italic;
-      font-size: var(--text-xl);
+      /* --text-lg for the same reason as the Challenge above — one rung clear
+         of the prose is the whole job, and --text-xl overshot it. */
+      font-size: var(--text-lg);
       line-height: var(--grid);
       /* Display weight for the size, and it keeps the mute as well — unlike the
          Challenge, a pull quote IS an aside, so both readings are true of it. */
@@ -956,6 +962,10 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       .case { grid-template-columns: minmax(0, 1fr); }
       .case :global(.rail),
       .case-main { grid-column: 1; }
+      /* One track now, and .col's own gutter is already holding the text off
+         the right edge — a second inset on top of it would just be a margin
+         nobody asked for. */
+      .case-main { margin-right: 0; }
       .case :global(.rail-inner) {
         position: static;
         max-height: none;
@@ -977,14 +987,10 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     }
 
     @media (max-width: 40rem) {
-      /* --text-xl over a phone-width column sets three or four words to the
-         line. --text-lg is one rung down and still one rung clear of the
-         prose, so the quote keeps a size step to stand on and the rules and
-         accent label no longer have to carry the distinction alone. */
-      .case-main :global(.callout--challenge p:not(.callout-label)),
-      .case-main :global(.pullquote p) {
-        font-size: var(--text-lg);
-      }
+      /* No font-size override here any more. This used to drop the Challenge
+         and the pull quote from --text-xl to --text-lg, because --text-xl over
+         a phone-width column set three or four words to the line. They are
+         --text-lg at every width now, so the phone needs no special case. */
       .case-main :global(.cols-3) { grid-template-columns: 1fr; }
       /* A 288px picture beside prose leaves the text ~50px on a phone. The
          row stacks instead, and the gap it loses with the column comes back

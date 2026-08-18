@@ -150,13 +150,31 @@
      keeps the same outer edges as the homepage. Only two of the three are
      declared — the main column is whatever is left, so they can't drift.
 
-     Cost, recorded: the main column is 800px, ~83 characters, over the
-     comfortable 45–75. It is carried by the 32px leading on 20px type. The
-     honest fix if it ever has to come back is a narrower --col-max for
-     project pages only, which costs edge alignment with the rest of the site
-     — not a wider rail, whose ink does not grow with its box. */
+     Cost, recorded: the main track is 800px, which at --text-base runs ~94
+     characters, over the comfortable 45–75. --main-inset below is the knob
+     that buys some of that back. */
   --rail: calc(var(--grid) * 8);        /* 256px */
   --rail-gap: var(--grid);              /* 32px */
+
+  /* Taken off the RIGHT of the case-study main track, so the text column
+     narrows without moving its left edge — every left edge on the page stays
+     on the line it was on, and only the measure changes. Whole grid units
+     only: 800 - 32 = 768 = 24 units, so the right edge lands on a painted
+     line too, and the h2 rules that span the column shorten with it.
+
+     What each unit buys, at --text-base:
+       0 units   800px   ~94 characters
+       1 unit    768px   ~90
+       2 units   736px   ~86
+       3 units   704px   ~83
+     Nowhere near 75 without giving up more width than the page can spare —
+     the rail already owns 9 of the 34 units. This is a dent in the problem,
+     not a fix for it; the real fix is a narrower --col-max on project pages,
+     which costs edge alignment with the rest of the site.
+
+     Dropped below 72rem, where the rail unstacks and .col's own gutter takes
+     over — see the breakpoint in projects/[id].astro. */
+  --main-inset: var(--grid);            /* 32px */
 
   /* Two rows, not three. At three the nav occupied the middle row and the
      icons floated at 48.5 — the midpoint between two painted lines. At two
