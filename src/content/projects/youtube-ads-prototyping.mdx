@@ -75,7 +75,7 @@ While the new design took shape, I kept building the current tool and building *
 
 **That reframed the bar for the redesign: it couldn't just be *possible* for non-engineers to use — it had to be *easier than asking us*.** This meant we couldn't expect non-engineers to write code and handle the hard cases, but we could expect them to do the parts that were easier to do than to wait for someone else to do them.
 
-<Figure flat src="/yt-ads-prototyping/flow.png" alt="A two-column diagram of the division of labor, with arrows running both ways. Researchers and designers start from templates, assemble screens and variants, set element options, and run studies; UX engineers build custom elements, author new templates, grow the shared library, and keep a code hatch for edge cases." />
+<Figure flat src="/yt-ads-prototyping/flow.webp" alt="A two-column diagram of the division of labor, with arrows running both ways. Researchers and designers start from templates, assemble screens and variants, set element options, and run studies; UX engineers build custom elements, author new templates, grow the shared library, and keep a code hatch for edge cases." />
 
 
 ## Design principles
@@ -99,33 +99,33 @@ The redesign came down to a few commitments:
 **My benchmark flow was a first-time user's first fifteen minutes**: they would start with a template, add pre-made YouTube components to a board, wire up simple interactions, and then be able to export a working prototype. This path should feel intuitive and effortless. Advanced usage through custom components, variables, conditional logic, etc. would stay available, but never in the way.
 
 **A new user logs in with no projects**, and is immediately guided to start a new project using a template.
-<Figure src="/yt-ads-prototyping/new-user.png" alt="The page a new user sees who has no projects" />
+<Figure src="/yt-ads-prototyping/new-user.webp" alt="The page a new user sees who has no projects" />
 
 **Templates make starting from scratch more approachable**, and empower the user to start creating.
-<Figure src="/yt-ads-prototyping/new-project.png" alt="The Start new project page" />
+<Figure src="/yt-ads-prototyping/new-project.webp" alt="The Start new project page" />
 
 **Sections are borrowed from known tools like Figma**, so users can reason about the interface without learning a new interaction grammar. Layers and variants (for experiments) on the left, data that applies to the entire project on the bottom left, and properties and options that apply to only the selected element on the right. 
-<Figure src="/yt-ads-prototyping/prototype-editing.png" alt="The redesigned editing screen showing distinct sections and clearer interactions" />
+<Figure src="/yt-ads-prototyping/prototype-editing.webp" alt="The redesigned editing screen showing distinct sections and clearer interactions" />
 
 **A long list of custom components is searchable across teams**, so users can build with building blocks provided by UX engineers without needing to know how to code.
-<Figure src="/yt-ads-prototyping/browse-custom-components.png" alt="The new custom components view when adding elements to a screen" />
+<Figure src="/yt-ads-prototyping/browse-custom-components.webp" alt="The new custom components view when adding elements to a screen" />
 
 **The components editing screen** is visually distinct from the prototyping editing screen, but keeps the same conventions. Users are encouraged to create their own components for reuse.
-<Figure src="/yt-ads-prototyping/components-editor.png" alt="The component editing page" />
+<Figure src="/yt-ads-prototyping/components-editor.webp" alt="The component editing page" />
 
 
-<FigureRow src="/yt-ads-prototyping/data-side-bar.png" alt="The redesigned data sidebar">
+<FigureRow src="/yt-ads-prototyping/data-side-bar.webp" alt="The redesigned data sidebar">
 **Data, code, and themes are unique to this tool.** They allow the user to have a lot of **fine-tuned control** over the prototype, and may require a UX engineer for tail-end use cases. But the redesign surfaces the most common options first, and hides advanced settings until they're needed.
 </FigureRow>
 
 
 
 **Data sources are added and linked to YouTube streams** to make the project real and usable without needing to write code.
-<Figure src="/yt-ads-prototyping/add-data-source.png" alt="The 'Add data source' dialog, building a reusable pool of content from a YouTube search: a source name, a search query, the number of results to pull, and a safe-search toggle" />
+<Figure src="/yt-ads-prototyping/add-data-source.webp" alt="The 'Add data source' dialog, building a reusable pool of content from a YouTube search: a source name, a search query, the number of results to pull, and a safe-search toggle" />
 
 
 **Actions allow for interactivity without writing code,** but the option to trigger scripts is still available for advanced users and custom interactions.
-<Figure src="/yt-ads-prototyping/add-action.png" alt="The 'Add an action' dialog, with an on-click trigger and 'Go to screen' selected. The other actions offered are opening a URL, logging an event, showing or hiding an element, and running a script." />
+<Figure src="/yt-ads-prototyping/add-action.webp" alt="The 'Add an action' dialog, with an on-click trigger and 'Go to screen' selected. The other actions offered are opening a URL, logging an event, showing or hiding an element, and running a script." />
 
 
 ## Where it goes next
