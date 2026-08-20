@@ -74,17 +74,26 @@ const loves = [
     <h2 class="section-label" data-snap>Selected work</h2>
     {work.map((w) => (
       <a class="work-row" href={w.href} data-snap-box>
-        <span class="work-num" data-snap>{w.num}</span>
-        <!-- data-snap belongs on the children, not on this wrapper: the
-             wrapper sets no line-height, so it computes to `normal` and the
-             baseline pass falls back to `lh = fs`. That measures a 24px line
-             box where the title's is 32px and snaps the title 4px off. -->
-        <span>
-          <span class="work-title" data-snap>{w.title}</span>
-          <span class="work-desc" data-snap>{w.desc}</span>
-          <span class="work-cta" data-snap>Read the case study →</span>
+        <!-- .work-inner exists so the press has something to scale. The row
+             itself must not move: its border-top is a grid rule, and the
+             three columns below carry [data-snap], so the snapper owns their
+             transforms and would overwrite a scale put on any of them. The
+             grid moved down here; the border, padding and tint stayed up on
+             the <a>. No data-snap on this one, for the same reason as the
+             wrapper below. -->
+        <span class="work-inner">
+          <span class="work-num" data-snap>{w.num}</span>
+          <!-- data-snap belongs on the children, not on this wrapper: the
+               wrapper sets no line-height, so it computes to `normal` and the
+               baseline pass falls back to `lh = fs`. That measures a 24px line
+               box where the title's is 32px and snaps the title 4px off. -->
+          <span>
+            <span class="work-title" data-snap>{w.title}</span>
+            <span class="work-desc" data-snap>{w.desc}</span>
+            <span class="work-cta" data-snap>Read the case study <span class="work-arrow">→</span></span>
+          </span>
+          <span class="work-meta" data-snap>{w.meta}</span>
         </span>
-        <span class="work-meta" data-snap>{w.meta}</span>
       </a>
     ))}
   </section>
@@ -202,7 +211,10 @@ const loves = [
     line-height: 1.1; cursor: pointer; transform: translateY(-2px);
   }
   .role-btn:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-  .role-btn .caret { transition: transform calc(var(--dur) * 1.33) ease; }
+  /* --ease-in-out, not --ease-out: the caret rotates between two resting
+     states and comes back, so the return has to look like the outbound
+     played backwards. */
+  .role-btn .caret { transition: transform 300ms cubic-bezier(0.65,0.05,0.36,1); }
   .role.open .role-btn .caret { transform: rotate(180deg); }
 
   .role-menu {
@@ -213,8 +225,67 @@ const loves = [
     /* The heavier of the two shadows: this one floats above the page rather
        than resting on it, unlike the figures. See tokens.css. */
     box-shadow: var(--shadow-lift);
+
+    /* ---- the open/close ----
+       The menu used to be display:none / display:block and nothing else, so it
+       arrived fully formed with no account of where it came from. It grows out
+       of the button's bottom-left corner instead, which is the corner it is
+       pinned to (top: 100%, left: 0) — that is what transform-origin is
+       naming, not a taste call.
+
+       The -4px is the same --space-1 that holds the menu off the button, so it
+       starts flush under the button and drops into its own gap. Order matters
+       in the transform list: the rightmost function is applied to the element
+       first, so scale() runs and translateY() then moves the scaled box by a
+       true 4px rather than 4 scaled px.
+
+       0.96, not 0.8 — the menu is meant to have been there and become visible,
+       not to inflate. Anything under ~0.9 reads as a pop.
+
+       display can be transitioned because of `allow-discrete`: it flips to
+       block at the START of the enter and back to none at the END of the exit,
+       which is what keeps the fade-out on screen long enough to see. The
+       duration is taken from the state being transitioned TO, so the enter's
+       numbers live in .role.open below and the exit's live here. Browsers
+       without @starting-style / allow-discrete ignore all of it and get the
+       instant show-hide this had before — the failure mode is the old
+       behaviour, not a broken menu. */
+    /* transform-origin: top left; */
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+    transition:
+      opacity var(--dur-menu) var(--ease-out),
+      transform var(--dur-menu) var(--ease-out),
+      display var(--dur-menu) allow-discrete;
   }
-  .role.open .role-menu { display: block; }
+  .role.open .role-menu {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity var(--dur-menu) var(--ease-out),
+      transform var(--dur-menu) var(--ease-out),
+      display var(--dur-menu) allow-discrete;
+  }
+  /* An element entering from display:none has no previous style for the
+     transition to start from. This declares one. It must come after the rule
+     it seeds. */
+  @starting-style {
+    .role.open .role-menu {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.96);
+    }
+  }
+  /* Gentler, not off: the fade still covers the appearance, only the movement
+     goes. Killing the transition outright would hand this reader the same
+     abrupt swap the animation exists to fix. */
+  @media (prefers-reduced-motion: reduce) {
+    .role-menu,
+    .role.open .role-menu { transform: none; }
+    @starting-style {
+      .role.open .role-menu { transform: none; }
+    }
+  }
   .role-option {
     display: block;
     font-family: var(--font-read); font-size: var(--text-lg); font-weight: var(--weight-display);
@@ -240,17 +311,48 @@ const loves = [
      tabular figures at --text-lg measure ~22px), so the title now starts at
      exactly two units in. The meta track is right-aligned, so only its right
      edge shows, and the row's own padding-right lands that on a line. */
+  /* The row is now chrome only — border, padding, tint. It is an <a>, so it
+     needs an explicit display now that `grid` has moved off it. */
   .work-row {
-    display: grid;
-    grid-template-columns: var(--grid) 1fr calc(var(--grid) * 6);
-    gap: var(--grid);
-    align-items: start;
+    display: block;
     padding: calc(var(--grid) * 1.5) var(--space-6) var(--space-4) 0;
     border-top: var(--rule);
     color: inherit; border-radius: var(--radius); transition: background var(--dur);
   }
+  /* The grid, and the only thing that moves on press. */
+  .work-inner {
+    display: grid;
+    grid-template-columns: var(--grid) 1fr calc(var(--grid) * 6);
+    gap: var(--grid);
+    align-items: start;
+    transition: transform var(--dur-press) var(--ease-out);
+  }
+  /* --press-scale-row (0.98) — see tokens.css for the arithmetic. In short:
+     this box is the full 1088px column, so each 0.01 of ratio is 10.9px of
+     travel, and 0.98 is already the largest movement on the site in pixels
+     while being the shallowest ratio.
+
+     centre origin, so the row compresses toward its middle the way a physical
+     surface would. `transform-origin: left center` is the alternative: it pins
+     the left edge so the numeral never moves at all, at the cost of the press
+     looking like it only happens on the right. Centre is the more honest
+     press; left is the more honest grid. This picks the press, because the
+     lines the grid actually paints are the borders, and those are on .work-row
+     and do not move either way. */
+  .work-row:active .work-inner { transform: scale(var(--press-scale-row)); }
+  /* A 1088px box breathing is exactly the kind of large-area movement this
+     setting exists to stop — unlike the 3% on a 32px button, which keeps its
+     scale. The tint and the arrow still answer the press, so nothing is left
+     without feedback. */
+  @media (prefers-reduced-motion: reduce) {
+    .work-inner { transition: none; }
+    .work-row:active .work-inner { transform: none; }
+  }
   .work-row:last-child { border-bottom: var(--rule); }
   .work-row:hover { background: var(--tint-link); }
+  /* The tint's share of the press. Only a 0.02 step, because tokens.css caps
+     this family at 0.08 before the maroon starts reading as a fill. */
+  .work-row:active { background: var(--tint-link-press); }
   .work-num {
     font-family: var(--font-ui); font-size: var(--text-lg); line-height: var(--grid);
     color: var(--color-accent); font-variant-numeric: tabular-nums;
@@ -279,6 +381,44 @@ const loves = [
     font-family: var(--font-ui); font-size: var(--text-xs); line-height: var(--grid);
     color: var(--color-accent);
   }
+  /* The arrow moves on row hover, the label does not — the glyph already
+     points the way the link goes, so the nudge is it doing what it depicts
+     rather than decoration laid over the top. Without it the row's tint says
+     "highlighted"; with it the row says "this goes somewhere".
+
+     inline-BLOCK, and that is the whole trick: `transform` does not apply to a
+     non-replaced inline box, so the obvious version of this — a bare <span>
+     around the arrow — silently does nothing at all and looks like a broken
+     selector.
+
+     Its own transform is safe next to the snapper. .work-cta carries
+     [data-snap], so BaseLayout owns that element's transform and overwrites it
+     on every pass; this is a child, so the two compose instead of fighting.
+     Anything animated inside a snapped block has to sit one level down like
+     this.
+
+     Gated to a real pointer: on touch, :hover latches after a tap and the
+     arrow would simply stay nudged until you tapped something else. */
+  .work-arrow { display: inline-block; transition: transform var(--dur-press) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .work-row:hover .work-arrow { transform: translateX(6px); }
+  }
+  /* Press. The transition moved up out of the hover query so this can use it
+     too: a tap has no hover to build on, and a press is the one response a
+     touch reader should still get.
+
+     Same specificity as the hover rule above (0,2,1), so this wins only by
+     coming after it. Reorder the two and a hovered row being pressed silently
+     stops responding.
+
+     It has to clear the hover's 6px or the press would pull the arrow
+     BACKWARDS out of the position hovering just put it in.
+
+     The arrow is one of three things answering a press here, alongside the
+     tint and .work-inner's scale. It is the loudest of them on purpose: the
+     scale is held to 0.99 because the row is a full column wide, so the
+     squeeze alone is too quiet to register as feedback. */
+  .work-row:active .work-arrow { transform: translateX(10px); }
   .work-meta {
     text-align: right;
     font-family: var(--font-ui); font-size: var(--text-xs);
@@ -320,6 +460,10 @@ const loves = [
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
+  .work-arrow {
+    margin-left: var(--space-1);
+  }
+
 
   /* ---- currently / also loves ---- */
   /* ---- the sign-off portrait ----
@@ -394,7 +538,7 @@ const loves = [
 
     /* Drops the meta track; the numeral track keeps the width it has at full
        size, so the title starts on the same line here as it does there. */
-    .work-row { grid-template-columns: var(--grid) 1fr; }
+    .work-inner { grid-template-columns: var(--grid) 1fr; }
     .work-meta { grid-column: 2; text-align: left; }
     .close { grid-template-columns: 1fr; gap: var(--grid); }
 
@@ -418,7 +562,9 @@ const loves = [
     }
     p.intro { font-size: var(--text-base); }
 
-    .work-row { grid-template-columns: 1fr; gap: var(--grid); padding-right: 0; }
+    /* padding stayed on the row, the tracks went with the grid */
+    .work-row { padding-right: 0; }
+    .work-inner { grid-template-columns: 1fr; gap: var(--grid); }
     .work-meta { grid-column: 1; }
     .work-title { font-size: var(--text-lg); }
 

@@ -49,13 +49,35 @@ const isExternal = href.startsWith('http');
     border: 1px solid var(--color-stroke-neutral);
     border-radius: 50%;
     color: var(--color-icon);
-    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+    /* --dur, not three copies of 0.15s — same number, but the token is the
+       one that moves if the site's hover speed ever changes. transform is
+       here rather than in global.css because this scoped selector outranks
+       anything unscoped, so a transition declared there would be discarded;
+       the :active rule itself still lives in global.css with the other two
+       controls that share it. */
+    transition:
+      color var(--dur), border-color var(--dur), background-color var(--dur),
+      transform var(--dur-press) var(--ease-out);
   }
   /* same hover language as .work-row and .career-box: a faint accent wash */
   .icon-link:hover {
     color: var(--color-accent);
     border-color: var(--color-accent);
     background: rgba(var(--accent-rgb), 0.06);
+  }
+  /* The press. --press-scale-sm alone is only 2.8px of travel on a 28px ring,
+     which is still faint, so the wash carries most of it — a colour step is
+     the one cue that reads the same whatever size the box is. This can live
+     in the component (unlike the transform) because `background` is not
+     declared for .icon-link in global.css, so nothing there outranks it.
+
+     0.14 is well past the 0.08 ceiling the --tint-* family keeps, and that is
+     allowed here for the reason the ceiling exists: that limit protects a
+     large FILL from reading as a block of colour. This is a 28px circle held
+     for a fraction of a second. */
+  .icon-link:active {
+    background: rgba(var(--accent-rgb), 0.14);
+    border-color: var(--color-accent);
   }
   /* The glyph's own size and stroke are Glyph.astro's — Astro scopes styles
      per component, so a rule written here could not reach it anyway. This

@@ -201,6 +201,59 @@ a:hover { color: var(--accent-strong); }
   font-family: var(--font-ui); font-size: var(--text-base);
   background: transparent; cursor: pointer;
 }
+/* ---- press feedback ----
+   The buttons had a hover and nothing else, so a click produced no response at
+   all — and both of these are <a> links that leave the page (mailto, PDF in a
+   new tab), which makes the press-down the only moment there is to answer.
+
+   --dur (150ms) rather than a raw number: it is already the site's one hover
+   duration and it lands inside the 100–160ms a press wants. A press has to
+   register before the finger lifts; anything past ~200ms arrives after the
+   click is over and reads as the page lagging.
+
+   Only `transform` is transitioned. The hover tint below still switches
+   instantly, exactly as it did — adding it here would have retuned a hover
+   nobody asked to change.
+
+   Cost, recorded: --btn-h is one --grid, so a button's top and bottom edges
+   normally rest on painted grid lines, and scaling by --press-scale lifts them
+   about a pixel off for the length of the press. It is the one deliberate
+   exception to the rule the rest of this file keeps. It is momentary, it
+   returns exactly where it started, and the grid is not what anyone is looking
+   at while pressing a button.
+
+   No reduced-motion opt-out, deliberately. The scale is 5% over 150ms on a
+   32px control — not the large-area movement that setting exists to stop — and
+   removing it would leave those readers with no press feedback whatsoever,
+   which is the state this rule was added to fix. */
+.btn { transition: transform var(--dur-press) var(--ease-out); }
+
+/* Press, for the site's three bounded controls — .btn, the header mark and the
+   nav icon rings. Each has a visible edge, which is what gives the eye
+   something to watch move — so these can take a ratio a bare line of type
+   cannot (--press-scale-text, a third of this one, is what the word-links get).
+
+   Two ratios, not one, and not because anyone preferred different numbers: the
+   button is ~150px wide and the rings are 28px, so a single ratio buys 7.5px
+   of travel on one and 1.4px on the other. See --press-scale in tokens.css for
+   the arithmetic.
+
+   .icon-link and .mark live in scoped components, but their class names are on
+   real elements, so an unscoped rule here reaches them. The one thing it
+   CANNOT do is set their `transition` — a scoped rule
+   (.icon-link[data-astro-cid-…]) outranks this selector, so IconLink declares
+   its own transform transition next to its colour one.
+
+   --dur-press, not --dur: a press on this curve is 91% done in the first half
+   of its duration, so 150ms left nothing to watch. See tokens.css. */
+.btn:active { transform: scale(var(--press-scale)); }
+.mark:active,
+.icon-link:active { transform: scale(var(--press-scale-sm)); }
+.mark { transition: transform var(--dur-press) var(--ease-out); }
+
+/* The glyph's own transform is untouched by the press: it is a CHILD of the
+   button, so the two compose rather than overwrite. Setting a transform on
+   .btn:active would have wiped this one out if it lived on the same element. */
 .btn .glyph { transform: translateY(calc(var(--btn-label-drop) * -1)); }
 .btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
 .btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
@@ -236,6 +289,25 @@ a:hover { color: var(--accent-strong); }
 }
 .footer a { color: rgba(var(--ink-rgb), 0.5); }
 .footer a:hover { color: var(--color-accent); }
+/* The one link on the site that needs no wrapper to press. data-snap sits on
+   .footer, not on the <a>, so the snapper owns the row and leaves the link's
+   own transform alone — and .footer is a flex container, so the <a> is already
+   blockified and takes a transform without needing display: inline-block.
+
+   RIGHT origin: .footer is space-between, so this link is pinned to the
+   column's right edge. Same reasoning as the case footer — scale about the
+   middle and that edge walks inward on every press. */
+.footer a {
+  transition: color var(--dur), transform var(--dur-press) var(--ease-out);
+}
+.footer a:active {
+  transform: scale(var(--press-scale-text));
+  transform-origin: right center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer a { transition: color var(--dur); }
+  .footer a:active { transform: none; }
+}
 
 .cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--grid); }
 

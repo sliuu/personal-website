@@ -119,12 +119,34 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
            gets snapped. A data-snap here would translate the border too — the
            links carry the baseline snap instead. -->
       <footer class="case-footer" data-snap-box>
-        <a class="case-footer__home" href="/" data-snap>&larr; All work</a>
+        <!-- __inner is not decoration: both <a>s carry data-snap, so BaseLayout
+             owns their transform and would overwrite a scale set on them. It
+             never tags a span, so a child is free to take the press. The
+             arrows were wrapped too, for a nudge that has since been removed —
+             they are plain glyphs again. -->
+        <a class="case-footer__home" href="/" data-snap><span class="case-footer__inner">&larr; All work</span></a>
         <a class="case-footer__next" href={`/projects/${next.id}`} data-snap>
-          Next: {next.data.title} &rarr;
+          <span class="case-footer__inner">Next: {next.data.title} &rarr;</span>
         </a>
       </footer>
-      <p class="case-cta">Want to talk? <a href={EMAIL_URL}><Glyph name="mail" inline /> Get in touch</a></p>
+      <!-- The same object the homepage closes on: the global .btn, not an
+           inline text link. Both pages now end on the same offer in the same
+           shape, which is the point — a case study that ends differently from
+           the homepage reads as a different site.
+
+           The lead-in is a <span> inside the row, NOT a <p> wrapped around
+           it. The tagger gives every <p> in here [data-snap] (BaseLayout), and
+           that is a transform — wrapping the button in one would translate the
+           button off the painted line its own height is built to land on. A
+           span matches nothing the tagger looks for, so it stays untouched.
+
+           The row needs its box tag by hand: the tagger only boxes
+           h2/h3/h4/.callout, and this holds a button exactly one grid row
+           tall (see --btn-h). -->
+      <div class="btn-row case-cta" data-snap-box>
+        <span class="case-cta__label">Want to talk?</span>
+        <a class="btn btn-primary" href={EMAIL_URL}><Glyph name="mail" />Get in touch</a>
+      </div>
     </div>
   </article>
 
@@ -242,6 +264,32 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       line-height: var(--grid);
       margin-bottom: var(--grid);
       transition: color var(--dur);
+    }
+    /* Press feedback for a link made of words: the whole phrase squeezes, and
+       that is all it does. The arrow used to slide 3px on press as well, and
+       the two cues fought — a squeeze pulls the phrase in from the right while
+       the arrow pushes out to the left, so the link appeared to stretch and
+       compress at once. One press, one cue. The arrow's wrapper span went with
+       the rule — a class nothing styles is just clutter.
+
+       The squeeze needs __inner because .rail-back carries data-snap and the
+       snapper owns its transform. inline-block, because transform does not
+       apply to a non-replaced inline box — a bare span would compile clean and
+       do nothing.
+
+       LEFT origin, not centre. .work-inner can scale about its middle because
+       it is a full-width grid whose own edges are the painted lines. This is
+       an 80px phrase pinned to the rail's left margin — one of the verticals
+       the whole page is aligned to. A centred origin would walk that edge
+       inward on every press. Anchored left, the alignment never moves and the
+       squeeze happens entirely inward. */
+    .case :global(.rail-back__inner) {
+      display: inline-block;
+      transition: transform var(--dur-press) var(--ease-out);
+    }
+    .case :global(.rail-back:active .rail-back__inner) {
+      transform: scale(var(--press-scale-text));
+      transform-origin: left center;
     }
     /* The rule belongs to the section BELOW it, never above the first one, so
        adding or removing a section can't leave a hairline hanging over
@@ -947,11 +995,64 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       line-height: var(--grid);
     }
     .case-footer__next { text-align: right; }
-    .case-main .case-cta {
+    /* Same press as .rail-back, and the same reasons — both of these are plain
+       words with an arrow, both carry data-snap. The arrows are static: they
+       had a 3px nudge on press and it competed with the squeeze rather than
+       adding to it. See the note on .rail-back above.
+
+       The squeeze is .work-inner's trick with one change: the origin is not
+       centred. These two are pinned to opposite ends of a
+       space-between row, so each sits on one of the column's edges. Scaling
+       about the middle would pull both off those edges on every press.
+       Anchoring each to the edge it already touches keeps the outer alignment
+       fixed and sends the squeeze inward.
+
+       The two get different travel from the same ratio and that is fine:
+       "All work" is ~80px, so --press-scale-text moves ~2.4px, while
+       "Next: <title>" is two or three times that. Same gesture, longer word. */
+    .case-footer__inner {
+      display: inline-block;
+      transition: transform var(--dur-press) var(--ease-out);
+    }
+    .case-footer__home:active .case-footer__inner {
+      transform: scale(var(--press-scale-text));
+      transform-origin: left center;
+    }
+    .case-footer__next:active .case-footer__inner {
+      transform: scale(var(--press-scale-text));
+      transform-origin: right center;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .case-footer__inner,
+      .case :global(.rail-back__inner) { transition: none; }
+      .case-footer__home:active .case-footer__inner,
+      .case-footer__next:active .case-footer__inner,
+      .case :global(.rail-back:active .rail-back__inner) { transform: none; }
+    }
+    /* .btn-row already supplies the flex, the gap and the two-row height (one
+       row for the button, one of air beneath). This adds the lead-in gap only,
+       a whole row, so everything below stays on its line. */
+    .case-main .case-cta { margin: var(--grid) 0 0; }
+    /* --font-ui, not the body's reading face, and that is what makes the two
+       sit on one baseline. .btn pays --btn-label-drop out of its top padding
+       to optically centre an Epilogue label in a 32px box; the same correction
+       applied to a Merriweather span would be the wrong number, since the drop
+       is computed from one font's ascent, descent and cap height. Setting the
+       lead-in in the same face as the button label means one correction serves
+       both. It is also what the type rule in tokens.css asks for: this is a
+       label attached to a control, not prose.
+
+       The row aligns flex-start, so both boxes start on the same painted line;
+       the translate then drops this text the same 1.5px the button's own
+       padding drops its label. A transform, so the layout the row is measured
+       from does not move. Safe from the snapper — it tags p/li/h1-h6, never a
+       span. */
+    .case-cta__label {
+      font-family: var(--font-ui);
       font-size: var(--text-base);
       line-height: var(--grid);
       color: var(--ink-muted);
-      margin: var(--grid) 0 0;
+      transform: translateY(var(--btn-label-drop));
     }
 
     /* --- one column -------------------------------------------------

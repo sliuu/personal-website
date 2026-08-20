@@ -38,7 +38,7 @@ const { backHref = "/", backLabel = "All work" } = Astro.props;
        this element to `position: static` for the length of its measurements —
        see the note over `pinned` in BaseLayout. -->
   <div class="rail-inner" data-snap-sticky>
-    <a class="rail-back" href={backHref} data-snap>&larr; {backLabel}</a>
+    <a class="rail-back" href={backHref} data-snap><span class="rail-back__inner">&larr; {backLabel}</span></a>
     <slot name="contents" />
     <slot name="action" />
   </div>

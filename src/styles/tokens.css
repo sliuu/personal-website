@@ -40,9 +40,15 @@
      there. Both stay under 0.08 or the maroon reads as a fill. */
   --tint-link: rgba(var(--accent-rgb), 0.06);
   --tint-row:  rgba(var(--accent-rgb), 0.03);
+  /* The pressed state of a --tint-link row, and it sits AT the 0.08 ceiling
+     named above rather than through it. That leaves a 0.02 step to carry the
+     press, which is deliberately not much: a full-column row cannot answer a
+     press by moving (its borders are grid rules), so the tint takes what it
+     can and the arrow inside it does the rest. */
+  --tint-link-press: rgba(var(--accent-rgb), 0.08);
 
   /* --- shared primitives -------------------------------------------- */
-  /* One hairline, two radii, one duration. Every rule on the site is this
+  /* One hairline, two radii, one duration, two curves. Every rule on the site is this
      weight and this colour; a double rule earns emphasis from repetition,
      never from getting heavier.
 
@@ -81,6 +87,122 @@
      and the first baseline pass, so it has to outlast them without reading as
      a curtain going up. See .page.is-ready in global.css. */
   --dur-load: 0.4s;
+
+  /* The dropdown's open/close beat. It was living inline on the caret as
+     `calc(var(--dur) * 1.33)`; the menu now animates over the same span, so by
+     the rule in CLAUDE.md a duration used twice becomes a token. They have to
+     stay equal — the caret and the menu are one gesture, and 50ms of daylight
+     between them is enough to read as two things happening. 200ms also sits in
+     the middle of the 150–250ms budget a dropdown gets. */
+  --dur-menu: calc(var(--dur) * 1.33);   /* 0.2s */
+  /* Same 0.2s as the menu, and a separate token anyway: they answer to
+     different things. --dur-menu is how long a panel takes to arrive;
+     --dur-press is how long a control takes to settle under a finger. That
+     they currently agree is a coincidence worth being able to break.
+
+     Why a press is the SLOWER of the two here, which looks backwards: the
+     curve. --ease-out puts 91.4% of its travel in the first half, so at --dur
+     a press was finished in ~70ms and reading as a jump to a smaller size
+     rather than as give. Stretching the same curve to 200ms buys back a
+     visible settle without flattening the curve itself. Still inside the range
+     where a press lands before the finger lifts. */
+  --dur-press: calc(var(--dur) * 1.33);  /* 0.2s */
+
+  /* --- press ----------------------------------------------------------
+     How far a small control shrinks under a finger. It is a ratio, so what it
+     costs in pixels depends entirely on the size of the box it is applied to,
+     and that is the whole reason it is not universal: on a 28px icon ring this
+     is 1.4px of travel, on the 1088px work row it would be 54px. Small,
+     bounded controls with a visible edge take this. Anything wide gets its own
+     smaller number stated where it is used (see .work-inner in index.astro).
+
+     Four of them, because one ratio cannot serve four sizes. The eye judges a
+     press by how far an edge TRAVELS, in pixels, and a ratio delivers that in
+     proportion to the box — so holding the ratio constant is exactly what
+     makes the presses look inconsistent:
+
+       .work-inner  1088px wide  x 0.98  = 21.8px of travel  the largest
+       .btn          ~150px      x 0.95  = 7.5px             reads clearly
+       .case-footer   ~80px      x 0.97  = 2.4px             faint by design
+       .icon-link      28px      x 0.95  = 1.4px             invisible
+       .icon-link      28px      x 0.90  = 2.8px             enough at 200ms
+
+     Same number, wildly different results. So each tier takes whatever ratio
+     buys it a comparable distance, and the ratios run backwards to the sizes:
+     the widest box has the shallowest number and still moves furthest.
+
+     The small round controls cannot reach 7px at any usable ratio — that would
+     need 0.75, which on a 28px circle reads as the icon collapsing — which is
+     why IconLink pairs its press with a colour step. Colour is the one cue
+     that does not care how big the box is. */
+  --press-scale: 0.95;      /* wide controls: .btn */
+  /* This was 0.85 for a while, and 0.85 was compensation for the wrong thing.
+     At --dur (150ms) on --ease-out the press was ~91% finished in 70ms, so the
+     only way to see it at all was to make it travel further — and 4.2px on a
+     28px ring is past give and into collapse. --dur-press fixed the cause, and
+     the ratio could come back up.
+
+     0.85 remains the floor if it is ever needed: below it a ring stops reading
+     as pressed and starts reading as shrinking, and the travel bought per step
+     is tiny anyway — 0.05 of ratio is 1.4px at this size. The lesson worth
+     keeping is that when a press will not register, reach for the duration
+     before the distance. */
+  --press-scale-sm: 0.9;    /* ~28px square ones: .mark, .icon-link */
+  /* Words. The table above used to end by saying a text link takes no scale at
+     all and answers a press by moving its arrow. Both halves are gone: the
+     objection was really to scaling a link the SNAPPER owns, which is answered
+     by putting the transform on a child span, and the arrow nudge turned out
+     to fight the squeeze rather than add to it. What survives is the ratio: 0.95 on a line of 16px type is
+     enough re-rasterising to read as the glyphs going soft. 0.97 is the most
+     a word can take before the softness is the thing you notice. On an 80px
+     phrase that is 2.4px, so the arrow still carries most of the press. */
+  --press-scale-text: 0.97; /* links that are only words */
+  /* The widest thing that presses: .work-inner is the full 1088px column, so
+     every 0.01 of ratio is 10.9px of travel — 5.4px per side from a centred
+     origin. That is why this is the shallowest number in the family and still
+     the largest movement in pixels. 0.97, the button's ratio, would throw the
+     row numeral 16px off the left edge the whole page aligns to. */
+  --press-scale-row: 0.98;  /* .work-inner, the full-width rows */
+
+  /* --- easing ---------------------------------------------------------
+     Two curves, and the same read as the two faces and the two weights: one
+     for something ARRIVING, one for something TRAVELLING between two places
+     you can see.
+
+     Until now every transition on the site said bare `ease` or `ease-out` —
+     the keywords — which meant nothing could be consistent even in principle,
+     since the keyword is whatever the UA decides it is. These state it.
+
+     --ease-out is for a one-way arrival: a menu opening, a press landing, a
+     page revealing. Both control points sit at y=1, so the curve leaves the
+     origin at high velocity and flattens hard into the end. In numbers, at the
+     halfway point of the duration it is 91.4% of the way there — against 68.5%
+     for the `ease-out` keyword (cubic-bezier(0, 0, 0.58, 1)). That gap is the
+     whole effect: the motion has visibly finished early and spends its back
+     half settling, which is what reads as "quick" without actually being
+     short. It is why a 200ms transition on this curve feels faster than a
+     150ms one on the keyword.
+
+     --ease-in-out is for a reversible trip between two resting states — a
+     toggle, a caret flipping back, an accordion. Symmetric (its midpoint lands
+     at 0.48, 0.50), so the return journey looks like the outbound one played
+     backwards, which is the point: nothing here has "arrived" anywhere, it has
+     moved. Never use it for an entrance — the slow start reads as lag.
+
+     A third curve was tried for presses — ease-out-quad, 74.9% at the halfway
+     mark — on the theory that --ease-out's front-loading was what made a press
+     feel harsh. It was not, or not only: flattening the curve made the press
+     feel soft in the wrong way, less like give than like lag. The harshness
+     was the press finishing in ~70ms with nothing after it. So the curve
+     stayed and --dur-press took the fix instead. Recorded because "add another
+     easing token" is the obvious move here and it was the wrong one.
+
+     Still two curves, then: --ease-out for anything that arrives or settles
+     (the role menu, every :active), --ease-in-out for anything that will come
+     back (the caret). A --ease-drawer (heavier, for a sheet dragged in from an
+     edge) is the usual third, and this site has no drawer to put it on. */
+  --ease-out:    cubic-bezier(0.17,0.84,0.44,1);
+  --ease-in-out: cubic-bezier(0.79,0.14,0.15,0.86);
 
   /* --- spacing ------------------------------------------------------ */
   /* A compact 4px scale derived from the baseline grid. Use these for
