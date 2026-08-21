@@ -31,9 +31,9 @@ const career = [
 ];
 
 const loves = [
-  "organizing information",
-  "complex → obvious",
-  "thinking about people",
+  "organizing a messy room",
+  "lifting weights",
+  "making things by hand",
   "unconventional furniture",
 ];
 ---
@@ -55,12 +55,13 @@ const loves = [
           aria-selected={i === 0 ? "true" : "false"}
         >{r}</span>
       ))}
-    </span></span> based in San&nbsp;Francisco.
+    </span></span> based in San&nbsp;Francisco
   </h1>
 
   <p class="intro" data-snap>
+    Loves making complex tools and interactions simple to use. 
     Previously designing &amp; building tools and interfaces at Google, Waymo, and&nbsp;Nuro.
-    Currently on a sabbatical. Below are a couple of projects I&rsquo;m glad to have worked on.
+    Currently looking for what’s next.
   </p>
 
   <div class="btn-row" data-snap-box>
@@ -118,8 +119,7 @@ const loves = [
     <div>
       <h2 class="section-label" data-snap>Currently</h2>
       <p class="statement" data-snap>
-        On a sabbatical through late 2026 — resting, reading, learning, building.
-        Looking for good work with good people.
+        Currently figuring out what I want to work on next. Especially interested in thoughtful teams building complex products.
       </p>
       <!-- snap-box: absorbs any fraction the statement's wrap leaves behind -->
       <div class="btn-row" data-snap-box>
@@ -454,9 +454,9 @@ const loves = [
   /* the company/role group is what gives when space runs out, never the date */
   .career-inner > span:first-child { min-width: 0; }
   .career-co { font-family: var(--font-read); font-size: var(--text-lg); color: var(--ink); margin-right: var(--space-2); }
-  .career-role { font-size: var(--text-base); color: rgba(var(--ink-rgb), 0.6); }
+  .career-role { font-size: var(--text-base); color: var(--ink-muted); }
   .career-date {
-    font-style: italic; font-size: var(--text-base); color: rgba(var(--ink-rgb), 0.5);
+    font-style: italic; font-size: var(--text-base); color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
@@ -518,7 +518,7 @@ const loves = [
   .aside-label {
     font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600;
     letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(var(--ink-rgb), 0.5); line-height: var(--grid);
+    color: var(--ink-soft); line-height: var(--grid);
     margin: 0 0 var(--grid);
   }
   .loves {

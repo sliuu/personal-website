@@ -338,7 +338,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       line-height: var(--grid);
       letter-spacing: 0.08em;
       font-variant-numeric: tabular-nums;
-      color: rgba(var(--ink-rgb), 0.35);
+      color: var(--ink-faint);
       transition: color var(--dur);
     }
     .case :global(.contents-list a:hover),
@@ -362,16 +362,17 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       font-style: italic;
       font-size: var(--text-xs);
       line-height: var(--grid);
-      color: rgba(var(--ink-rgb), 0.5);
+      color: var(--ink-soft);
       margin: 0;
     }
 
     /* --- the confidentiality note ---
        Italic, and therefore --font-read: Merriweather is loaded as a variable
        range on BOTH axes (ital,wght@0,300..600;1,300..600), so this is a real
-       italic. --font-ui could not be — Epilogue is requested at 400 and 600
-       upright only, and asking it for italic gets a synthesized slant, the same
-       smearing the `strong` rule in global.css avoids by refusing 700.
+       italic. --font-ui could not be — Murecho is requested at 400 and 600
+       upright only, and has no italic cut to request in any case; asking for
+       one gets a synthesized slant, the same smearing the `strong` rule in
+       global.css avoids by refusing 700.
 
        --text-base, not the --text-xs the rail-note takes: at 14px an italic
        serif turns into texture rather than a sentence, and this one has to be
@@ -446,7 +447,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
       font-size: var(--text-xs);
       letter-spacing: 0.16em; text-transform: uppercase;
       line-height: var(--grid);
-      color: rgba(var(--ink-rgb), 0.5);
+      color: var(--ink-soft);
       margin: 0;
     }
     .case-main :global(.project-meta dd) {
@@ -824,10 +825,50 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
        A rule down the left, not a box. 2px and in the accent: it is the only
        mark setting the passage apart, and the 1px hairline used everywhere
        else disappears next to 24px type. The padding pays for the border out
-       of its own row so the text still starts one whole row in. */
+       of its own row so the text still starts one whole row in.
+
+       padding-bottom exists to make the rule overhang the type at BOTH ends.
+       It did not, because only one end of this box is set by the half-leading.
+       The <p> is 20px Merriweather on a 32px row; its hhea metrics are ascent
+       0.984 + descent 0.273 = 1.257, so the content box is 25.14px and the
+       half-leading is (32 - 25.14)/2 = 3.43px above and below.
+
+       At the bottom that 3.43px is nearly the whole overhang: Merriweather's
+       descenders reach 0.270 against a descent line of 0.273, so the rule
+       stopped 3.49px under a 'g'. At the top the half-leading is joined by the
+       space above the tallest letters, since nothing reaches 0.984:
+
+         to the ascender line (h, l, d, 0.830)   3.43 + 3.09 = 6.52px
+         to the cap line      (T, M, U, 0.743)   3.43 + 4.82 = 8.25px
+
+       Squaring those is the FLOOR, not the target. A rule bracketing a block
+       of text reads bottom-light when it is mathematically even — the same
+       reason the mat under a framed picture is cut deeper than the one above
+       it. It wants more underneath than the arithmetic asks for.
+
+       --space-2 (8px), which puts 11.49px under the descender line against
+       8.25px over the cap line. The space scale runs in eighths of the row —
+       4, 8, 12, 16 — and --space-1 (4px) lands at 7.49px, SHORTER than the top
+       overhang, which is the version that read wrong. There is no rung
+       between, and adding one for a single consumer would break the scale.
+
+       Carried over from the Inria Serif experiment, where the same 8px gave
+       12.01px against a 9.93px cap-line overhang. Merriweather has a deeper
+       descent and a shorter cap, so the same token now runs a little more
+       generous underneath — kept because the shorter rung was tried and
+       rejected by eye, not because 8px is derived for this face.
+
+       Measured to the descender line rather than the baseline, and to the cap
+       line rather than the ascender line, because both are properties of the
+       face — the result holds whatever letters a quote contains. A last line
+       ending in a descender (`for new users.`) is the case this is tuned for;
+       one without (`they were unconvinced.`) runs 5.40px longer still. That is
+       the right way round: tuning for the other case would put descenders into
+       the end of the rule. */
     .case-main :global(.pullquote) {
       margin: var(--grid) 0;
       padding-left: calc(var(--grid) - 2px);
+      padding-bottom: var(--space-2);
       border-left: 2px solid var(--color-accent);
     }
     .case-main :global(.pullquote p) {
@@ -941,7 +982,7 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     .case-main :global(figcaption) {
       font-family: var(--font-ui);
       font-size: var(--text-xs);
-      line-height: var(--lh-tight);
+      line-height: var(--lh-caption);
       color: var(--ink-muted);
       margin-top: var(--caption-gap);
     }
@@ -1035,9 +1076,10 @@ const next = all[(index + 1) % all.length];   // wraps around to the first
     .case-main .case-cta { margin: var(--grid) 0 0; }
     /* --font-ui, not the body's reading face, and that is what makes the two
        sit on one baseline. .btn pays --btn-label-drop out of its top padding
-       to optically centre an Epilogue label in a 32px box; the same correction
-       applied to a Merriweather span would be the wrong number, since the drop
-       is computed from one font's ascent, descent and cap height. Setting the
+       to optically centre a Murecho label in a 32px box — currently a NEGATIVE
+       drop, paid out of the bottom padding instead; the same correction applied
+       to a Merriweather span would be the wrong number, since the drop is
+       computed from one font's ascent, descent and cap height. Setting the
        lead-in in the same face as the button label means one correction serves
        both. It is also what the type rule in tokens.css asks for: this is a
        label attached to a control, not prose.

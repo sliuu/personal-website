@@ -54,7 +54,7 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Merriweather (variable, 300-700 used) for --font-read; Epilogue 400/600
+    <!-- Merriweather (variable, 300-700 used) for --font-read; Murecho 400/600
          for --font-ui. Every weight either face is asked for is loaded, so
          nothing gets a synthesized bold.
          Merriweather is requested as a range, not discrete weights: font-weight 500
@@ -62,10 +62,12 @@ const ogImage = new URL("/me-og.jpg", Astro.site);
          runs to 700 because `strong` is 700 (see global.css). Widening it cost
          nothing — Merriweather's axis is 300..900 and Google serves one variable
          file whatever subrange you name; the number here only sets the
-         @font-face descriptor. Epilogue stays discrete — --font-ui only ever
+         @font-face descriptor. Murecho stays discrete — --font-ui only ever
          sets 400 and 600, and a range would ship the whole 100-900 axis to
-         serve two of them. -->
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300..700;1,300..700&family=Epilogue:wght@400;600&display=swap" rel="stylesheet" />
+         serve two of them. Murecho is a CJK family, so the latin subset is a
+         small slice of the file Google serves; asking for a weight range here
+         would be an expensive way to get two cuts. -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300..700;1,300..700&family=Murecho:wght@400;600&display=swap" rel="stylesheet" />
 
     <!-- Gates the load fade on JS being alive. Inline and in the head so the
          class lands before first paint — a deferred module would flip it after

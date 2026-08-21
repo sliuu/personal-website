@@ -14,6 +14,26 @@
   --ink-rgb: 38,34,28;       /* text as R,G,B so one var drives solid + translucent */
   --ink: rgb(var(--ink-rgb));
   --ink-muted: rgba(var(--ink-rgb), 0.7);
+  /* Two more rungs below --ink-muted, because the pages had grown eleven raw
+     alphas — 0.35, 0.5 and 0.6, scattered across five files — and the lightest
+     of them were not readable. Contrast against --paper, measured:
+
+       0.35   2.11:1   fails even the 3:1 asked of large text
+       0.50   3.11:1   fails the 4.5:1 asked of body text
+       0.60   4.16:1   just under
+       0.65   4.85:1   clears AA
+       0.70   5.68:1   --ink-muted
+
+     --ink-soft is the floor for anything a reader is meant to READ: dates,
+     captions, notes, metadata labels, the footer. 0.65 is the lowest alpha on
+     this paper that clears 4.5:1 (0.63 exactly, rounded up for margin).
+
+     --ink-faint is NOT for reading. It is for marks that are structure rather
+     than content — the contents numerals, which repeat a heading the eye is
+     already on. 3.6:1 is deliberate: enough to see, quiet enough to ignore.
+     Nothing whose absence would cost the reader information belongs here. */
+  --ink-soft:  rgba(var(--ink-rgb), 0.65);
+  --ink-faint: rgba(var(--ink-rgb), 0.55);
   /* Warm off-white. The hue is the same 30° orange it always was — only the
      saturation moved (14% -> 38% HSL), so the paper gets warmer without the
      page changing colour. Lightness is held at ~97% on purpose: ink on paper
@@ -227,10 +247,35 @@
      A caption belongs to the picture above it, and an image is an arbitrary
      number of pixels tall, so a caption snapped to the nearest line sits a
      different distance from every picture. These two put it the same distance
-     under every one instead. --lh-tight is a ratio, not a row: a wrapped
-     caption has to set as a block of its own, not as two grid rows. */
+     under every one instead. --lh-caption is a ratio, not a row: a wrapped
+     caption has to set as a block of its own, not as two grid rows.
+
+     Was --lh-tight: 1.4, and under Murecho that was not merely tight, it was
+     NEGATIVE. Murecho carries Japanese, so its em box clears kana: ascent
+     1.160 + descent 0.288 = 1.448, which is the line height the face takes at
+     `normal`. A ratio of 1.4 is BELOW that, so the line box came out smaller
+     than the content box and the half-leading was -0.34px — consecutive
+     caption lines were being pulled together, not merely set close.
+
+     Measured as the gap between one line's descenders and the next line's
+     ascenders, at --text-xs:
+
+       1.4   19.60px   half-leading -0.34px   gap 5.68px   (was)
+       1.5   21.00px   half-leading +0.36px   gap 7.08px
+       1.6   22.40px   half-leading +1.06px   gap 8.48px   (is)
+       1.7   23.80px   half-leading +1.76px   gap 9.88px
+
+     The number survived the swap from Epilogue untouched, which is luck
+     rather than design: Epilogue's em box is the opposite shape (1.025em, one
+     of the tightest of any UI face) but its ink fills almost all of it, so
+     1.4 gave a 5.38px gap there too and 1.6 gave 8.18px. Two different faults,
+     the same fix, within 0.3px of each other.
+
+     1.6 is the first round number that opens it up, and the name moved with
+     it: at 1.6 this is no longer tight, and calling it that would be a lie.
+     One consumer, the figcaption rule in projects/[id].astro. */
   --caption-gap: calc(var(--grid) / 4);   /* 8px */
-  --lh-tight: 1.4;
+  --lh-caption: 1.6;
 
   /* --- the cursor spotlight ----------------------------------------- */
   --glow-strength: 0.5;      /* half alpha, so the lit line lands between the
@@ -248,15 +293,35 @@
      lines. Its own token because .btn-row reads it to size itself. */
   --btn-h: var(--grid);      /* 32px */
 
-  /* Optical centring for a .btn label. Epilogue's ascent (0.790em) clears its
-     cap height (0.738em) by almost nothing while its descent runs 0.235em, so
-     a line box centred in the button leaves the caps 1.46px high at
-     --text-base — visible next to a glyph, which centres on its own square.
-     Measured from the font's hhea and OS/2 tables, not eyeballed:
-     (ascent + descent)/2 - capHeight/2. Fira Sans came out at 0.15px, which is
-     why this token didn't exist before. A different --font-ui needs a new
+  /* Optical centring for a .btn label, and it is NEGATIVE for Murecho.
+
+     The formula, measured from hhea and OS/2 rather than eyeballed, is
+     (capHeight - ascent + descent) / 2, times --text-base. A button has a
+     fixed height and centres its content, so padding of P on one edge moves
+     that content by P/2 — which is why every consumer multiplies this token
+     by two. Inside the line box the caps' centre already sits
+     (ascent - descent - capHeight)/2 below the box's middle; set the two
+     equal and the formula falls out.
+
+       face          ascent  descent  cap     drop at 16px
+       Fira Sans     0.935   0.265    0.700   +0.15px   (no token needed)
+       Epilogue      0.790   0.235    0.738   +1.46px   (shipped 1.5px)
+       Murecho       1.160   0.288    0.728   -1.15px   (shipped -1.2px)
+
+     Murecho carries Japanese, so its em box is drawn to clear kana: an ascent
+     of 1.160em against a cap height of 0.728em. Its caps therefore sit BELOW
+     the centre of a line box, not above it, and the correction has to lift
+     them rather than drop them. Hence the sign, and hence the signed max()
+     padding split in global.css — padding cannot go negative, so one number
+     is dealt out across the two edges with exactly one ever non-zero.
+
+     Sanity check, because this failed once: --btn-h is one grid row, so the
+     content box is 32 - 2 (borders) - 2.30 (the bottom padding this implies)
+     = 27.70px, against Murecho's `normal` line box of 1.448em = 23.17px at
+     --text-base. Clear. The earlier failure was a POSITIVE drop of 7.4px,
+     which left 22.6px and overflowed. A different --font-ui needs a new
      number here, or none. */
-  --btn-label-drop: 1.5px;
+  --btn-label-drop: -1.2px;
 
   /* The content width, and the only width on the page below the masthead.
      34 grid units, and it has to stay a whole number of them: .col centres
@@ -328,7 +393,7 @@
      everything you USE (nav, buttons, eyebrows, labels, captions, metadata).
      Every font-family in this codebase picks one of these two. */
   --font-read: 'Merriweather', serif;
-  --font-ui: 'Epilogue', sans-serif;
+  --font-ui: 'Murecho', sans-serif;
 
   /* Two weights, one axis — the same split as the two faces above, and for the
      same reason. --weight-prose is for copy you read THROUGH, at prose size;

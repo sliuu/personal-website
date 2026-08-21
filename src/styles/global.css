@@ -31,7 +31,7 @@ body {
    A real 700, not a synthesized one — Merriweather is requested to 700 in
    BaseLayout. Safe to set globally because no `strong` ever lands in a
    --font-ui context: all bold comes from MDX prose, which is --font-read.
-   Epilogue is still loaded at 400/600 only, so if a `strong` ever does end up
+   Murecho is still loaded at 400/600 only, so if a `strong` ever does end up
    inside UI type, this rule needs scoping to prose rather than widening. */
 strong, b { font-weight: 700; }
 
@@ -51,7 +51,7 @@ a:hover { color: var(--accent-strong); }
 }
 
 /* ---- the load fade ----
-   Not decoration. The page paints in fallback faces, Merriweather and Epilogue
+   Not decoration. The page paints in fallback faces, Merriweather and Murecho
    swap in, and only then does the baseline pass translate every block onto the
    grid — so a cold load shows the type reflowing and settling, which is the
    one moment the grid looks assembled rather than given. This holds the page
@@ -187,16 +187,25 @@ a:hover { color: var(--accent-strong); }
 /* ---- outlined buttons (colour as stroke, never a fill) ---- */
 /* The gap only shows itself on a button that has a glyph next to its label;
    a text-only button has nothing to put space between. */
-/* The top padding is the label's optical centring, and it has to be twice
-   --btn-label-drop: the button's height is fixed, so padding at the top takes
-   the content box down by 2d and shortens it by 2d, and the centred content
-   inside it moves by half that. The glyph is already centred correctly on its
-   own square box, so it takes the drop back out — as a transform, which moves
-   the paint without moving the layout the gap is measured from. */
+/* The vertical padding is the label's optical centring, and it is twice
+   --btn-label-drop: the button's height is fixed, so padding on one edge takes
+   the content box in by 2d and shortens it by 2d, and the centred content
+   inside it moves by half that. Which edge depends on the sign — see below.
+   The glyph is already centred correctly on its own square box, so it takes
+   the drop back out as a transform, which moves the paint without moving the
+   layout the gap is measured from. Multiplying by the token means it follows a
+   negative drop without any change. */
 .btn {
   display: inline-flex; align-items: center; gap: var(--space-2);
   height: var(--btn-h);
-  padding: calc(var(--btn-label-drop) * 2) var(--space-5) 0;
+  /* The optical correction, and it has to work in both directions: the token
+     goes negative for any face whose caps already sit below the button's
+     centre (see --btn-label-drop). Padding cannot be negative, so the two
+     max() calls split one signed number across the two edges — exactly one of
+     them is ever non-zero. */
+  padding:
+    max(0px, calc(var(--btn-label-drop) * 2)) var(--space-5)
+    max(0px, calc(var(--btn-label-drop) * -2));
   border: 1px solid; border-radius: var(--radius);
   font-family: var(--font-ui); font-size: var(--text-base);
   background: transparent; cursor: pointer;
@@ -285,9 +294,9 @@ a:hover { color: var(--accent-strong); }
 .footer {
   display: flex; justify-content: space-between; align-items: baseline;
   height: var(--grid); font-size: var(--text-xs); line-height: var(--grid);
-  color: rgba(var(--ink-rgb), 0.5); font-family: var(--font-ui);
+  color: var(--ink-soft); font-family: var(--font-ui);
 }
-.footer a { color: rgba(var(--ink-rgb), 0.5); }
+.footer a { color: var(--ink-soft); }
 .footer a:hover { color: var(--color-accent); }
 /* The one link on the site that needs no wrapper to press. data-snap sits on
    .footer, not on the <a>, so the snapper owns the row and leaves the link's
